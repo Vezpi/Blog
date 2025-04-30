@@ -1,0 +1,7 @@
+baseURL: "https://blog.vezpi.me/"
+languageCode: "en-us"
+title: "Vezpi Blog"
+theme: "PaperMod"
+
+frontmatter:
+  format: "yaml"
