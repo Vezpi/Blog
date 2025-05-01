@@ -16,7 +16,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Get current Hugo version
-        run: echo "current_version=$(${BLOG_FOLDER}/bin/current/hugo version | grep -oE 'v[0-9]+\.[0-9]+\.[0-9]+')" | tee -a $GITEA_ENV
+        run: echo "current_version=$(${BLOG_FOLDER}/bin/hugo version | grep -oE 'v[0-9]+\.[0-9]+\.[0-9]+')" | tee -a $GITEA_ENV
 
       - name: Verify latest Hugo version
         run: echo "latest_version=$(curl -s https://api.github.com/repos/gohugoio/hugo/releases/latest | jq -r .tag_name)" | tee -a $GITEA_ENV
@@ -25,7 +25,7 @@ jobs:
         if: env.current_version != env.latest_version
         run: |
           curl -L https://github.com/gohugoio/hugo/releases/download/$latest_version/hugo_extended_${latest_version#v}_Linux-64bit.tar.gz -o hugo.tar.gz
-          tar -xzvf hugo.tar.gz -C ${BLOG_FOLDER}/bin/current/
+          tar -xzvf hugo.tar.gz -C ${BLOG_FOLDER}/bin/
 
       - name: Generate the static files with Hugo
-        run: ${BLOG_FOLDER}/bin/current/hugo -s ${BLOG_FOLDER} -d ${BLOG_FOLDER}/public
+        run: ${BLOG_FOLDER}/bin/hugo -s ${BLOG_FOLDER} -d ${BLOG_FOLDER}/public
