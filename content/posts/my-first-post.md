@@ -7,7 +7,18 @@ tags: ["homelab", "infrastructure", "docker"]
 
 # 🏡 Welcome to My Homelab
 
-This is a placeholder post to test the features of my new blog powered by **Hugo** and the `PaperMod` theme.
+This is a placeholder post to test the features of my new blog powered by **Hugo** and the `PaperMod` theme.  
+I like :
+- Chicken
+- Sausage
+- Oranges
+- Potatoes 
+- Pasta
+- Beer
+- Squid
+- Doritos
+- Banana
+- Kiwi
 
 ---
 
