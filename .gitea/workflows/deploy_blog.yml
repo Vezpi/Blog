@@ -13,7 +13,12 @@ jobs:
         run: apt update && apt install -y jq
         
       - name: Check out repository
-        uses: actions/checkout@v4
+        run: |
+          cd ${BLOG_FOLDER}
+          git config --global user.name "Gitea Actions"
+          git config --global user.email "actions@local"
+          git config --global --add safe.directory ${BLOG_FOLDER}
+          git pull
 
       - name: Get current Hugo version
         run: echo "current_version=$(${BLOG_FOLDER}/bin/hugo version | grep -oE 'v[0-9]+\.[0-9]+\.[0-9]+')" | tee -a $GITEA_ENV
