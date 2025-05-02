@@ -33,4 +33,7 @@ jobs:
           tar -xzvf hugo.tar.gz -C ${BLOG_FOLDER}/bin/
 
       - name: Generate the static files with Hugo
-        run: ${BLOG_FOLDER}/bin/hugo -s ${BLOG_FOLDER} -d ${BLOG_FOLDER}/public
+        run: |
+          rm -f ${BLOG_FOLDER}/content/posts/template.md
+          ${BLOG_FOLDER}/bin/hugo -D -s ${BLOG_FOLDER} -d ${BLOG_FOLDER}/private
+          ${BLOG_FOLDER}/bin/hugo -s ${BLOG_FOLDER} -d ${BLOG_FOLDER}/public
