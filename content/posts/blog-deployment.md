@@ -1,10 +1,10 @@
 ---
-title: Automated Blog Deployment featuring Obsidian, Hugo and Gitea Actions
+title: Blog Deployment featuring Obsidian, Hugo and Gitea Actions
 date: 2025-05-02
 draft: true
 tags:
 ---
-Over the past few days, I set up an automated pipeline to build and deploy my blog using **Gitea Actions**. This post explains how it works and the design decisions behind it.
+I always wanted to share my own experiences to give others idea or help them on their projects, but I didn't want to maintain the con
 
 ## 🧠 Goals
 
