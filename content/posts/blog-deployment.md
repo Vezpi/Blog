@@ -137,7 +137,7 @@ jobs:
           git push -u origin main
 ```
 
-### Step 3: Gitea Actions for Blog Repository
+### Step 4: Gitea Actions for Blog Repository
 
 The blog repository contains the full Hugo site, including the synced content and theme.
 
