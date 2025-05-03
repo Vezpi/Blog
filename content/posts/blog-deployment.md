@@ -4,12 +4,18 @@ date: 2025-05-02
 draft: true
 tags:
 ---
-I always wanted to share my own experiences to give others ideas or help them on their projects. I'm constantly tinkering in my homelab, trying new tools and workflows. Instead of keeping all these experiments in private notes, I decided to create a blog where I can document and publish them easily. I wanted the entire process to be automated, self-hosted, and integrated into the tools I already use daily.
+I always wanted to share my own experiences to give others ideas or help them on their projects.
+
+I'm constantly tinkering in my homelab, trying new tools and workflows. Instead of keeping all these experiments in private notes, I decided to create a blog where I can document and publish them easily.
+
+I wanted the entire process to be automated, self-hosted, and integrated into the tools I already use daily.
 
 ## 🔧 Tools
 ### Obsidian
 
-Before I was using Notion, but some months ago I switched to [Obsidian](https://obsidian.md/). It's a markdown-based note-taking app that stores everything locally, which gives me more flexibility and control. To sync my notes between devices, I use the [Obsidian Git plugin](https://github.com/denolehov/obsidian-git), which commits changes to a Git repository hosted on my self-hosted Gitea instance.
+Before I was using Notion, but some months ago I switched to [Obsidian](https://obsidian.md/). It's a markdown-based note-taking app that stores everything locally, which gives me more flexibility and control.
+
+To sync my notes between devices, I use the [Obsidian Git plugin](https://github.com/denolehov/obsidian-git), which commits changes to a Git repository hosted on my self-hosted Gitea instance.
 
 This setup not only allows for versioned backups of all my notes but also opens the door to automation.
 
@@ -75,7 +81,7 @@ container:
     - /appli*
 ```
 
-The runner appears in the `Administration Area`, under `Actions` > `Runners`. To obtain the registration token, click on the `Create new Runner` button
+The runner appears in the `Administration Area`, under `Actions`>`Runners`. To obtain the registration token, click on the `Create new Runner` button
 ![[Pasted image 20250502230954.png]]
 
 ### Step 3: Set up Gitea Actions for Obsidian Repository
@@ -136,7 +142,7 @@ jobs:
 The blog repository contains the full Hugo site, including the synced content and theme.
 
 Its workflow:
-- Install jq
+- Install `jq`
 - Checkout the blog repository
 - Check if the Hugo version is up-to-date. If not, it downloads the latest release and replaces the old binary.
 - Build the static website using Hugo.
