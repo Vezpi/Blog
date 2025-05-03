@@ -22,6 +22,9 @@ I like :
 - Kiwi
 - Pizza
 - Automation
+- Cats
+- Tomatoes
+- Fish
 
 ---
 

@@ -82,17 +82,17 @@ container:
 ```
 
 The runner appears in the `Administration Area`, under `Actions`>`Runners`. To obtain the registration token, click on the `Create new Runner` button
-![[Pasted image 20250502230954.png]]
+![Pasted_image_20250502230954.png](Images/Pasted_image_20250502230954.png)
 
 ### Step 3: Set up Gitea Actions for Obsidian Repository
 
 First I enabled the Gitea Actions, this is disabled by default, tick the box `Enable Repository Actions`  in the settings for that repository
 
 I created a new PAT (Personal Access Token) with RW permission on the repositories
-![[Pasted image 20250501235521.png]]
+![Pasted_image_20250501235521.png](Images/Pasted_image_20250501235521.png)
 
 I added this token as secret `REPO_TOKEN` in the repository
-![[Pasted image 20250501235427.png]]
+![Pasted_image_20250501235427.png](Images/Pasted_image_20250501235427.png)
 
 I needed to create the workflow that will spin-up a container and do the following:
 - When I push new/updated files in the `Blog` folder
