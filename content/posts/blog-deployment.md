@@ -124,7 +124,21 @@ jobs:
         run: git clone https://${{ secrets.REPO_TOKEN }}@git.vezpi.me/Vezpi/blog.git 
 
       - name: Transfer blog content from Obsidian
-        run: rsync -av --delete Blog/ blog/content
+        run: |
+          echo "Copy Markdown files"
+          rsync -av --delete Blog/ blog/content
+          # Gather all used images from markdown files
+          used_images=$(grep -rhoE '!\[\[.*\]\]' blog/content | sed -E 's/!\[\[(.*)\]\]/\1/' | sort -u)
+          mkdir -p blog/assets/Images
+          # Loop over each used image"
+          while IFS= read -r image; do
+            # Loop through all .md files and replace image links
+            grep -rl "$image" blog/content/* | while IFS= read -r md_file; do
+              sed -i "s|\!\[\[$image\]\]|\!\[${image// /_}\](Images/${image// /_})|g" "$md_file"
+            done
+            echo "Copy the image ${image// /_} to the static folder"
+            cp "Images/$image" "blog/assets/Images/${image// /_}"
+          done <<< "$used_images"
 
       - name: Commit the change to the blog repository
         run: |
@@ -135,7 +149,14 @@ jobs:
           git add .
           git commit -m "Auto-update blog content from Obsidian: $(date '+%F %T')" || echo "Nothing to commit"
           git push -u origin main
+
+
 ```
+
+Obsidian uses wiki-style links for images, like `![[image name.png]]`, which isn't compatible with Hugo out of the box. Here's how I automated it in a Gitea Actions workflow:
+- I find all used image references in `.md` files.
+- For each referenced image, I update the link in relevant `.md` files like `![image name](Images/image_name.png)`.
+- I then copy those used images to the blog's assets directory while replacing white-spaces by underscores.
 
 ### Step 4: Gitea Actions for Blog Repository
 
