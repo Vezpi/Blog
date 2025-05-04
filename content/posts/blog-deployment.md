@@ -40,7 +40,7 @@ The idea is simple:
 3. The first action syncs the updated blog content to a separate [blog repository](https://git.vezpi.me/Vezpi/blog).
 4. In the blog repository, another Gitea Action is triggered.
 5. The second Gitea Action generates the static web pages while upgrading Hugo if needed
-6. The blog is now updated.
+6. The blog is now updated (the one you are reading).
 
 This way, I never need to manually copy files or trigger deployments. Everything flows from writing markdown in Obsidian to having a fully deployed website.
 
