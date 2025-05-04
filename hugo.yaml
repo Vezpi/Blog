@@ -90,3 +90,10 @@ menu:
       name: 🔍 Search
       url: /search/
       weight: 40
+
+widgets:
+  homepage:
+    - type: "categories"
+    - type: "search"
+  page:
+    - type: "toc"
