@@ -10,6 +10,7 @@ I'm constantly tinkering in my homelab, trying new tools and workflows. Instead 
 
 I wanted the entire process to be automated, self-hosted, and integrated into the tools I already use.
 
+---
 ## 🔧 Tools
 ### Obsidian
 
@@ -34,13 +35,13 @@ To run those workflows, I installed a [Gitea runner](https://gitea.com/gitea/act
 ## 🔁 Workflow
 
 The idea is simple:
-
 1. I write blog content in my Obsidian vault, under a specific `Blog` folder.
-2. When I push updates to that folder, a first Gitea Action is triggered.
-3. The first action syncs the updated blog content to a separate [blog repository](https://git.vezpi.me/Vezpi/blog).
-4. In the blog repository, another Gitea Action is triggered.
-5. The second Gitea Action generates the static web pages while upgrading Hugo if needed
-6. The blog is now updated (the one you are reading).
+2. When I'm done editing the file, the Obisdian Git plugin automatically commits and push updates to the Gitea repository
+3. When Gitea receives that push, a first Gitea Action is triggered.
+4. The first action syncs the updated blog content to another separate [Git repository](https://git.vezpi.me/Vezpi/blog) which hosts my blog content.
+5. In that blog repository, another Gitea Action is triggered.
+6. The second Gitea Action generates the static web pages while upgrading Hugo if needed
+7. The blog is now updated (the one you are reading).
 
 This way, I never need to manually copy files or trigger deployments. Everything flows from writing markdown in Obsidian to having a fully deployed website.
 
