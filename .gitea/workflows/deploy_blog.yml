@@ -18,6 +18,7 @@ jobs:
           git config --global user.name "Gitea Actions"
           git config --global user.email "actions@local"
           git config --global --add safe.directory ${BLOG_FOLDER}
+          git submodule update --init --recursive
           git pull
 
       - name: Get current Hugo version
