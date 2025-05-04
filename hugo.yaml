@@ -5,3 +5,67 @@ theme: "PaperMod"
 
 frontmatter:
   format: "yaml"
+
+outputs:
+  home:
+    - HTML
+    - RSS
+    - JSON
+
+params:
+  # Appearance
+  defaultTheme: auto        # auto | dark | light
+  disableThemeToggle: false # Show dark/light switch
+  ShowReadingTime: true
+  ShowLastMod: true
+  ShowWordCount: false
+  showtoc: true
+  tocopen: true
+  disableComments: true
+
+  # Fancy post features
+  showBreadcrumb: true     # Path-like post location at top
+  showPostNavLinks: false   # Next/Previous post links
+  hideSummary: false       # Show summary on list view
+  comments: false
+
+  # Syntax highlighting
+  assets:
+    disableHLJS: false
+    hljsStyle: monokai-sublime # Pick from: https://highlightjs.org/static/demo/
+
+  # Social icons (top right or footer)
+  socialIcons:
+    - name: "GitHub"
+      url: "https://github.com/vezpi"
+    - name: "LinkedIn"
+      url: "https://linkedin.com/in/vezpi"
+
+  # Search (Fuse.js)
+  fuseOpts:
+    isCaseSensitive: false
+    shouldSort: true
+    location: 0
+    distance: 1000
+    threshold: 0.4
+    minMatchCharLength: 3
+    keys: ["title", "permalink", "summary", "content"]
+
+menu:
+  main:
+    - identifier: homelab
+      name: Homelab
+      url: /homelab/
+      weight: 10
+    - identifier: about
+      name: About
+      url: /about/
+      weight: 20
+    - identifier: tags
+      name: Tags
+      url: /tags/
+      weight: 30
+    - identifier: search
+      name: 🔍 Search
+      url: /search/
+      weight: 40
