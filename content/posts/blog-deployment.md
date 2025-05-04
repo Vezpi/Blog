@@ -8,7 +8,7 @@ I always wanted to share my own experiences to give others ideas or help them on
 
 I'm constantly tinkering in my homelab, trying new tools and workflows. Instead of keeping all these experiments in private notes, I decided to create a blog where I can document and publish them easily.
 
-I wanted the entire process to be automated, self-hosted, and integrated into the tools I already use daily.
+I wanted the entire process to be automated, self-hosted, and integrated into the tools I already use.
 
 ## 🔧 Tools
 ### Obsidian
@@ -153,7 +153,7 @@ jobs:
 
 ```
 
-Obsidian uses wiki-style links for images, like `![[image name.png]]`, which isn't compatible with Hugo out of the box. Here's how I automated it in a Gitea Actions workflow:
+Obsidian uses wiki-style links for images, like `![[image name.png]]`, which isn't compatible with Hugo out of the box. Here's how I automated a workaround in a Gitea Actions workflow:
 - I find all used image references in `.md` files.
 - For each referenced image, I update the link in relevant `.md` files like `![image name](Images/image_name.png)`.
 - I then copy those used images to the blog's assets directory while replacing white-spaces by underscores.
