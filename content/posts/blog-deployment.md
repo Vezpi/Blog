@@ -216,3 +216,5 @@ jobs:
 
 This workflow gives me the best of both worlds: I can focus on writing in Obsidian, and my infrastructure takes care of the rest — from syncing and building to publishing the blog automatically.
 
+
+
