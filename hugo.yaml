@@ -18,6 +18,11 @@ params:
     lastUpdated: "Jan 2, 2006"
   toc:
     enable: true
+  sidebar:
+    avatar:
+      enabled: true
+      src: avatar.jpg
+      local: true
   article:
     math: false
     toc: true
