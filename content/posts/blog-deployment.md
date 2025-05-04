@@ -96,7 +96,6 @@ I added this token as secret `REPO_TOKEN` in the repository
 
 I needed to create the workflow that will spin-up a container and do the following:
 - When I push new/updated files in the `Blog` folder
-- Install `rsync`
 - Checkout the current repository (Obsidian vault)
 - Clone the blog repository
 - Transfer blog content from Obsidian
@@ -163,7 +162,6 @@ Obsidian uses wiki-style links for images, like `![[image name.png]]`, which isn
 The blog repository contains the full Hugo site, including the synced content and theme.
 
 Its workflow:
-- Install `jq`
 - Checkout the blog repository
 - Check if the Hugo version is up-to-date. If not, it downloads the latest release and replaces the old binary.
 - Build the static website using Hugo.
