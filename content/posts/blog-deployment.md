@@ -44,7 +44,7 @@ The idea is simple:
 
 This way, I never need to manually copy files or trigger deployments. Everything flows from writing markdown in Obsidian to having a fully deployed website.
 
-## ⚙️Implementation
+## ⚙️ Implementation
 
 ### Step 1: Obsidian Vault Setup
 
