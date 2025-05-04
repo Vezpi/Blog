@@ -9,8 +9,12 @@ frontmatter:
 params:
   mainSections: ["posts"]
   sidebar:
-    compact: false
-    emoji: "🧠"
+    emoji: "🚀"
+    avatar:
+      enabled: true
+      src: avatar.jpg
+      local: true
+  favicon: favicon.ico
   footer:
     since: 2025
   dateFormat:
@@ -18,11 +22,7 @@ params:
     lastUpdated: "Jan 2, 2006"
   toc:
     enable: true
-  sidebar:
-    avatar:
-      enabled: true
-      src: avatar.jpg
-      local: true
+
   article:
     math: false
     toc: true
