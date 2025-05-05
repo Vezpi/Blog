@@ -3,6 +3,10 @@ title: Blog Deployment featuring Obsidian, Hugo and Gitea Actions
 date: 2025-05-02
 draft: true
 tags:
+  - obsidian
+  - hugo
+  - gitea
+category: homelab
 ---
 I always wanted to share my own experiences to give others ideas or help them on their projects.
 
@@ -32,6 +36,7 @@ To run those workflows, I installed a [Gitea runner](https://gitea.com/gitea/act
 
 [Hugo](https://gohugo.io/) is a fast and flexible static site generator written in Go. It’s perfect for generating content from Markdown files. Hugo is highly customizable, supports themes, and can generate a complete website in seconds. It’s ideal for a blog based on Obsidian notes, and it works beautifully in CI/CD pipelines due to its speed and simplicity.
 
+---
 ## 🔁 Workflow
 
 The idea is simple:
@@ -45,6 +50,7 @@ The idea is simple:
 
 This way, I never need to manually copy files or trigger deployments. Everything flows from writing markdown in Obsidian to having a fully deployed website.
 
+---
 ## ⚙️ Implementation
 
 ### Step 1: Obsidian Vault Setup
@@ -211,6 +217,7 @@ jobs:
 
 ```
 
+---
 ## 🚀 Results
 
 This workflow allows me to focus on what matters most: writing and refining my content. By automating the publishing pipeline — from syncing my Obsidian notes to building the blog with Hugo — I no longer need to worry about manually managing content in a CMS. Every note I draft can evolve naturally into a clear, structured article, and the technical workflow fades into the background. It’s a simple yet powerful way to turn personal knowledge into shareable documentation.

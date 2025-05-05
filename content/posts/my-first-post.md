@@ -1,8 +1,12 @@
 ---
-title: "Welcome to My Homelab Blog"
+title: Welcome to My Homelab Blog
 date: 2025-04-25
 draft: false
-tags: ["homelab", "infrastructure", "docker"]
+tags:
+  - homelab
+  - infrastructure
+  - docker
+  - t
 ---
 
 # 🏡 Welcome to My Homelab
