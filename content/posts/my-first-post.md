@@ -6,7 +6,6 @@ tags:
   - homelab
   - infrastructure
   - docker
-  - t
 ---
 
 # 🏡 Welcome to My Homelab
