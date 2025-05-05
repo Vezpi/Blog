@@ -32,6 +32,7 @@ params:
   widgets:
     homepage:
       - type: "categories"
+      - type: "tag-cloud"
       - type: "search"
     page:
       - type: "toc"
