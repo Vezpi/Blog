@@ -6,7 +6,7 @@ tags:
   - obsidian
   - hugo
   - gitea
-categories: 
+categories:
   - homelab
 ---
 I always wanted to share my own experiences to give others ideas or help them on their projects.
