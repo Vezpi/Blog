@@ -9,7 +9,6 @@ frontmatter:
 params:
   mainSections: ["posts"]
   sidebar:
-    emoji: "🚀"
     avatar:
       enabled: true
       src: avatar.jpg
@@ -17,6 +16,7 @@ params:
   favicon: "/favicon-32x32.png"
   footer:
     since: 2025
+    customText: ""
   dateFormat:
     published: "Jan 2, 2006"
     lastUpdated: "Jan 2, 2006"
