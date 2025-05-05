@@ -14,7 +14,7 @@ params:
       enabled: true
       src: avatar.jpg
       local: true
-  favicon: "/favicon.ico"
+  favicon: "/favicon-32x32.png"
   footer:
     since: 2025
   dateFormat:
@@ -102,3 +102,7 @@ widgets:
     - type: "search"
   page:
     - type: "toc"
+
+colorScheme:
+  toggle = true
+  default = "dark"
