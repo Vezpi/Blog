@@ -55,8 +55,8 @@ menu:
     - identifier: "email"
       name: Email
       url: "mailto:etienne.girault@gmail.com"
-      params:
-        icon: "email"
+      # params:
+      #   icon: "email"
     - identifier: "github"
       name: "GitHub"
       url: "https://github.com/CaiJimmy/Vezpi"
