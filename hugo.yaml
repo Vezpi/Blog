@@ -55,16 +55,19 @@ menu:
     - identifier: "mail"
       name: Mail
       url: "mailto:etienne.girault@gmail.com"
+      weight: 10
       params:
         icon: "mail"
     - identifier: "github"
       name: "GitHub"
-      url: "https://github.com/CaiJimmy/Vezpi"
+      url: "https://github.com/Vezpi"
+      weight: 20
       params:
         icon: "brand-github"
     - identifier: "linkedin"
       name: "LinkedIn"
       url: "https://www.linkedin.com/in/etiennegirault/"
+      weight: 30
       params:
         icon: "brand-linkedin"
 
