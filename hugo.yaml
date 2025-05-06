@@ -52,11 +52,11 @@ menu:
   main: []
 
   social:
-    - identifier: "email"
-      name: Email
+    - identifier: "mail"
+      name: Mail
       url: "mailto:etienne.girault@gmail.com"
-      # params:
-      #   icon: "email"
+      params:
+        icon: "mail"
     - identifier: "github"
       name: "GitHub"
       url: "https://github.com/CaiJimmy/Vezpi"
@@ -65,8 +65,8 @@ menu:
     - identifier: "linkedin"
       name: "LinkedIn"
       url: "https://www.linkedin.com/in/etiennegirault/"
-      # params:
-      #   icon: "brand-linkedin"
+      params:
+        icon: "brand-linkedin"
 
 outputs:
   home:
