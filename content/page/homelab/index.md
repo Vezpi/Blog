@@ -7,7 +7,7 @@ menu:
   main:
     weight: 20
     params:
-      icon: home
+      icon: flask
 ---
 
 Welcome to my homelab — a space where I explore new technologies, break things on purpose, and learn by doing. What started as a few old machines has grown into a modest but powerful setup that I use for self-hosting, automation, testing infrastructure tools, and running personal projects.
