@@ -8,38 +8,45 @@ frontmatter:
 
 params:
   mainSections: ["posts"]
+  favicon: "/favicon-32x32.png"
+
   sidebar:
     avatar:
       enabled: true
       src: avatar.jpg
       local: true
-  favicon: "/favicon-32x32.png"
+
   footer:
     since: 2025
     customText: ""
+
   dateFormat:
     published: "Jan 2, 2006"
     lastUpdated: "Jan 2, 2006"
+
   toc:
     enable: true
+
   article:
     math: false
     toc: true
     readingTime: true
     lastUpdated: true
+
   comments:
     enable: false
+
   widgets:
     homepage:
+      - type: "search"
       - type: "categories"
       - type: "tag-cloud"
-      - type: "search"
     page:
       - type: "toc"
+
   colorScheme:
     toggle: true
     default: "dark"
-
   
 menu:
   main: []
