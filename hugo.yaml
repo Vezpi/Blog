@@ -42,27 +42,8 @@ params:
 
   
 menu:
-  main:
-    - identifier: home
+  main: []
 
-    - identifier: homelab
-      name: Homelab
-      url: /homelab/
-      weight: 10
-      params:
-        - icon: "home"
-    - identifier: about
-      name: About
-      url: /about/
-      weight: 20
-    - identifier: tags
-      name: Tags
-      url: /tags/
-      weight: 30
-    - identifier: search
-      name: 🔍 Search
-      url: /search/
-      weight: 40
   social:
     - identifier: "github"
       name: "GitHub"
