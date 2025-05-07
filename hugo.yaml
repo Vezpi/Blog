@@ -1,6 +1,6 @@
 baseURL: "https://blog.vezpi.me/"
 languageCode: "en-us"
-title: "Vezpi Blog"
+title: "Vezpi Lab"
 theme: "stack"
 
 frontmatter:
