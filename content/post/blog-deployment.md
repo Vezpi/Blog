@@ -111,7 +111,7 @@ I needed to create the workflow that will spin-up a container and do the followi
 - Transfer blog content from Obsidian
 - Commit the change to the blog repository
 
-`.gitea/workflows/sync_blog.yml`
+**sync_blog.yml**
 ```yaml
 name: Synchronize content with the blog repo
 on:
@@ -137,16 +137,17 @@ jobs:
           echo "Copy Markdown files"
           rsync -av --delete Blog/ blog/content
           # Gather all used images from markdown files
-          used_images=$(grep -rhoE '!\[\[.*\]\]' blog/content | sed -E 's/!\[\[(.*)\]\]/\1/' | sort -u)
-          mkdir -p blog/assets/Images
+          used_images=$(grep -rhoE '^!\[\[.*\]\]' blog/content | sed -E 's/!\[\[(.*)\]\]/\1/' | sort -u)
+          # Create the target image folder
+          mkdir -p blog/static/img
           # Loop over each used image"
           while IFS= read -r image; do
             # Loop through all .md files and replace image links
             grep -rl "$image" blog/content/* | while IFS= read -r md_file; do
-              sed -i "s|\!\[\[$image\]\]|\!\[${image// /_}\](Images/${image// /_})|g" "$md_file"
+              sed -i "s|\!\[\[$image\]\]|\!\[${image// /_}\](img/${image// /_})|g" "$md_file"
             done
             echo "Copy the image ${image// /_} to the static folder"
-            cp "Images/$image" "blog/assets/Images/${image// /_}"
+            cp "Images/$image" "blog/static/img/${image// /_}"
           done <<< "$used_images"
 
       - name: Commit the change to the blog repository
@@ -158,13 +159,11 @@ jobs:
           git add .
           git commit -m "Auto-update blog content from Obsidian: $(date '+%F %T')" || echo "Nothing to commit"
           git push -u origin main
-
-
 ```
 
 Obsidian uses wiki-style links for images, like `![[image name.png]]`, which isn't compatible with Hugo out of the box. Here's how I automated a workaround in a Gitea Actions workflow:
 - I find all used image references in `.md` files.
-- For each referenced image, I update the link in relevant `.md` files like `![image name](Images/image_name.png)`.
+- For each referenced image, I update the link in relevant `.md` files like `![image name](img/image_name.png)`.
 - I then copy those used images to the blog's assets directory while replacing white-spaces by underscores.
 
 ### Step 4: Gitea Actions for Blog Repository
@@ -176,7 +175,7 @@ Its workflow:
 - Check if the Hugo version is up-to-date. If not, it downloads the latest release and replaces the old binary.
 - Build the static website using Hugo.
 
-`.gitea/workflows/deploy_blog.yml`
+**deploy_blog.yml**
 ```yaml
 name: Deploy
 on: [push]
@@ -189,38 +188,45 @@ jobs:
       volumes:
         - /appli/data/blog:/blog
     steps:
-      - name: Install prerequisites
-        run: apt update && apt install -y jq
-        
       - name: Check out repository
         run: |
           cd ${BLOG_FOLDER}
           git config --global user.name "Gitea Actions"
           git config --global user.email "actions@local"
           git config --global --add safe.directory ${BLOG_FOLDER}
-          git pull
+          git submodule update --init --recursive
+          git fetch origin
+          git reset --hard origin/main
 
       - name: Get current Hugo version
-        run: echo "current_version=$(${BLOG_FOLDER}/bin/hugo version | grep -oE 'v[0-9]+\.[0-9]+\.[0-9]+')" | tee -a $GITEA_ENV
+        run: |
+          current_version=$(${BLOG_FOLDER}/hugo version | grep -oE 'v[0-9]+\.[0-9]+\.[0-9]+')
+          echo "current_version=$current_version" | tee -a $GITEA_ENV
 
       - name: Verify latest Hugo version
-        run: echo "latest_version=$(curl -s https://api.github.com/repos/gohugoio/hugo/releases/latest | jq -r .tag_name)" | tee -a $GITEA_ENV
+        run: |
+          latest_version=$(curl -s https://api.github.com/repos/gohugoio/hugo/releases/latest | grep -oP '"tag_name": "\K[^"]+')
+          echo "latest_version=$latest_version" | tee -a $GITEA_ENV
 
       - name: Download latest Hugo version
         if: env.current_version != env.latest_version
         run: |
+          rm -f ${BLOG_FOLDER}/{LICENSE,README.md,hugo}
           curl -L https://github.com/gohugoio/hugo/releases/download/$latest_version/hugo_extended_${latest_version#v}_Linux-64bit.tar.gz -o hugo.tar.gz
-          tar -xzvf hugo.tar.gz -C ${BLOG_FOLDER}/bin/
+          tar -xzvf hugo.tar.gz -C ${BLOG_FOLDER}/
 
       - name: Generate the static files with Hugo
         run: |
           rm -f ${BLOG_FOLDER}/content/posts/template.md
-          ${BLOG_FOLDER}/bin/hugo -D -b https://blog-dev.vezpi.me -s ${BLOG_FOLDER} -d ${BLOG_FOLDER}/private
-          ${BLOG_FOLDER}/bin/hugo -s ${BLOG_FOLDER} -d ${BLOG_FOLDER}/public
-
+          rm -rf ${BLOG_FOLDER}/private/* ${BLOG_FOLDER}/public/*
+          ${BLOG_FOLDER}/hugo -D -b https://blog-dev.vezpi.me -s ${BLOG_FOLDER} -d ${BLOG_FOLDER}/private
+          ${BLOG_FOLDER}/hugo -s ${BLOG_FOLDER} -d ${BLOG_FOLDER}/public
+          chown 1000:1000 -R ${BLOG_FOLDER}
 ```
 
 ---
 ## 🚀 Results
 
-This workflow allows me to focus on what matters most: writing and refining my content. By automating the publishing pipeline — from syncing my Obsidian notes to building the blog with Hugo — I no longer need to worry about manually managing content in a CMS. Every note I draft can evolve naturally into a clear, structured article, and the technical workflow fades into the background. It’s a simple yet powerful way to turn personal knowledge into shareable documentation.
+This workflow allows me to focus on what matters most: writing and refining my content. By automating the publishing pipeline — from syncing my Obsidian notes to building the blog with Hugo — I no longer need to worry about manually managing content in a CMS.
+
+Every note I draft can evolve naturally into a clear, structured article, and the technical workflow fades into the background. It’s a simple yet powerful way to turn personal knowledge into shareable documentation.
