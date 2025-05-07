@@ -9,9 +9,6 @@ jobs:
       volumes:
         - /appli/data/blog:/blog
     steps:
-      - name: Install prerequisites
-        run: apt update && apt install -y jq
-        
       - name: Check out repository
         run: |
           cd ${BLOG_FOLDER}
@@ -22,20 +19,14 @@ jobs:
           git fetch origin
           git reset --hard origin/main
 
-      - name: Get current Hugo version
-        run: echo "current_version=$(${BLOG_FOLDER}/bin/hugo version | grep -oE 'v[0-9]+\.[0-9]+\.[0-9]+')" | tee -a $GITEA_ENV
-
-      - name: Verify latest Hugo version
-        run: echo "latest_version=$(curl -s https://api.github.com/repos/gohugoio/hugo/releases/latest | jq -r .tag_name)" | tee -a $GITEA_ENV
-
-      - name: Download latest Hugo version
-        if: env.current_version != env.latest_version
+      - name: Download Hugo 
         run: |
-          curl -L https://github.com/gohugoio/hugo/releases/download/$latest_version/hugo_extended_${latest_version#v}_Linux-64bit.tar.gz -o hugo.tar.gz
-          tar -xzvf hugo.tar.gz -C ${BLOG_FOLDER}/bin/
+          curl -s https://api.github.com/repos/gohugoio/hugo/releases/latest | grep -oP 'https://[^"]+hugo_extended_[^"]+_Linux-64bit.tar.gz' | head -n 1 | xargs -n 1 curl -L -o hugo.tar.gz
+          tar -xzvf hugo.tar.gz -C ${BLOG_FOLDER}/
 
       - name: Generate the static files with Hugo
         run: |
           rm -f ${BLOG_FOLDER}/content/posts/template.md
-          ${BLOG_FOLDER}/bin/hugo -D -b https://blog-dev.vezpi.me -s ${BLOG_FOLDER} -d ${BLOG_FOLDER}/private
-          ${BLOG_FOLDER}/bin/hugo -s ${BLOG_FOLDER} -d ${BLOG_FOLDER}/public
+          rm -rf ${BLOG_FOLDER}/private/* ${BLOG_FOLDER}/public/*
+          ${BLOG_FOLDER}/hugo -D -b https://blog-dev.vezpi.me -s ${BLOG_FOLDER} -d ${BLOG_FOLDER}/private
+          ${BLOG_FOLDER}/hugo -s ${BLOG_FOLDER} -d ${BLOG_FOLDER}/public
