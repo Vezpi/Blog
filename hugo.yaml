@@ -78,6 +78,10 @@ menu:
       params:
         icon: "brand-linkedin"
 
+taxonomies:
+  category: "categories"
+  tag: "tags
+
 related:
     includeNewer: true
     threshold: 60
