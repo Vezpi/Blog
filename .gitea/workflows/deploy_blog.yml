@@ -20,10 +20,14 @@ jobs:
           git reset --hard origin/main
 
       - name: Get current Hugo version
-        run: echo "current_version=$(${BLOG_FOLDER}/hugo version | grep -oE 'v[0-9]+\.[0-9]+\.[0-9]+')" | tee -a $GITEA_ENV
+        run: |
+          current_version=$(${BLOG_FOLDER}/hugo version | grep -oE 'v[0-9]+\.[0-9]+\.[0-9]+')
+          echo "current_version=$current_version | tee -a $GITEA_ENV
 
       - name: Verify latest Hugo version
-        run: echo "latest_version=$(curl -s https://api.github.com/repos/gohugoio/hugo/releases/latest | grep -oP '\"tag_name\": \"\K[^\"]+')" | tee -a $GITEA_ENV
+        run: |
+          latest_version=$(curl -s https://api.github.com/repos/gohugoio/hugo/releases/latest | grep -oP '"tag_name": "\K[^"]+')
+          echo "latest_version=$latest_version" | tee -a $GITEA_ENV
 
       - name: Download latest Hugo version
         if: env.current_version != env.latest_version
