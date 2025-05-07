@@ -19,9 +19,17 @@ jobs:
           git fetch origin
           git reset --hard origin/main
 
-      - name: Download Hugo 
+      - name: Get current Hugo version
+        run: echo "current_version=$(${BLOG_FOLDER}/hugo version | grep -oE 'v[0-9]+\.[0-9]+\.[0-9]+')" | tee -a $GITEA_ENV
+
+      - name: Verify latest Hugo version
+        run: echo "latest_version=$(curl -s https://api.github.com/repos/gohugoio/hugo/releases/latest | grep -oP '"tag_name": "\K[^"]+')" | tee -a $GITEA_ENV
+
+      - name: Download latest Hugo version
+        if: env.current_version != env.latest_version
         run: |
-          curl -s https://api.github.com/repos/gohugoio/hugo/releases/latest | grep -oP 'https://[^"]+hugo_extended_[^"]+_Linux-64bit.tar.gz' | head -n 1 | xargs -n 1 curl -L -o hugo.tar.gz
+          rm -f ${BLOG_FOLDER}/{LICENSE,README.md,hugo}
+          curl -L https://github.com/gohugoio/hugo/releases/download/$latest_version/hugo_extended_${latest_version#v}_Linux-64bit.tar.gz -o hugo.tar.gz
           tar -xzvf hugo.tar.gz -C ${BLOG_FOLDER}/
 
       - name: Generate the static files with Hugo
