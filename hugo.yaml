@@ -50,7 +50,13 @@ params:
     default: "dark"
   
 menu:
-  main: []
+  main:
+    - name: Categories
+      url: /categories/
+      weight: 50
+    - name: Tags
+      url: /tags/
+      weight: 60
 
   social:
     - identifier: "mail"
@@ -80,17 +86,17 @@ menu:
 
 taxonomies:
   category: "categories"
-  tag: "tags
+  tag: "tags"
 
 related:
     includeNewer: true
     threshold: 60
     toLower: false
     indices:
-        - name: tags
-          weight: 10
-        - name: categories
-          weight: 20
+      - name: tags
+        weight: 10
+      - name: categories
+        weight: 20
 
 outputs:
   home:
