@@ -9,6 +9,8 @@ tags:
 categories:
   - homelab
 ---
+## 💡 Introduction
+
 I always wanted to share my own experiences to give others ideas or help them on their projects.
 
 I'm constantly tinkering in my homelab, trying new tools and workflows. Instead of keeping all these experiments in private notes, I decided to create a blog where I can document and publish them easily.
