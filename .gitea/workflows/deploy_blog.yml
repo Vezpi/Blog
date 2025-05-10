@@ -40,6 +40,6 @@ jobs:
         run: |
           rm -f ${BLOG_FOLDER}/content/posts/template.md
           rm -rf ${BLOG_FOLDER}/private/* ${BLOG_FOLDER}/public/*
-          ${BLOG_FOLDER}/hugo -D -b https://blog-dev.vezpi.me -s ${BLOG_FOLDER} -d ${BLOG_FOLDER}/private
+          ${BLOG_FOLDER}/hugo -D -b https://blog-dev.vezpi.com -s ${BLOG_FOLDER} -d ${BLOG_FOLDER}/private
           ${BLOG_FOLDER}/hugo -s ${BLOG_FOLDER} -d ${BLOG_FOLDER}/public
           chown 1000:1000 -R ${BLOG_FOLDER}
