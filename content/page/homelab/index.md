@@ -18,7 +18,11 @@ finally in 2019 I bought tiny form factor headless pc, DeskMini A300, small yet 
 
 My homelab journey began in 2013 with a humble Raspberry Pi, the very first model. I was needing a cheap machine for my first step into the world of Linux. It helped me a lot to dive into this technology and served me as a basic NAS, thank you Vezpibox (the name is shitty I know) 
 
-though its limited power quickly became apparent. In 2015, I upgraded to a Raspberry Pi 2, seeking better performance. By 2018, the need for more RAM led me to a Raspberry Pi 3, allowing me to run more demanding applications. Finally, in 2019, I took a significant step forward with a DeskMini A300 — a compact yet powerful headless PC that laid the foundation for a more capable and versatile homelab.
+In 2015, I upgraded to a Raspberry Pi 2, seeking better performance to run multiple applications like XBMC (the old Kodi's name), CouchPotato, SickBeard, you know...
+
+By 2018, the need for more RAM led me to a Raspberry Pi 3, allowing me to run even more applications. My 3 little machines were running toge
+
+Finally, in 2019, I took a significant step forward with a DeskMini A300, a compact yet powerful headless PC that laid the foundation for a more capable and versatile homelab.
 ## Why a Homelab ?
 want to spawn VM, build kubernetes cluster
 evolution of my setup
