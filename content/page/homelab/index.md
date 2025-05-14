@@ -20,9 +20,9 @@ My homelab journey began in 2013 with a humble Raspberry Pi, the very first mode
 
 In 2015, I upgraded to a Raspberry Pi 2, seeking better performance to run multiple applications like XBMC (the old Kodi's name), CouchPotato, SickBeard, you know...
 
-By 2018, the need for more RAM led me to a Raspberry Pi 3, allowing me to run even more applications. My 3 little machines were running toge
+By 2018, the need for more RAM led me to a Raspberry Pi 3, allowing me to run even more applications. My 3 little machines were running happily together, in a quite ordered mess.
 
-Finally, in 2019, I took a significant step forward with a DeskMini A300, a compact yet powerful headless PC that laid the foundation for a more capable and versatile homelab.
+Finally, in 2019, my new job made me discover the virtualizationI took a significant step forward with a DeskMini A300, a compact yet powerful headless PC that laid the foundation for a more capable and versatile homelab.
 ## Why a Homelab ?
 want to spawn VM, build kubernetes cluster
 evolution of my setup
