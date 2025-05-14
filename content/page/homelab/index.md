@@ -1,7 +1,7 @@
 ---
-title: "Homelab"
-layout: "page"
-description: "An overview of the hardware, software, and projects powering my personal homelab."
+title: Welcome to My Homelab
+layout: page
+description: The story behind my homelab project
 showToc: true
 menu:
   main:
@@ -17,6 +17,7 @@ from raspberry pi to discover linux
 
 ## Why a Homelab ?
 
+evolution of my setup
 experiment
 privacy
 
@@ -26,11 +27,16 @@ Inconvenient
 - buy hardware
 - power consumption
 
+- - Personal motivations and key objectives
+        
+## Planning & Constraints
+    
 
+## Infrastructure Overview
+    
+## Software Stack
 
-
-
-
+## Roadmap for my Homelab
 
 
 
