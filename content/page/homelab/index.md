@@ -10,19 +10,14 @@ menu:
       icon: flask
 ---
 ## Introduction
-first raspberry pi first of his name in 2013 to discover linux and act as a NAS
-then in 2015 a rapsberry pi 2 more powerful because the first raspberry pi was slow
-and the last one in 2018, raspberry pi 3, for more RAM
-finally in 2019 I bought tiny form factor headless pc, DeskMini A300, small yet powerful
 
+My homelab journey began in 2013 with a humble Raspberry Pi, the very first model. I was needing a cheap machine for my first step into the world of Linux. It helped me a lot to dive into this technology and served me as a basic NAS, thank you Vezpibox (shitty name, I know) 
 
-My homelab journey began in 2013 with a humble Raspberry Pi, the very first model. I was needing a cheap machine for my first step into the world of Linux. It helped me a lot to dive into this technology and served me as a basic NAS, thank you Vezpibox (the name is shitty I know) 
-
-In 2015, I upgraded to a Raspberry Pi 2, seeking better performance to run multiple applications like XBMC (the old Kodi's name), CouchPotato, SickBeard, you know...
+In 2015, I upgraded to a Raspberry Pi 2, seeking better performance to run multiple applications like XBMC (the old Kodi's name), CouchPotato, SickBeard, you name it...
 
 By 2018, the need for more RAM led me to a Raspberry Pi 3, allowing me to run even more applications. My 3 little machines were running happily together, in a quite ordered mess.
 
-Finally, in 2019, my new job made me discover the virtualizationI took a significant step forward with a DeskMini A300, a compact yet powerful headless PC that laid the foundation for a more capable and versatile homelab.
+Finally, in 2019, my new job made me discover the virtualization, with virtual machines and above all Docker. I wanted to try that at home, I took a significant step forward with a compact yet powerful headless PC that laid the foundation for a more capable and versatile homelab.
 ## Why a Homelab ?
 want to spawn VM, build kubernetes cluster
 evolution of my setup
