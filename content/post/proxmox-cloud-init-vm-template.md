@@ -1,7 +1,7 @@
 ---
 title: Proxmox - Create a Cloud-Init VM Template
 date: 2025-01-31
-draft: true
+draft: false
 tags:
   - proxmox
   - cloud-init

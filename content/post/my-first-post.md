@@ -1,7 +1,7 @@
 ---
 title: Welcome to My Homelab Blog
 date: 2025-04-25
-draft: false
+draft: true
 tags:
   - homelab
   - infrastructure

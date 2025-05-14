@@ -1,7 +1,7 @@
 ---
 title: Blog Deployment featuring Obsidian, Hugo and Gitea Actions
 date: 2025-05-02
-draft: true
+draft: false
 tags:
   - obsidian
   - hugo

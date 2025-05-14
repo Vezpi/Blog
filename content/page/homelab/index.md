@@ -9,8 +9,38 @@ menu:
     params:
       icon: flask
 ---
+## Introduction
+
+from raspberry pi to discover linux
+
+
+
+## Why a Homelab ?
+
+experiment
+privacy
+
+Advantages
+- a lot of experience
+Inconvenient
+- buy hardware
+- power consumption
+
+
+
+
+
+
+
+
+
+
+
+
 
 Welcome to my homelab — a space where I explore new technologies, break things on purpose, and learn by doing. What started as a few old machines has grown into a modest but powerful setup that I use for self-hosting, automation, testing infrastructure tools, and running personal projects.
+
+
 
 ## 1. Hardware
 
