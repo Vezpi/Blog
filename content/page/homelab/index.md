@@ -10,35 +10,65 @@ menu:
       icon: flask
 ---
 ## Introduction
-
-from raspberry pi to discover linux
-
-
-
+first raspberry pi first of his name in 2013 to discover linux and act as a NAS
+then rapsberry pi 2 more powerful because the first raspberry pi was slow
+and the last one in 2018, raspberry pi 3, for more RAM
+finally in 2019 I bought tiny form factor headless pc, DeskMini A300, small yet powerful
 ## Why a Homelab ?
-
+want to spawn VM, build kubernetes cluster
 evolution of my setup
 experiment
 privacy
-
-Advantages
-- a lot of experience
-Inconvenient
-- buy hardware
-- power consumption
-
-- - Personal motivations and key objectives
-        
-## Planning & Constraints
-    
-
+experience
+## Shaping the Lab
+### Specifications
+what I want to be able to do :
+- host my current services
+- simulate enterprise environment
+- 3 nodes
+- distributed storage
+- network / vlan
+### Constraints
+- space
+- noise
+- power
+- budget
 ## Infrastructure Overview
-    
+### Rack
+### Servers
+### Network
+### Cooling
+### Photos
 ## Software Stack
-
-## Roadmap for my Homelab
-
-
+### Hypervisor
+### Network
+### Application
+#### Docker
+#### Kubernetes
+## Roadmap for my Lab
+### Building my Homelab
+- building the first proxmox node
+- migrating from my headless PC to a VM
+- building the second proxmox node with HDDs
+- Install the rack
+- Create the network
+- Installating OPNsense
+- Switching routing from my freebox to OPNsense
+- Reconfigure my WiFi clients
+- Build the third Proxmox node
+- Externalize my HDDs
+- Deploy VLAN
+- Setup Proxmox Cluster
+- Setup Ceph Storage
+- Install fans
+- Install ADguard Home along Unbound DNS
+- Setup IPAM
+- Install a bastion
+### Let's Play
+- Deploy a VM with Terraform
+- Create a Terraform module
+- Deploy Terraform infrastructure using Ansible
+- Create a Blog
 
 
 
