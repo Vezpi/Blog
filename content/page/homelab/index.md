@@ -58,7 +58,9 @@ This beauty was the perfect match. The size was spot-on, the build quality impre
 
 I was already having one server and I wanted to keep that first stone, but it had 2 main problems:
 - Only one network interface, I wanted at least 2.
-- Old
+- Old hardware, 5 years old, limited compatibility option.
+
+
 ### Network
 ### Cooling
 ### Photos
