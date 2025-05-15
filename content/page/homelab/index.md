@@ -30,21 +30,35 @@ I also wanted to spawn new virtual machines at will, rebuild them from scratch, 
 
 Initially, my goal was to provide high availability for my existing services. One server wasn’t enough. So, I wanted a second node. But in most HA setups, three nodes are the sweet spot. And just like that, I was on my way to building what would become my homelab.
 ## Shaping the Lab
-### Specifications
-what I want to be able to do :
-- host my existing services
-- simulate enterprise environment
-- 3 nodes for HA
-- distributed storage for HA
-- network / vlan for learning
+### Blueprint
+
+First, I needed to define what my homelab was actually supposed to do. I wanted it to host my existing services reliably, but that wasn’t enough, I wanted a true playground, capable of simulating a more complex enterprise environment.
+
+That meant:
+- **High Availability:** Three nodes to ensure that no single point of failure would bring everything down.
+- **Distributed Storage:** Data redundancy across nodes, not just for uptime but also to learn how enterprise-grade storage systems work.
+- **Network Segmentation:** Multiple VLANs to mimic real-world network topologies, isolate services, and practice advanced networking.
+
+Basically, I wanted to build a tiny datacenter in a closet.
 ### Constraints
-- space: very small space, hidden in a service enclosure in the middle of the appartment
-- noise: It must be silent because of its placement
-- power: as running 24/7, the power draw must be reasonable
-- budget: not cheap, but not too expensive
+
+Of course, reality doesn’t always align with ambitions. Here’s what I was up against:
+- **Space:** My lab needed to fit in a small, hidden service enclosure in the middle of my apartment. Not exactly a server room.
+- **Noise:** Silence was crucial. This wasn’t going to be tucked away in a garage or basement, it was right in the middle of our living space.
+- **Power Draw:** Running 24/7, the power consumption had to be kept in check. I couldn’t afford to triple my electric bill just to tinker with VMs.
+- **Budget:** I wasn’t going to drop thousands on enterprise-grade hardware. The balance was finding reliable, second-hand gear that wouldn’t break the bank.
+- Temperature: I’m not gonna lie, I forgot about it.. Mini PCs don’t generate much heat, but network gear? That’s a different story. Lesson learned.
 ## Infrastructure Overview
 ### Rack
+
+What is a datacenter without a rack? Honestly, I didn’t think one would fit in my limited space, until I discovered the [DeskPi RackMate T1](https://deskpi.com/products/deskpi-rackmate-t1-2).
+
+This beauty was the perfect match. The size was spot-on, the build quality impressive, and the modular design allowed me to add some extra accessories, like a power strip and shelves, to complete the setup.
 ### Servers
+
+I was already having one server and I wanted to keep that first stone, but it had 2 main problems:
+- Only one network interface, I wanted at least 2.
+- Old
 ### Network
 ### Cooling
 ### Photos
