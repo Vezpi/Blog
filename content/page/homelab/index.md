@@ -60,7 +60,7 @@ I was already having one server and I wanted to keep that first stone, but it ha
 - Only one network interface, I wanted at least 2.
 - Old hardware, 5 years old, limited compatibility option.
 
-
+For the missing NIC, I researched a way to add one. I thought about an USB adapter, but then I discovered I could use the internal
 ### Network
 ### Cooling
 ### Photos
