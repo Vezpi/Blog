@@ -70,7 +70,8 @@ Let's break it down:
 | ---- | ------ | ---- | ------ |
 | Case |        |      |        |
 | CPU  |        |      |        |
-|      |        |      |        |
+| RAM  |        |      |        |
+| NIC  |        |      |        |
 
 ### Network
 ### Cooling
