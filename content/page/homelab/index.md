@@ -19,6 +19,7 @@ By 2018, the need for more RAM led me to a Raspberry Pi 3, allowing me to run ev
 
 Finally, in 2019, my new job made me discover the virtualization, with virtual machines and above all Docker. I wanted to try that at home, I took a significant step forward with a compact yet powerful headless PC that laid the foundation of my homelab.
 ## Why a Homelab ?
+
 want to spawn VM, build kubernetes cluster
 evolution of my setup
 experiment
