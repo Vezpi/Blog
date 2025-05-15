@@ -20,23 +20,25 @@ By 2018, the need for more RAM led me to a Raspberry Pi 3, allowing me to run ev
 Finally, in 2019, my new job made me discover the virtualization, with virtual machines and above all Docker. I wanted to try that at home, I took a significant step forward with a compact yet powerful headless PC that laid the foundation of my homelab.
 ## Why a Homelab ?
 
-I love trying new things out, 
-quick answer to the question : I wanted a playground, be able to restart a machine from scratch, simulate HA environment
-want to spawn VM, build kubernetes cluster
-evolution of my setup
-experiment
-privacy
-experience
+I wanted my own playground, a space where breaking things was not just okay, but encouraged. It’s the best way to learn how to fix them and, more importantly, to really understand how they work.
+
+My single server was great, but testing anything risky on it became a problem. It was running critical services like home automation and DNS, and believe me, having no lights or internet is a major incident in my household. The server had become indispensable. When it was down, everything was down. Not so fun anymore.
+
+The first big challenge I set for myself was building a Kubernetes cluster. Sure, I could run one on a single node, but what’s the point of a cluster with only one node? You could argue that running Kubernetes to control my shutters is overkill, and you’d be right. But that wasn’t the point.
+
+I also wanted to spawn new virtual machines at will, rebuild them from scratch, and apply Infrastructure as Code principles. I could have done all of that in the cloud, but I wanted full control.
+
+Initially, my goal was to provide high availability for my existing services. One server wasn’t enough. So, I wanted a second node. But in most HA setups, three nodes are the sweet spot. And just like that, I was on my way to building what would become my homelab.
 ## Shaping the Lab
 ### Specifications
 what I want to be able to do :
-- host my current services
+- host my existing services
 - simulate enterprise environment
-- 3 nodes
-- distributed storage
-- network / vlan
+- 3 nodes for HA
+- distributed storage for HA
+- network / vlan for learning
 ### Constraints
-- space
+- space: 
 - noise
 - power
 - budget
