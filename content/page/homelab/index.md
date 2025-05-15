@@ -66,12 +66,12 @@ Regarding hardware, my existing server was powered by an AM4 Ryzen 3 2200G with 
 
 Here’s the breakdown of my three-node setup:
 
-| Node | Vertex | Apex | Zenith |
-| ---- | ------ | ---- | ------ |
-| Case |        |      |        |
-| CPU  |        |      |        |
-| RAM  |        |      |        |
-| NIC  |        |      |        |
+| Node  | Vertex | Apex | Zenith |
+| ----- | ------ | ---- | ------ |
+| Model |        |      |        |
+| CPU   |        |      |        |
+| RAM   |        |      |        |
+| NIC   |        |      |        |
 
 ### Network
 ### Cooling
