@@ -56,15 +56,15 @@ What is a datacenter without a rack? Honestly, I didn’t think one would fit in
 This beauty was the perfect match. The size was spot-on, the build quality impressive, and the modular design allowed me to add some extra accessories, like a power strip and shelves, to complete the setup.
 ### Servers
 
-I was already having one server and I wanted to keep that first stone, but it had 2 main problems:
-- Only one network interface, I wanted at least 2.
-- Old hardware, 5 years old, limited compatibility option.
+I already had one server that served as the cornerstone of my homelab, and I wanted to keep it. But it had two major drawbacks:
+- **Single Network Interface:** I wanted at least two NICs for network segmentation and redundancy.
+- **Aging Hardware:** It was over five years old, and its compatibility options were becoming limited.
 
-For the missing NIC, I researched a way to add one. I thought about an USB adapter, but then I discovered I could use the internal M.2 port of the WiFi module to connect a 2.5Gbps adapter.
+For the missing NIC, I considered a USB adapter but then stumbled upon a better solution: using the internal M.2 port, originally meant for a WiFi module, to connect a 2.5Gbps adapter. It was a perfect fit.
 
-On the hardware, my current server is powered by a AM4 Ryzen 3 2200G with 16GB of RAM. For the sake of compatibility, I wanted all my nodes to have similar setup. I sticked with a AM4 socket for the other nodes.
+Regarding hardware, my existing server was powered by an AM4 Ryzen 3 2200G with 16GB of RAM. To keep things consistent and simplify compatibility, I decided to stick with the AM4 socket for all nodes.
 
-Let's break it down:
+Here’s the breakdown of my three-node setup:
 
 | Node | Vertex | Apex | Zenith |
 | ---- | ------ | ---- | ------ |
