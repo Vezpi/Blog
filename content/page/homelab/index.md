@@ -38,10 +38,10 @@ what I want to be able to do :
 - distributed storage for HA
 - network / vlan for learning
 ### Constraints
-- space: 
-- noise
-- power
-- budget
+- space: very small space, hidden in a service enclosure in the middle of the appartment
+- noise: It must be silent because of its placement
+- power: as running 24/7, the power draw must be reasonable
+- budget: not cheap, but not too expensive
 ## Infrastructure Overview
 ### Rack
 ### Servers
