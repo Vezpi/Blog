@@ -95,7 +95,9 @@ Here is the final network setup:
 - **Access Point:** [UniFi U7 Pro Wall](https://eu.store.ui.com/eu/en/category/all-wifi/products/u7-pro-wall), Wi-Fi 7, 2.5Gbps PoE+ in.
 ### Cooling
 
-I quickly realized that my network equipment was heating my closet up quite fast. Luckily for me, me build started  in December and I was not much affected
+I quickly realized that my network equipment was heating my closet up quite fast. Luckily for me, me build started in December and I was not much affected, but in summer, it would be a different story.
+
+I didn't had many options, drilling through my wall was somewhat not WAF, and no way I could explain to my wife that I needed to cool donw my servers was 
 ### Photos
 ## Software Stack
 ### Hypervisor
