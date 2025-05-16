@@ -62,16 +62,16 @@ I already had one server that served as the cornerstone of my homelab, and I wan
 
 For the missing NIC, I considered a USB adapter but then stumbled upon a better solution: using the internal M.2 port, originally meant for a WiFi module, to connect a 2.5Gbps adapter. It was a perfect fit.
 
-Regarding hardware, my existing server was powered by an AM4 Ryzen 3 2200G with 16GB of RAM. To keep things consistent and simplify compatibility, I decided to stick with the AM4 socket for all nodes.
+Regarding hardware, my existing server was powered by an AM4 Ryzen 3 2200G with 16GB of RAM DDR4. To keep things consistent and simplify compatibility, I decided to stick with the AM4 socket for all nodes.
 
-Here’s the breakdown of my three-node setup:
+Here is the breakdown of my nodes:
 
-| Node  | Vertex | Apex | Zenith |
-| ----- | ------ | ---- | ------ |
-| Model |        |      |        |
-| CPU   |        |      |        |
-| RAM   |        |      |        |
-| NIC   |        |      |        |
+| Node  | Vertex                  | Apex                    | Zenith                   |
+| ----- | ----------------------- | ----------------------- | ------------------------ |
+| Model | ASRock DeskMini A300    | Minisforum HM50         | T-bao MN57               |
+| CPU   | AMD Ryzen 3 2200G 4C/4T | AMD Ryzen 5 4500U 6C/6T | AMD Ryzen 7 5700U 8C/16T |
+| RAM   | 16GB                    | 16GB                    | 32GB                     |
+| NIC   | 1Gbps (+ 2.5Gbps)       | 1Gbps + 2.5Gbps         | 1Gbps + 2.5Gbps          |
 
 ### Network
 ### Cooling
