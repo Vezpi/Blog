@@ -97,7 +97,7 @@ Here is the final network setup:
 
 I quickly realized that my network equipment was heating my closet up quite fast. Luckily for me, me build started in December and I was not much affected, but in summer, it would be a different story.
 
-I didn't had many options, drilling through my wall was somewhat not WAF, and no way I could explain to my wife that I needed to cool donw my servers was 
+I didn't had many options, drilling through my wall was somewhat not WAF, and no way I could explain to my wife that I needed to cool down my servers. Plus it needed to be silent, a tough equ ation really. 
 ### Photos
 ## Software Stack
 ### Hypervisor
