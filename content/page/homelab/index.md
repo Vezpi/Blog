@@ -95,9 +95,23 @@ Here is the final network setup:
 - **Access Point:** [UniFi U7 Pro Wall](https://eu.store.ui.com/eu/en/category/all-wifi/products/u7-pro-wall), Wi-Fi 7, 2.5Gbps PoE+ in.
 ### Cooling
 
-I quickly realized that my network equipment was heating my closet up quite fast. Luckily for me, me build started in December and I was not much affected, but in summer, it would be a different story.
+I quickly learned that my network gear was turning my closet into a mini furnace. Fortunately, I started the build in December, so the heat wasn’t too noticeable, but come summer, it was bound to become a real problem.
 
-I didn't had many options, drilling through my wall was somewhat not WAF, and no way I could explain to my wife that I needed to cool down my servers. Plus it needed to be silent, a tough equ ation really. 
+I didn't had many options, drilling through my wall was somewhat not WAF, and no way I could explain to my wife that I needed to cool down my servers. Plus it needed to be silent, a tough equation really. 
+
+The only option I had was to drill two 40mm holes above my kitchen cabinet, insert two small PVC tubes into the wall and place two fans surrounded by foam to reduce vibrations and therefore noise.
+
+Added to that, I inserted two 80mm fans in the rack to help the air flow. I also added a PWM controller for all the fans to adjust the speed where it could not be audible.
+
+
+
+Options were limited, there was no way I was going to convince my wife that our servers needed a cooling system. Plus, it had to be silent. Not an easy combo.
+
+The best solution I came up with was to drill two 40mm holes above the kitchen cabinet. I ran PVC pipes through the wall and installed two small fans, each cushioned with foam to minimize vibrations and keep noise down.
+
+Inside the rack, I added two 80mm fans to help with airflow. To keep everything quiet, I hooked up a PWM controller to regulate fan speeds, striking a balance between airflow and silence.
+
+
 ### Photos
 ## Software Stack
 ### Hypervisor
