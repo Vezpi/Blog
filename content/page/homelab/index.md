@@ -84,23 +84,22 @@ Here is the layout of my nodes:
 
 For the network, I had two main objectives: implement VLANs for network segmentation and manage my firewall for more granular control. Since my nodes were equipped with 2.5Gbps NICs, I needed switches that could handle those speeds, and a few Power over Ethernet (PoE) ports for my Zigbee antenna and what could come after.
 
-Initially, I was drawn to MikroTik hardware, great for learning, but their switch layouts didn’t quite align with my setup. Then I came across Ubiquiti’s UniFi line, which not only offered the necessary features but also came with a sleek UI and impressive hardware aesthetics.
+Initially, I was drawn to MikroTik hardware, great for learning, but their switch layouts didn’t quite align with my setup. On the other hand, Ubiquiti's UniFi line was the easy route with their with a sleek UI and impressive hardware aesthetics.
 
-I've heard of Microtik hardware and I really wanted it, but the layout of their switches wouldn't fit with the target. On the other hand, Ubiquiti was proposing a very good range of equipments with UniFi, with a sleek UI and actually beautiful hardware.
+For the router, I opted against the UniFi gateway. I wanted something more customizable, something I could get my hands dirty with. After some research, I settled on OPNsense over pfSense, it was said to be a bit more beginner-friendly, and so far, I haven’t regretted it.
 
-For the router I really wanted a custom one, I didn't want the UniFi gateway, I wanted my hands a bit dirtier than that. I was hesitating between pfSense and OPNsense and I finally choose the latter because I heard it was maybe more newbie friendly, I don't regret for now.
-
-My network setup is finally as follow:
-- OPNsense router installed a on Topton fanless box, powered by a N100, 16GB of RAM and 4x 2.5Gbps ports
-- [UniFi Switch Lite 16 PoE](https://eu.store.ui.com/eu/en/category/switching-utility/products/usw-lite-16-poe) with 8x 1Gbps PoE ports and 8x non PoE ports
-- [UniFi Flex Mini 2.5G](https://eu.store.ui.com/eu/en/category/switching-utility/products/usw-flex-2-5g-5) with 5x 2.5Gbps and one of these PoE in
-- [UniFi U7 Pro Wall](https://eu.store.ui.com/eu/en/category/all-wifi/products/u7-pro-wall) as WiFI 7 access point, PoE+ in at 2.5Gbps
+Here is the final network setup:
+- **Router:** OPNsense running on a fanless Topton box with an Intel N100, 16GB RAM, and 4x 2.5Gbps ports.
+- **Switch:** [UniFi Switch Lite 16 PoE](https://eu.store.ui.com/eu/en/category/switching-utility/products/usw-lite-16-poe), 8x 1Gbps PoE ports and 8x non-PoE ports.
+- **Switch:** [UniFi Flex Mini 2.5G](https://eu.store.ui.com/eu/en/category/switching-utility/products/usw-flex-2-5g-5), 5x 2.5Gbps ports, with one PoE-in port.
+- **Access Point:** [UniFi U7 Pro Wall](https://eu.store.ui.com/eu/en/category/all-wifi/products/u7-pro-wall), Wi-Fi 7, 2.5Gbps PoE+ in.
 
 
 
 
 
-For the router, I opted against the UniFi gateway. I wanted something more customizable, something I could get my hands dirty with. After some research, I settled on OPNsense over pfSense — it was said to be a bit more beginner-friendly, and so far, I haven’t regretted it.
+
+
 
 Here’s the final network setup:
 
