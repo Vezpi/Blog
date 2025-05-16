@@ -97,19 +97,18 @@ Here is the final network setup:
 
 I quickly learned that my network gear was turning my closet into a mini furnace. Fortunately, I started the build in December, so the heat wasn’t too noticeable, but come summer, it was bound to become a real problem.
 
-I didn't had many options, drilling through my wall was somewhat not WAF, and no way I could explain to my wife that I needed to cool down my servers. Plus it needed to be silent, a tough equation really. 
-
-The only option I had was to drill two 40mm holes above my kitchen cabinet, insert two small PVC tubes into the wall and place two fans surrounded by foam to reduce vibrations and therefore noise.
-
-Added to that, I inserted two 80mm fans in the rack to help the air flow. I also added a PWM controller for all the fans to adjust the speed where it could not be audible.
-
-
-
 Options were limited, there was no way I was going to convince my wife that our servers needed a cooling system. Plus, it had to be silent. Not an easy combo.
 
 The best solution I came up with was to drill two 40mm holes above the kitchen cabinet. I ran PVC pipes through the wall and installed two small fans, each cushioned with foam to minimize vibrations and keep noise down.
 
-Inside the rack, I added two 80mm fans to help with airflow. To keep everything quiet, I hooked up a PWM controller to regulate fan speeds, striking a balance between airflow and silence.
+Inside the rack, I also added two 80mm fans to help with airflow. To keep everything quiet, I hooked up a PWM controller to regulate fan speeds, striking a balance between airflow and silence.
+
+
+
+
+
+
+
 
 
 ### Photos
