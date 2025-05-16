@@ -64,12 +64,15 @@ For the missing NIC, I considered a USB adapter but then stumbled upon a better 
 
 Regarding hardware, my existing server was powered by an AM4 Ryzen 3 2200G with 16GB of RAM DDR4. To keep things consistent and simplify compatibility, I decided to stick with the AM4 socket for all nodes.
 
+Finally, the specifications for the two additional nodes were clear: an AM4 socket for consistency, low power consumption, dual NICs with at least one 2.5Gbps, and sufficient storage options, at least one M.2 NVMe slot and a 2.5" drive bay.
+
 Here is the breakdown of my nodes:
 
 | Node  | Vertex                  | Apex                    | Zenith                   |
 | ----- | ----------------------- | ----------------------- | ------------------------ |
 | Model | ASRock DeskMini A300    | Minisforum HM50         | T-bao MN57               |
 | CPU   | AMD Ryzen 3 2200G 4C/4T | AMD Ryzen 5 4500U 6C/6T | AMD Ryzen 7 5700U 8C/16T |
+| TDP   | 65W                     | 15W                     | 15W                      |
 | RAM   | 16GB                    | 16GB                    | 32GB                     |
 | NIC   | 1Gbps (+ 2.5Gbps)       | 1Gbps + 2.5Gbps         | 1Gbps + 2.5Gbps          |
 
