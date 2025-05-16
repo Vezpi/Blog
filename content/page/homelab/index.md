@@ -48,7 +48,7 @@ Of course, reality doesn’t always align with ambitions. Here’s what I was up
 - **Noise:** Silence was crucial. This wasn’t going to be tucked away in a garage or basement, it was right in the middle of our living space.
 - **Power Draw:** Running 24/7, the power consumption had to be kept in check. I couldn’t afford to triple my electric bill just to tinker with VMs.
 - **Budget:** I wasn’t going to drop thousands on enterprise-grade hardware. The balance was finding reliable, second-hand gear that wouldn’t break the bank.
-- Temperature: I’m not gonna lie, I forgot about it.. Mini PCs don’t generate much heat, but network gear? That’s a different story. Lesson learned.
+- **Temperature**: I’m not gonna lie, I forgot about it.. Mini PCs don’t generate much heat, but network gear? That’s a different story. Lesson learned.
 ## Infrastructure Overview
 
 Let’s break down the components that make up my homelab.
@@ -93,24 +93,9 @@ Here is the final network setup:
 - **Switch:** [UniFi Switch Lite 16 PoE](https://eu.store.ui.com/eu/en/category/switching-utility/products/usw-lite-16-poe), 8x 1Gbps PoE ports and 8x non-PoE ports.
 - **Switch:** [UniFi Flex Mini 2.5G](https://eu.store.ui.com/eu/en/category/switching-utility/products/usw-flex-2-5g-5), 5x 2.5Gbps ports, with one PoE-in port.
 - **Access Point:** [UniFi U7 Pro Wall](https://eu.store.ui.com/eu/en/category/all-wifi/products/u7-pro-wall), Wi-Fi 7, 2.5Gbps PoE+ in.
-
-
-
-
-
-
-
-
-Here’s the final network setup:
-
-- **Router:** OPNsense running on a fanless Topton box with an Intel N100, 16GB RAM, and 4x 2.5Gbps ports.
-    
-- **Switch:** [UniFi Switch Lite 16 PoE](https://eu.store.ui.com/eu/en/category/switching-utility/products/usw-lite-16-poe) — 8x 1Gbps PoE ports and 8x non-PoE ports.
-    
-- **Switch:** [UniFi Flex Mini 2.5G](https://eu.store.ui.com/eu/en/category/switching-utility/products/usw-flex-2-5g-5) — 5x 2.5Gbps ports, with one PoE-in port.
-    
-- **Access Point:** [UniFi U7 Pro Wall](https://eu.store.ui.com/eu/en/category/all-wifi/products/u7-pro-wall) — Wi-Fi 7, 2.5Gbps PoE+ in.
 ### Cooling
+
+I quickly realized that my network equipment was heating my closet up quite fast. Luckily for me, me build started  in December and I was not much affected
 ### Photos
 ## Software Stack
 ### Hypervisor
