@@ -80,6 +80,7 @@ Here is the layout of my nodes:
 | **NIC**   | 1Gbps (+ 2.5Gbps)       | 1Gbps + 2.5Gbps         | 1Gbps + 2.5Gbps          |
 | **M.2**   | 2                       | 1                       | 1                        |
 | **2,5"**  | 2                       | 2                       | 1                        |
+Each node follows the same disk layout: a 256GB SSD in the 2.5" bay for the operating system and a 1TB NVMe drive for data storage.
 ### Network
 
 For the network, I had two main objectives: implement VLANs for network segmentation and manage my firewall for more granular control. Since my nodes were equipped with 2.5Gbps NICs, I needed switches that could handle those speeds, and a few Power over Ethernet (PoE) ports for my Zigbee antenna and what could come after.
@@ -102,16 +103,15 @@ Options were limited, there was no way I was going to convince my wife that our 
 The best solution I came up with was to drill two 40mm holes above the kitchen cabinet. I ran PVC pipes through the wall and installed two small fans, each cushioned with foam to minimize vibrations and keep noise down.
 
 Inside the rack, I also added two 80mm fans to help with airflow. To keep everything quiet, I hooked up a PWM controller to regulate fan speeds, striking a balance between airflow and silence.
-
-
-
-
-
-
-
-
-
 ### Photos
+
+Here what is look like
+
+![homelab-rack.jpg](img/homelab-rack.jpg)
+
+![homelab-enclosure-open.jpg](img/homelab-enclosure-open.jpg)  ![homelab-enclosure-closed.jpg](img/homelab-enclosure-closed.jpg)
+
+
 ## Software Stack
 ### Hypervisor
 ### Network
