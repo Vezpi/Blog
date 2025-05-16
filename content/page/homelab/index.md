@@ -31,9 +31,9 @@ I also wanted to spawn new virtual machines at will, rebuild them from scratch, 
 
 Initially, my goal was to provide high availability for my existing services. One server wasn’t enough. So, I wanted a second node. But in most HA setups, three nodes are the sweet spot. And just like that, I was on my way to building what would become my homelab.
 ## Shaping the Lab
-### Blueprint
 
 First, I needed to define what my homelab was actually supposed to do. I wanted it to host my existing services reliably, but that wasn’t enough, I wanted a true playground, capable of simulating a more complex enterprise environment.
+### Blueprint
 
 That meant:
 - **High Availability:** Three nodes to ensure that no single point of failure would bring everything down.
@@ -50,6 +50,8 @@ Of course, reality doesn’t always align with ambitions. Here’s what I was up
 - **Budget:** I wasn’t going to drop thousands on enterprise-grade hardware. The balance was finding reliable, second-hand gear that wouldn’t break the bank.
 - Temperature: I’m not gonna lie, I forgot about it.. Mini PCs don’t generate much heat, but network gear? That’s a different story. Lesson learned.
 ## Infrastructure Overview
+
+Let’s break down the components that make up my homelab.
 ### Rack
 
 What is a datacenter without a rack? Honestly, I didn’t think one would fit in my limited space, until I discovered the [DeskPi RackMate T1](https://deskpi.com/products/deskpi-rackmate-t1-2).
@@ -67,7 +69,7 @@ Regarding hardware, my existing server was powered by an AM4 Ryzen 3 2200G with 
 
 The specifications for the two additional nodes were clear: an AM4 socket for consistency, low power consumption, dual NICs with at least one 2.5Gbps, and sufficient storage options, at least one M.2 NVMe slot and a 2.5" drive bay. Since AM4 is somewhat dated, newer models were off the table, a good news for my budget, as I was able to buy second-hand mini PCs.
 
-Here is the breakdown of my nodes:
+Here is the layout of my nodes:
 
 | **Node**  | **Vertex**              | **Apex**                | **Zenith**               |
 | --------- | ----------------------- | ----------------------- | ------------------------ |
@@ -80,7 +82,15 @@ Here is the breakdown of my nodes:
 | **2,5"**  | 2                       | 2                       | 1                        |
 ### Network
 
-For the network, I wanted to play around with VLANs to segregate my network and a better control over my firewall. I also needed wanted a couple of Power over Ethernet ports and 
+For the network, I wanted to play around with VLANs to segregate my network and a better control over my firewall. I needed some 2.5Gbps ports to make use of those of my nodes, and I also wanted a couple of Power over Ethernet ports.
+
+I've heard of Microtik hardware and I really wanted it, but the layout of their switches wouldn't fit with the target. On the other hand, Ubiquiti was proposing a very good range of equipments with UniFi, with a sleek UI and actually beautiful hardware.
+
+For the router I really wanted a custom one, I didn't want the UniFi gateway, I wanted my hands a bit dirtier than that. I was hesitating between pfSense and OPNsense and I finally choose the latter because I heard it was maybe more newbie friendly, I don't regret for now.
+
+My network setup is finally as follow:
+- OPNsense router installed a on Topton box, powered by a N100, 16GB of RAM and 4x 2.5Gbps ports
+- 
 
 ### Cooling
 ### Photos
@@ -118,41 +128,6 @@ For the network, I wanted to play around with VLANs to segregate my network and 
 
 
 
-
-Welcome to my homelab — a space where I explore new technologies, break things on purpose, and learn by doing. What started as a few old machines has grown into a modest but powerful setup that I use for self-hosting, automation, testing infrastructure tools, and running personal projects.
-
-
-
-## 1. Hardware
-
-I currently run a 3-node cluster built with energy-efficient mini PCs and repurposed desktops. Here's a breakdown:
-
-- **Node 1**: AMD Ryzen 4C/4T, 16GB RAM  
-- **Node 2**: AMD Ryzen 6C/6T, 16GB RAM  
-- **Node 3**: AMD Ryzen 8C/16T, 64GB RAM  
-- **Storage**: Ceph-based distributed storage across all nodes  
-- **Network**: 1Gbps LAN with 2.5Gbps NICs for Ceph replication traffic  
-- **Rack**: Compact 10" rack with managed switch and PDU
-
-## 2. Software
-
-- **Proxmox VE**: Used for virtualization and clustering  
-- **Ceph**: Distributed storage for VM disks  
-- **Kubernetes (K3s)**: For orchestrating containerized apps  
-- **Gitea**: Self-hosted Git with CI/CD via Gitea Actions  
-- **OPNsense**: Firewall, VLANs, and DNS (with AdGuard + Unbound)  
-- **Monitoring**: Grafana, Prometheus, Node Exporter
-
-## 3. Projects
-
-Some of the ongoing and past projects I've worked on:
-
-- CI/CD automation using Gitea Actions  
-- GitOps pipeline for Kubernetes using ArgoCD  
-- Hugo-based personal blog hosted with Docker  
-- Home automation with Zigbee2MQTT and Home Assistant  
-- VPN and remote access via WireGuard  
-- Infrastructure as Code with Terraform and Ansible
 
 ---
 
