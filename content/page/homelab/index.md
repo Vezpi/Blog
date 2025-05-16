@@ -5,6 +5,7 @@ description: The story behind my homelab project
 showToc: true
 menu:
   main:
+    name: Homelab
     weight: 20
     params:
       icon: flask
