@@ -79,6 +79,8 @@ Here is the breakdown of my nodes:
 | **2,5"**  | 2                       | 2                       | 1                        |
 ### Network
 
+For the network, I wanted to play around with VLANs to segregate my network and a better control over my firewall. I also needed wanted a couple of Power over Ethernet ports and 
+
 ### Cooling
 ### Photos
 ## Software Stack
