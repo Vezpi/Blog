@@ -119,6 +119,8 @@ Here what is look like
 
 ---
 ## Software Stack
+
+With the hardware foundation set, the next step was to decide what software would orchestrate everything, the real engine behind every experiment, deployment, and learning opportunity.
 ### Hypervisor
 ### Network
 ### Application
