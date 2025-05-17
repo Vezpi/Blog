@@ -109,9 +109,7 @@ Here what is look like
 
 ![homelab-rack.jpg](img/homelab-rack.jpg)
 
-![homelab-enclosure-open.jpg](img/homelab-enclosure-open.jpg)  ![homelab-enclosure-closed.jpg](img/homelab-enclosure-closed.jpg)
-
-![homelab-enclosure-open-closed.png](img/homelab-enclosure-open-closed.png)
+![homelab-enclore-open-closed.png](img/homelab-enclore-open-closed.png)
 
 
 ## Software Stack
