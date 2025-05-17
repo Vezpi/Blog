@@ -19,6 +19,8 @@ In 2015, I upgraded to a Raspberry Pi 2, seeking better performance to run multi
 By 2018, the need for more RAM led me to a Raspberry Pi 3, allowing me to run even more applications. My 3 little machines were running happily together, in a quite ordered mess.
 
 Finally, in 2019, my new job made me discover the virtualization, with virtual machines and above all Docker. I wanted to try that at home, I took a significant step forward with a compact yet powerful headless PC that laid the foundation of my homelab.
+
+---
 ## Why a Homelab ?
 
 I wanted my own playground, a space where breaking things was not just okay, but encouraged. It’s the best way to learn how to fix them and, more importantly, to really understand how they work.
@@ -30,6 +32,8 @@ The first big challenge I set for myself was building a Kubernetes cluster. Sure
 I also wanted to spawn new virtual machines at will, rebuild them from scratch, and apply Infrastructure as Code principles. I could have done all of that in the cloud, but I wanted full control.
 
 Initially, my goal was to provide high availability for my existing services. One server wasn’t enough. So, I wanted a second node. But in most HA setups, three nodes are the sweet spot. And just like that, I was on my way to building what would become my homelab.
+
+---
 ## Shaping the Lab
 
 First, I needed to define what my homelab was actually supposed to do. I wanted it to host my existing services reliably, but that wasn’t enough, I wanted a true playground, capable of simulating a more complex enterprise environment.
@@ -49,6 +53,8 @@ Of course, reality doesn’t always align with ambitions. Here’s what I was up
 - **Power Draw:** Running 24/7, the power consumption had to be kept in check. I couldn’t afford to triple my electric bill just to tinker with VMs.
 - **Budget:** I wasn’t going to drop thousands on enterprise-grade hardware. The balance was finding reliable, second-hand gear that wouldn’t break the bank.
 - **Temperature**: I’m not gonna lie, I forgot about it.. Mini PCs don’t generate much heat, but network gear? That’s a different story. Lesson learned.
+
+---
 ## Infrastructure Overview
 
 Let’s break down the components that make up my homelab.
@@ -111,7 +117,7 @@ Here what is look like
 ![homelab-rack-legend.png](img/homelab-rack-legend.png)
 ![homelab-enclore-open-closed.png](img/homelab-enclore-open-closed.png)
 
-
+---
 ## Software Stack
 ### Hypervisor
 ### Network
