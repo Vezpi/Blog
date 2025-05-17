@@ -111,6 +111,8 @@ Here what is look like
 
 ![homelab-enclosure-open.jpg](img/homelab-enclosure-open.jpg)  ![homelab-enclosure-closed.jpg](img/homelab-enclosure-closed.jpg)
 
+![homelab-enclosure-open-closed.png](img/homelab-enclosure-open-closed.png)
+
 
 ## Software Stack
 ### Hypervisor
