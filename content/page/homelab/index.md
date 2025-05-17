@@ -80,6 +80,7 @@ Here is the layout of my nodes:
 | **NIC**   | 1Gbps (+ 2.5Gbps)       | 1Gbps + 2.5Gbps         | 1Gbps + 2.5Gbps          |
 | **M.2**   | 2                       | 1                       | 1                        |
 | **2,5"**  | 2                       | 2                       | 1                        |
+
 Each node follows the same disk layout: a 256GB SSD in the 2.5" bay for the operating system and a 1TB NVMe drive for data storage.
 ### Network
 
