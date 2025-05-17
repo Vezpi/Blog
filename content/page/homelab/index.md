@@ -149,10 +149,6 @@ Here what is look like
 - Deploy Terraform infrastructure using Ansible
 - Create a Blog
 
-
-
-
-
 ---
 
 If you're curious about any part of the stack or want to know how I built something specific, feel free to check the related blog posts!
