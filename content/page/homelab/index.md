@@ -128,7 +128,7 @@ At the core of my setup is a 3-node Proxmox VE 8 cluster, a KVM-based hypervisor
 For now, I’m primarily running just one VM and one LXC container. The VM is essentially a clone of my old physical server, hosting most of my applications as Docker containers. The LXC container serves as a simple jump server.
 ### Network
 
-The interconnection of my lab is managed by my UniFi switches
+My entire home network is handled by my UniFi switches, managed by a self-hosted UniFi controller. The fire
 switching + wifi provided by 
 
 
