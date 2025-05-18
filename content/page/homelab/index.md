@@ -123,11 +123,13 @@ Here what is look like
 With the hardware foundation set, the next step was to decide what software would orchestrate everything, the real engine behind every experiment, deployment, and learning opportunity.
 ### Hypervisor
 
-At the groud level, I'm using 3-nodes Proxmox VE 8 cluster, a KVM based hypervisor which can also manage LXC. The OS is based on Debian, it provides live migration, HA and integrates Ceph out of the box.
+At the core of my setup is a 3-node Proxmox VE 8 cluster, a KVM-based hypervisor that also supports LXC containers. Built on Debian, it provides essential features like live migration, HA, and seamless Ceph integration right out of the box.
 
-For the moment, I'm mainly use only one virtual machine along with one LXC. The former is basically a clone of my old physical server, where the most part of my applications are running as Docker containers, the latter is a simple jump server.
+For now, I’m primarily running just one VM and one LXC container. The VM is essentially a clone of my old physical server, hosting most of my applications as Docker containers. The LXC container serves as a simple jump server.
 ### Network
 
+The interconnection of my lab is managed by my UniFi switches
+switching + wifi provided by 
 
 
 ### Storage
