@@ -128,9 +128,22 @@ At the core of my setup is a 3-node Proxmox VE 8 cluster, a KVM-based hypervisor
 For now, I’m primarily running just one VM and one LXC container. The VM is essentially a clone of my old physical server, hosting most of my applications as Docker containers. The LXC container serves as a simple jump server.
 ### Network
 
-My entire home network is handled by a couple of UniFi switches, managed by a self-hosted UniFi controller. This allows me to simply configure my L2 network on a sleek and simplified UI.
+The objective for the network was to implement VLANs and manage the firewall rules myself. I'm running OPNsense on a dedicated fanless box, relegating my ISP router in bridge mode.
 
-For the router and firewall, I wanted more control, I've chosen to go with OPNsense. Initially I wanted to implement VLANs, to learn more on how to work with them and toy with firewalling. 
+The brain
+My entire home network is handl
+
+
+by a couple of UniFi switches, managed by a self-hosted UniFi controller. This allows me to simply configure my L2 network on a sleek and simplified UI.
+
+For the router and firewall, I wanted more control, I've chosen to go with OPNsense. As it replaced my ISP router, it serves as DHCP and DNS server. Initially I wanted to implement VLANs, to learn more on how to work with them and toy with firewalling. 
+OPNsense offers the possibility to add plugins, 
+
+OPNsense is capable 
+VLAN
+DNS
+DHCP
+VPN
 
 | Description | ID   | Network      | Mask | Gateway      | Comments                     |
 | ----------- | ---- | ------------ | ---- | ------------ | ---------------------------- |
@@ -142,12 +155,6 @@ For the router and firewall, I wanted more control, I've chosen to go with OPNse
 | Mgmt        | 88   | 192.168.88.0 | 24   | 192.168.88.1 | Management                   |
 | Ceph        | 99   | 192.168.99.0 | 24   |              | Ceph                         |
 | VPN         | 1337 | 10.13.37.0   | 24   | 10.13.37.1   | Wireguard network            |
-
-OPNsense is capable 
-VLAN
-DNS
-DHCP
-
 
 
 ### Storage
