@@ -130,8 +130,20 @@ For now, I’m primarily running just one VM and one LXC container. The VM is es
 
 My entire home network is handled by a couple of UniFi switches, managed by a self-hosted UniFi controller. This allows me to simply configure my L2 network on a sleek and simplified UI.
 
-For the router and firewall, I wanted more control, I've chosen to go with OPNsense. Initially I wanted to implement VLANs, to learn more on how to work with them and toy with firewalling.
+For the router and firewall, I wanted more control, I've chosen to go with OPNsense. Initially I wanted to implement VLANs, to learn more on how to work with them and toy with firewalling. 
 
+| Description | ID   | Network      | Mask | Gateway      | Comments                     |
+| ----------- | ---- | ------------ | ---- | ------------ | ---------------------------- |
+| User        | 13   | 192.168.13.0 | 24   | 192.168.13.1 | Home network                 |
+| IoT         | 37   | 192.168.37.0 | 24   | 192.168.37.1 | IoT and untrusted equipments |
+| DMZ         | 55   | 192.168.55.0 | 24   | 192.168.55.1 | Internet facing              |
+| Lab         | 66   | 192.168.66.0 | 24   | 192.168.66.1 | Lab network, trusted         |
+| Heartbeat   | 77   | 192.168.77.0 | 24   |              | Proxmox cluster heartbeat    |
+| Mgmt        | 88   | 192.168.88.0 | 24   | 192.168.88.1 | Management                   |
+| Ceph        | 99   | 192.168.99.0 | 24   |              | Ceph                         |
+| VPN         | 1337 | 10.13.37.0   | 24   | 10.13.37.1   | Wireguard network            |
+
+OPNsense is capable 
 VLAN
 DNS
 DHCP
