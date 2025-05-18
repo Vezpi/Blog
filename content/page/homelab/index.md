@@ -123,6 +123,8 @@ Here what is look like
 With the hardware foundation set, the next step was to decide what software would orchestrate everything, the real engine behind every experiment, deployment, and learning opportunity.
 ### Hypervisor
 
+At the basement we have the hypervisor, in that case this is Proxmox VE 8 which I'm currently using. It's pretty good for a small cluster, it provides live migration, HA and integrates Ceph out of the box
+### Virtual Machines
 ### Network
 ### Application
 #### Docker
