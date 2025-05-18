@@ -128,8 +128,14 @@ At the core of my setup is a 3-node Proxmox VE 8 cluster, a KVM-based hypervisor
 For now, I’m primarily running just one VM and one LXC container. The VM is essentially a clone of my old physical server, hosting most of my applications as Docker containers. The LXC container serves as a simple jump server.
 ### Network
 
-My entire home network is handled by my UniFi switches, managed by a self-hosted UniFi controller. The fire
-switching + wifi provided by 
+My entire home network is handled by a couple of UniFi switches, managed by a self-hosted UniFi controller. This allows me to simply configure my L2 network on a sleek and simplified UI.
+
+For the router and firewall, I wanted more control, I've chosen to go with OPNsense. Initially I wanted to implement VLANs, to learn more on how to work with them and toy with firewalling.
+
+VLAN
+DNS
+DHCP
+
 
 
 ### Storage
