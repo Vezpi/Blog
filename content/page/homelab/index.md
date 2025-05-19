@@ -139,27 +139,24 @@ Layer 2 networking is managed by **UniFi switches**, chosen for their sleek UI a
 
 A 2.5Gbps UniFi switch is dedicated to Ceph storage communications, isolating storage traffic to prevent interference with other networks.
 
-I initially set up **LACP** (Link Aggregation) between the router and the main switch, hoping to double bandwidth. Reality check: it doesn’t. LACP provides redundancy and load balancing, not bandwidth aggregation. It was a good learning experience, but not essential for this setup.
-
----
-
-#### **VLANs: Segmented Network Design**
+I  set up **LACP** (Link Aggregation) between the router and the main switch at 1Gbps, hoping to double bandwidth. Reality check: a single session will only use one link, meaning that a single download will still cap at 1Gbps.
+#### VLANs
 
 To segment traffic, I divided the network into several VLANs:
 
-| VLAN ID | Name       | Purpose                                                        |
-| ------- | ---------- | -------------------------------------------------------------- |
-| 10      | Management | Access to infrastructure devices, including OPNsense and UniFi |
-| 20      | Services   | Web servers, containers, VMs                                   |
-| 30      | IoT        | Smart devices, isolated from the rest of the network           |
-| 40      | Storage    | Ceph traffic, isolated for data replication                    |
-| 50      | Guests     | Internet-only access for visitors                              |
+| Name      | ID   | Purpose                      |
+| --------- | ---- | ---------------------------- |
+| User      | 13   | Home network                 |
+| IoT       | 37   | IoT and untrusted equipments |
+| DMZ       | 55   | Internet facing              |
+| Lab       | 66   | Lab network, trusted         |
+| Heartbeat | 77   | Proxmox cluster heartbeat    |
+| Mgmt      | 88   | Management                   |
+| Ceph      | 99   | Ceph                         |
+| VPN       | 1337 | Wireguard network            |
 
-Each VLAN has its own DHCP pool managed by OPNsense, allowing for controlled segmentation and simplified management.
-
----
-
-#### **DNS: Layered and Encrypted**
+Each VLAN has its own DHCP pool managed by OPNsense, excepted the Heartbeat and Ceph ones.
+#### DNS
 
 DNS is structured in two layers within OPNsense:
 
