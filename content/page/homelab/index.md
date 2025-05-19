@@ -128,6 +128,80 @@ At the core of my setup is a 3-node Proxmox VE 8 cluster, a KVM-based hypervisor
 For now, I’m primarily running just one VM and one LXC container. The VM is essentially a clone of my old physical server, hosting most of my applications as Docker containers. The LXC container serves as a simple jump server.
 ### Network
 
+The objective for my network was to implement VLANs for segmentation and manage firewall rules directly to simulate more complex setups. 
+
+#### Router and Firewall
+
+At the heart of this network is **OPNsense**, running on a dedicated fanless box. The ISP router is in bridge mode, passing all traffic to OPNsense, which handles all routing and firewall duties. Inter-VLAN traffic is restricted, explicit firewall rules are mandatory, only the management VLAN having access to other segments.  
+#### L2 Network
+
+Layer 2 networking is managed by **UniFi switches**, chosen for their sleek UI and simplicity. The UniFi controller, which manages the devices configuration, runs as a plugin on OPNsense.
+
+A 2.5Gbps UniFi switch is dedicated to Ceph storage communications, isolating storage traffic to prevent interference with other networks.
+
+I initially set up **LACP** (Link Aggregation) between the router and the main switch, hoping to double bandwidth. Reality check: it doesn’t. LACP provides redundancy and load balancing, not bandwidth aggregation. It was a good learning experience, but not essential for this setup.
+
+---
+
+#### **VLANs: Segmented Network Design**
+
+To segment traffic, I divided the network into several VLANs:
+
+| VLAN ID | Name       | Purpose                                                        |
+| ------- | ---------- | -------------------------------------------------------------- |
+| 10      | Management | Access to infrastructure devices, including OPNsense and UniFi |
+| 20      | Services   | Web servers, containers, VMs                                   |
+| 30      | IoT        | Smart devices, isolated from the rest of the network           |
+| 40      | Storage    | Ceph traffic, isolated for data replication                    |
+| 50      | Guests     | Internet-only access for visitors                              |
+
+Each VLAN has its own DHCP pool managed by OPNsense, allowing for controlled segmentation and simplified management.
+
+---
+
+#### **DNS: Layered and Encrypted**
+
+DNS is structured in two layers within OPNsense:
+
+- **Level 1 (Port 53):** ADguard Home filters ads and trackers, reducing network noise and providing a cleaner browsing experience.
+    
+- **Level 2 (Port 5353):** ADguard forwards requests to **Unbound**, which caches queries and uses **DNS over TLS (DoT)** for encrypted external lookups.
+    
+
+This setup balances privacy, performance, and control over DNS traffic.
+
+---
+
+#### **Reverse Proxy: Caddy and Traefik**
+
+**Caddy** is installed as an OPNsense plugin to handle external requests and SSL termination. It forwards traffic to a main VM running **Traefik**, which routes requests internally to various services.
+
+This two-layer proxy setup keeps SSL management centralized in Caddy while maintaining flexible internal routing through Traefik.
+
+---
+
+#### **VPN Access: Remote Management with WireGuard**
+
+For secure remote access, I configured **WireGuard** on OPNsense. This lightweight VPN provides encrypted connectivity to my lab from anywhere, allowing management of all VLANs without exposing services directly to the internet.
+
+---
+
+#### **Network Diagram:**
+
+
+
+
+
+
+
+
+I opted for **OPNsense** as my main router, running on a dedicated, fanless box. The ISP router is in bridge mode, passing all traffic to OPNsense, which handles all routing and firewall duties. This setup gives me granular control over network segmentation and allows for more advanced firewall rules.
+
+The firewall rules are strict:
+
+- **Inter-VLAN traffic is mostly blocked**, except for the management VLAN, which can access all other segments.
+    
+- External traffic is tightly controlled, with most services exposed through reverse proxies.
 The objective for the network was to implement VLANs and manage the firewall rules myself. I'm running OPNsense on a dedicated fanless box, relegating my ISP router in bridge mode.
 
 The brain
