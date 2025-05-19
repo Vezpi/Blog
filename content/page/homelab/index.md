@@ -159,10 +159,8 @@ Each VLAN has its own DHCP pool managed by OPNsense, excepted the Heartbeat and 
 #### DNS
 
 DNS is structured in two layers within OPNsense:
-
-- **Level 1 (Port 53):** ADguard Home filters ads and trackers, reducing network noise and providing a cleaner browsing experience.
-    
-- **Level 2 (Port 5353):** ADguard forwards requests to **Unbound**, which caches queries and uses **DNS over TLS (DoT)** for encrypted external lookups.
+- ADguard Home (Port 53):  filters ads and trackers, serves every client on the network
+- Unbound DNS (Port 5353): acts as recursive DNS, serves only locally the ADguard Home service
     
 
 This setup balances privacy, performance, and control over DNS traffic.
