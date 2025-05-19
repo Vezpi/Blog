@@ -160,8 +160,7 @@ Each VLAN has its own DHCP pool managed by OPNsense, excepted the Heartbeat and 
 
 DNS is structured in two layers within OPNsense:
 - ADguard Home:  ads and trackers filters, serves every client on the network over plain DNS on port 53
-- Unbound DNS: recursive DNS, serves only locally the ADguard Home service, the upstream i
-    
+- Unbound DNS: recursive DNS, serves only  the ADguard Home DNS service locally
 
 This setup balances privacy, performance, and control over DNS traffic.
 
