@@ -133,6 +133,9 @@ The objective for the network was to implement VLANs and manage the firewall rul
 The brain
 My entire home network is handl
 
+![homelab-network-schema.png](img/homelab-network-schema.png)
+
+
 
 by a couple of UniFi switches, managed by a self-hosted UniFi controller. This allows me to simply configure my L2 network on a sleek and simplified UI.
 
