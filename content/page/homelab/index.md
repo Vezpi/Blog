@@ -185,21 +185,25 @@ For secure remote access, I configured **WireGuard** on OPNsense. This lightweig
 ![homelab-network-schema.png](img/homelab-network-schema.png)
 ### Application
 
-Let's now dive into the fun part! Initially, I'm using a server at home to be useful to me, I never ceased to add new services, from almost critical to nearly useless. Let me introduce you which services I'm currently running in my homelab:
-- Home Assistant: 
-- Vaultwarden
-- Nextcloud
-- Gitea
-- Blog
-- Immich
-- Jellyfin
-- 
-- Duplicati
-- Prometheus
-- Portainer
-- 
+Let's dive into the fun part! What started as a modest setup meant to serve a few personal needs quickly turned into a full ecosystem of open source services, each solving a specific need or just satisfying curiosity.
 
+Here’s an overview of what’s currently running in my homelab:
+- **Home Assistant**: Central hub for home automation, integrating smart devices and routines.
+- **Vaultwarden**: Lightweight alternative to Bitwarden for managing and syncing passwords securely.
+- **Nextcloud**: Self-hosted cloud storage.
+- **Gitea**:  Git repository solution for managing my code and projects.
+- **Blog**: My Hugo-based personal blog, which you are reading now.
+- **Immich** – Photo and video management app, similar to Google Photos.
+- **Jellyfin**: Media server for streaming movies and shows.
+- **ARR Stack**: Automated media acquisition tools. (Radarr, Sonarr, Torrent, etc.)
+- **Duplicati**: Encrypted backup solution for my important data and configs.
+- **Prometheus**: Monitoring and metrics collection tool, used with Grafana for dashboards.
+- **Portainer**: Web interface for managing Docker containers and stacks.
+- **Umami**: Privacy-focused analytics for tracking visits on my blog.
+- **phpIPAM**: IP address management tool for keeping my VLANs and subnets organized.
 #### Docker
+
+
 #### Kubernetes
 ## Roadmap for my Lab
 ### Building my Homelab
