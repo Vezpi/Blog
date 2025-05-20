@@ -160,15 +160,10 @@ Each VLAN has its own DHCP pool managed by OPNsense, excepted the Heartbeat and 
 
 DNS is structured in two layers within OPNsense:
 - ADguard Home:  ads and trackers filters, serves every client on the network over plain DNS on port 53
-- Unbound DNS: recursive DNS, serves only  the ADguard Home DNS service locally
+- Unbound DNS: recursive DNS, serves only the ADguard Home DNS service locally
+#### Reverse Proxy
 
-This setup balances privacy, performance, and control over DNS traffic.
-
----
-
-#### **Reverse Proxy: Caddy and Traefik**
-
-**Caddy** is installed as an OPNsense plugin to handle external requests and SSL termination. It forwards traffic to a main VM running **Traefik**, which routes requests internally to various services.
+**Caddy** is installed as an OPNsense plugin to handle web requests. It forwards traffic to **Traefik**, which routes requests internally to various services.
 
 This two-layer proxy setup keeps SSL management centralized in Caddy while maintaining flexible internal routing through Traefik.
 
