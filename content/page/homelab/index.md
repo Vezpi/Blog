@@ -190,6 +190,14 @@ Let's now dive into the fun part! Initially, I'm using a server at home to be us
 - Vaultwarden
 - Nextcloud
 - Gitea
+- Blog
+- Immich
+- Jellyfin
+- 
+- Duplicati
+- Prometheus
+- Portainer
+- 
 
 #### Docker
 #### Kubernetes
