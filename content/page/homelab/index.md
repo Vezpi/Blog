@@ -101,6 +101,12 @@ Here is the final network setup:
 - **Switch:** [UniFi Switch Lite 16 PoE](https://eu.store.ui.com/eu/en/category/switching-utility/products/usw-lite-16-poe), 8x 1Gbps PoE ports and 8x non-PoE ports.
 - **Switch:** [UniFi Flex Mini 2.5G](https://eu.store.ui.com/eu/en/category/switching-utility/products/usw-flex-2-5g-5), 5x 2.5Gbps ports, with one PoE-in port.
 - **Access Point:** [UniFi U7 Pro Wall](https://eu.store.ui.com/eu/en/category/all-wifi/products/u7-pro-wall), Wi-Fi 7, 2.5Gbps PoE+ in.
+### Storage
+
+I don't have massive storage needs, I could use a NAS in the next future, but here the storage break down:
+- 256GB 
+
+
 ### Cooling
 
 I quickly learned that my network gear was turning my closet into a mini furnace. Fortunately, I started the build in December, so the heat wasn’t too noticeable, but come summer, it was bound to become a real problem.
@@ -141,7 +147,7 @@ The access point is broadcasting 2 SSIDs, one for my family's laptops and cellul
 
 A 2.5Gbps UniFi switch is dedicated to Ceph storage communications, isolating storage traffic to prevent interference with other networks.
 
-I  set up **LACP** (Link Aggregation) between the router and the main switch at 1Gbps, hoping to double bandwidth. Reality check: a single session will only use one link, meaning that a single download will still cap at 1Gbps.
+I set up **LACP** (Link Aggregation) between the router and the main switch at 1Gbps, hoping to double bandwidth. Reality check: a single session will only use one link, meaning that a single download will still cap at 1Gbps.
 #### VLANs
 
 To segment traffic, I divided the network into several VLANs:
@@ -176,9 +182,6 @@ For secure remote access, I configured **WireGuard** on OPNsense. This lightweig
 #### Network Diagram
 
 ![homelab-network-schema.png](img/homelab-network-schema.png)
-### Storage
-
-
 ### Application
 #### Docker
 #### Kubernetes
