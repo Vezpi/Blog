@@ -185,7 +185,12 @@ For secure remote access, I configured **WireGuard** on OPNsense. This lightweig
 ![homelab-network-schema.png](img/homelab-network-schema.png)
 ### Application
 
-Let's now dive into
+Let's now dive into the fun part! Initially, I'm using a server at home to be useful to me, I never ceased to add new services, from almost critical to nearly useless. Let me introduce you which services I'm currently running in my homelab:
+- Home Assistant: 
+- Vaultwarden
+- Nextcloud
+- Gitea
+
 #### Docker
 #### Kubernetes
 ## Roadmap for my Lab
