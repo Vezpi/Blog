@@ -184,6 +184,8 @@ For secure remote access, I configured **WireGuard** on OPNsense. This lightweig
 
 ![homelab-network-schema.png](img/homelab-network-schema.png)
 ### Application
+
+Let's now dive into
 #### Docker
 #### Kubernetes
 ## Roadmap for my Lab
