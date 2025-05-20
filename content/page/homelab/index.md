@@ -137,6 +137,8 @@ At the heart of this network is **OPNsense**, running on a dedicated fanless box
 
 Layer 2 networking is managed by **UniFi switches**, chosen for their sleek UI and simplicity. The UniFi controller, which manages the devices configuration, runs as a plugin on OPNsense.
 
+The access point is broadcasting 2 SSIDs, one for my family's laptops and cellulars (5 and 6Ghz) and the other only in 2.4Ghz for everything else (IoT, vacuum, AC, printer, Chromecast, etc.)
+
 A 2.5Gbps UniFi switch is dedicated to Ceph storage communications, isolating storage traffic to prevent interference with other networks.
 
 I  set up **LACP** (Link Aggregation) between the router and the main switch at 1Gbps, hoping to double bandwidth. Reality check: a single session will only use one link, meaning that a single download will still cap at 1Gbps.
