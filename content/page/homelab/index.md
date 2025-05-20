@@ -203,34 +203,17 @@ Here’s an overview of what’s currently running in my homelab:
 - **phpIPAM**: IP address management tool for keeping my VLANs and subnets organized.
 #### Docker
 
-
+Docker was the real game-changer in my self-hosted journey. Before containers, managing multiple services on a single server felt like a constant battle with dependencies and conflicts. Now, every service runs neatly, managed with Docker Compose inside a single VM. Traefik dynamically handles reverse proxy, simplifying access and SSL.
 #### Kubernetes
-## Roadmap for my Lab
-### Building my Homelab
-- building the first proxmox node
-- migrating from my headless PC to a VM
-- building the second proxmox node with HDDs
-- Install the rack
-- Create the network
-- Installating OPNsense
-- Switching routing from my freebox to OPNsense
-- Reconfigure my WiFi clients
-- Build the third Proxmox node
-- Externalize my HDDs
-- Deploy VLAN
-- Setup Proxmox Cluster
-- Setup Ceph Storage
-- Install fans
-- Install ADguard Home along Unbound DNS
-- Setup IPAM
-- Install a bastion
-### Let's Play
-- Deploy a VM with Terraform
-- Create a Terraform module
-- Deploy Terraform infrastructure using Ansible
-- Create a Blog
+
+My next big challenge is to take container orchestration to the next level. While Docker Swarm could meet the technical need, my primary goal is to gain hands-on experience with Kubernetes, and there’s no better way to learn than by applying it to real-world use cases.
 
 ---
 
-If you're curious about any part of the stack or want to know how I built something specific, feel free to check the related blog posts!
+## Final Words
 
+Thank you for taking the time to read through my homelab journey!
+
+Building and refining this setup has been a great source of learning and fun, and I’m always looking for new ways to improve it.
+
+If you’ve got ideas, feedback, better solutions, or just want to share your own setup, I’d love to hear from you. Drop me a message, challenge my choices, or inspire me with your story!
