@@ -163,66 +163,17 @@ DNS is structured in two layers within OPNsense:
 - Unbound DNS: recursive DNS, serves only the ADguard Home DNS service locally
 #### Reverse Proxy
 
-**Caddy** is installed as an OPNsense plugin to handle web requests. It forwards traffic to **Traefik**, which routes requests internally to various services.
+**Caddy** runs as a plugin on OPNsense and acts as the main entry point for web traffic. It routes requests based on subdomains and automatically handles HTTPS certificates and drops internal service access coming from the WAN.
 
-This two-layer proxy setup keeps SSL management centralized in Caddy while maintaining flexible internal routing through Traefik.
+Most services are still managed by a **Traefik** instance running on my VM. In those cases, Caddy simply forwards HTTPS requests directly to Traefik.
 
----
+This two-layer proxy setup centralizes SSL certificate management in **Caddy** while preserving flexible and dynamic routing internally with **Traefik**.
+#### VPN
 
-#### **VPN Access: Remote Management with WireGuard**
-
-For secure remote access, I configured **WireGuard** on OPNsense. This lightweight VPN provides encrypted connectivity to my lab from anywhere, allowing management of all VLANs without exposing services directly to the internet.
-
----
-
-#### **Network Diagram:**
-
-
-
-
-
-
-
-
-I opted for **OPNsense** as my main router, running on a dedicated, fanless box. The ISP router is in bridge mode, passing all traffic to OPNsense, which handles all routing and firewall duties. This setup gives me granular control over network segmentation and allows for more advanced firewall rules.
-
-The firewall rules are strict:
-
-- **Inter-VLAN traffic is mostly blocked**, except for the management VLAN, which can access all other segments.
-    
-- External traffic is tightly controlled, with most services exposed through reverse proxies.
-The objective for the network was to implement VLANs and manage the firewall rules myself. I'm running OPNsense on a dedicated fanless box, relegating my ISP router in bridge mode.
-
-The brain
-My entire home network is handl
+For secure remote access, I configured **WireGuard** on OPNsense. This lightweight VPN provides encrypted connectivity to my lab from anywhere, allowing management of all my services without exposing them all directly to the internet.
+#### Network Diagram
 
 ![homelab-network-schema.png](img/homelab-network-schema.png)
-
-
-
-by a couple of UniFi switches, managed by a self-hosted UniFi controller. This allows me to simply configure my L2 network on a sleek and simplified UI.
-
-For the router and firewall, I wanted more control, I've chosen to go with OPNsense. As it replaced my ISP router, it serves as DHCP and DNS server. Initially I wanted to implement VLANs, to learn more on how to work with them and toy with firewalling. 
-OPNsense offers the possibility to add plugins, 
-
-OPNsense is capable 
-VLAN
-DNS
-DHCP
-VPN
-
-| Description | ID   | Network      | Mask | Gateway      | Comments                     |
-| ----------- | ---- | ------------ | ---- | ------------ | ---------------------------- |
-| User        | 13   | 192.168.13.0 | 24   | 192.168.13.1 | Home network                 |
-| IoT         | 37   | 192.168.37.0 | 24   | 192.168.37.1 | IoT and untrusted equipments |
-| DMZ         | 55   | 192.168.55.0 | 24   | 192.168.55.1 | Internet facing              |
-| Lab         | 66   | 192.168.66.0 | 24   | 192.168.66.1 | Lab network, trusted         |
-| Heartbeat   | 77   | 192.168.77.0 | 24   |              | Proxmox cluster heartbeat    |
-| Mgmt        | 88   | 192.168.88.0 | 24   | 192.168.88.1 | Management                   |
-| Ceph        | 99   | 192.168.99.0 | 24   |              | Ceph                         |
-| VPN         | 1337 | 10.13.37.0   | 24   | 10.13.37.1   | Wireguard network            |
-
-
 ### Storage
 
 
