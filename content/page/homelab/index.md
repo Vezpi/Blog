@@ -103,12 +103,9 @@ Here is the final network setup:
 - **Access Point:** [UniFi U7 Pro Wall](https://eu.store.ui.com/eu/en/category/all-wifi/products/u7-pro-wall), Wi-Fi 7, 2.5Gbps PoE+ in.
 ### Storage
 
-While I don't have massive storage requirement, I still needed a flexible setup to either store my homelab workload and my photos,
+While I don't have massive storage requirement, I still needed a flexible setup to either store my homelab workload and my personal media and documents.
 
-
-that was **reliable, fast, and flexible** enough to support my workloads. I don’t run large media libraries or host massive datasets, so I focused on a minimal yet efficient storage layout.
-
-Each Proxmox node is equipped with a **256GB SATA SSD** for the operating system, ISO files, and VM/LXC templates. For my workload storage, I added a **1TB NVMe drive** per node, which forms the basis of my **Ceph cluster**. This gives me distributed, redundant, and high-performance storage for VMs and containers, which allows live migration and high availability across the cluster.
+Each Proxmox node is equipped with a **256GB SATA SSD** for the operating system, ISO files, and VM/LXC templates. For the workload storage, I added a **1TB NVMe drive** per node, which forms the basis of my **Ceph cluster**. This gives me distributed, redundant, and high-performance storage for VMs and containers, which allows live migration and high availability across the cluster.
 
 Originally, my first node had two **1TB HDDs** installed internally for bulk storage. To free up space and improve airflow, I moved them outside the case using **USB-to-SATA adapters** and reconnected them to the same node. These drives now store my **photos, personal documents, and backups**—less performance-critical data that doesn’t need to sit on Ceph.
 
