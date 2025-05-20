@@ -107,9 +107,7 @@ While I don't have massive storage requirement, I still needed a flexible setup 
 
 Each Proxmox node is equipped with a **256GB SATA SSD** for the operating system, ISO files, and VM/LXC templates. For the workload storage, I added a **1TB NVMe drive** per node, which forms the basis of my **Ceph cluster**. This gives me distributed, redundant, and high-performance storage for VMs and containers, which allows live migration and high availability across the cluster.
 
-Originally, my first node had two **1TB HDDs** installed internally for bulk storage. To free up space and improve airflow, I moved them outside the case using **USB-to-SATA adapters** and reconnected them to the same node. These drives now store my **photos, personal documents, and backups**—less performance-critical data that doesn’t need to sit on Ceph.
-
-
+Originally, my first server had two **1TB HDDs** installed internally. Because I needed a slot for the SSD, I moved them outside the case using **USB-to-SATA adapters** and reconnected them to the same node. These drives store my photos, Nextcloud documents and backups, less performance-critical data that doesn’t need to sit on Ceph. They are served on the network using a NFS server sitting in a LXC container on that node.
 ### Cooling
 
 I quickly learned that my network gear was turning my closet into a mini furnace. Fortunately, I started the build in December, so the heat wasn’t too noticeable, but come summer, it was bound to become a real problem.
