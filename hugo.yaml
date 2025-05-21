@@ -1,7 +1,22 @@
 baseURL: "https://blog.vezpi.com/"
-languageCode: "en-us"
 title: "Vezpi Lab"
 theme: "stack"
+languageCode: "en-us"
+DefaultContentLanguage: "en"
+
+languages:
+  en:
+    languageName: English
+    weight: 1
+    params:
+      sidebar:
+        subtitle: "Homelab & Automation"
+  fr:
+    languageName: Français
+    weight: 2
+    params:
+      sidebar:
+        subtitle: "Homelab & Automatisation"
 
 frontmatter:
   format: "yaml"
@@ -11,7 +26,6 @@ params:
   favicon: "/favicon-32x32.png"
 
   sidebar:
-    subtitle: "Homelab & Automation"
     avatar:
       enabled: true
       src: avatar.jpg
