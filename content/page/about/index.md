@@ -15,4 +15,5 @@ This blog is my way of documenting what I build, fix, break (on purpose!), and a
 
 If you're working on something cool, have questions, or want to bring new ideas on the table, **feel free to reach out**! I’d love to hear from you.
 
-![IMG_8780.jpg](img/IMG_8780.jpg)
+![me-and-my-redhat.jpg](img/me-and-my-redhat.jpg)
+
