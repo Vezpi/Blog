@@ -7,4 +7,4 @@ menu:
     params:
       icon: user
 ---
-Hello world !
+Hi!
