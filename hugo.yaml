@@ -65,12 +65,14 @@ params:
   
 menu:
   main:
-    - name: Categories
+    - identifier: categories
+      name: Categories
       url: /categories/
       weight: 50
       params:
         icon: "categories"
-    - name: Tags
+    - identifier: tags
+      name: Tags
       url: /tags/
       weight: 60
       params:

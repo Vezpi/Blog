@@ -1,3 +1,6 @@
+categories: Catégories
+tags: Mots Clés
+
 toggleMenu:
     other: Afficher le menu
 
@@ -66,7 +69,7 @@ search:
 
 footer:
     builtWith:
-        other: ""
+        other: " "
 
     designedBy:
-        other: ""
+        other: " "
