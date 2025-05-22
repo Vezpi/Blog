@@ -1,7 +1,7 @@
-categories: 
-    other: Catégories
-tags: 
-    other: Mots Clés
+- id: categories
+  translation: Catégories
+- id: tags
+  translation: Mots Clés
 
 toggleMenu:
     other: Afficher le menu

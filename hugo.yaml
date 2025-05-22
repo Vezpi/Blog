@@ -67,12 +67,12 @@ params:
 menu:
   main:
     - identifier: categories
-      url: "/categories/"
+      pageRef: /categories
       weight: 50
       params:
         icon: "categories"
     - identifier: tags
-      url: "/tags/"
+      pageRef: /tags
       weight: 60
       params:
         icon: "tag"
