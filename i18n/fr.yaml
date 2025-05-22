@@ -64,7 +64,7 @@ search:
         other: Rechercher
 
     placeholder:
-        other: Cherchez un article, une publication, etc.
+        other: Tapez quelque chose...
 
     resultTitle:
         other: "#PAGES_COUNT pages (#TIME_SECONDS secondes)"
