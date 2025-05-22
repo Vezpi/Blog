@@ -54,6 +54,7 @@ frontmatter:
 
 params:
   mainSections: ["post"]
+  description: "A blog documenting my homelab journey, covering automation, self-hosted services, and hands-on experiments with open source technologies."
   favicon: "/favicon-32x32.png"
 
   sidebar:
@@ -134,6 +135,11 @@ related:
         weight: 10
       - name: categories
         weight: 20
+
+sitemap:
+  ChangeFreq: "weekly"
+  Priority: 0.6
+
 
 outputs:
   home:
