@@ -11,6 +11,7 @@ languages:
     params:
       sidebar:
         subtitle: "Homelab & Automation"
+        
   fr:
     languageName: Français
     weight: 2
@@ -67,13 +68,13 @@ menu:
   main:
     - identifier: categories
       name: Categories
-      url: /categories/
+      url: "#categories"
       weight: 50
       params:
         icon: "categories"
     - identifier: tags
       name: Tags
-      url: /tags/
+      url: "#tags"
       weight: 60
       params:
         icon: "tag"
