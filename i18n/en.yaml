@@ -1,7 +1,7 @@
-- id: categories
-  translation: Categories
-- id: tags
-  translation: Tags
+categories: 
+    other: Catgories
+tags: 
+    other: Tags
     
 toggleMenu:
     other: Toggle Menu
