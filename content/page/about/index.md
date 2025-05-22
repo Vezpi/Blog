@@ -1,6 +1,7 @@
 ---
 title: About myself
-description: Who is this dude
+description: Who I am
+translationKey: about
 menu:
   main:
     name: About
