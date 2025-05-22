@@ -11,6 +11,21 @@ languages:
     params:
       sidebar:
         subtitle: "Homelab & Automation"
+    
+    menu:
+      main:
+        - identifier: categories
+          name: Categories
+          url: /categories
+          weight: 50
+          params:
+            icon: "categories"
+        - identifier: tags
+          name: Tags
+          url: /tags
+          weight: 60
+          params:
+            icon: "tag"
 
   fr:
     languageName: Français
@@ -18,6 +33,21 @@ languages:
     params:
       sidebar:
         subtitle: "Homelab & Automatisation"
+    
+    menu:
+      main:
+        - identifier: categories
+          name: Catégories
+          url: /fr/categories
+          weight: 50
+          params:
+            icon: "categories"
+        - identifier: tags
+          name: Mots Clés
+          url: /fr/tags
+          weight: 60
+          params:
+            icon: "tag"
 
 frontmatter:
   format: "yaml"
@@ -64,19 +94,6 @@ params:
   colorScheme:
     toggle: true
     default: "dark"
-  
-menu:
-  main:
-    - identifier: categories
-      pageRef: /categories
-      weight: 50
-      params:
-        icon: "categories"
-    - Name: tags
-      pageRef: /tags
-      weight: 60
-      params:
-        icon: "tag"
 
   social:
     - identifier: "mail"
