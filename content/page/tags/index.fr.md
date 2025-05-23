@@ -6,5 +6,5 @@ menu:
   main:
     weight: 50
     params:
-      icon: tags
+      icon: tag
 ---
