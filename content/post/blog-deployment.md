@@ -29,40 +29,42 @@ This setup not only allows for versioned backups of all my notes but also opens 
 
 ### Gitea
 
-[Gitea](https://gitea.io/) est un service Git self-hosted similaire à GitHub, mais léger et facile à maintenir. J'y héberge mes dépôts personnels, notamment mon vault Obsidian et mon blog.
+[Gitea](https://gitea.io/) is a self-hosted Git service similar to GitHub, but lightweight and easy to maintain. I host my personal repositories there, including my Obsidian vault and my blog.
 
-Gitea prend désormais en charge [Gitea Actions](https://docs.gitea.com/usage/actions/overview), un mécanisme de pipeline CI/CD compatible avec la syntaxe GitHub Actions.
+Gitea now supports [Gitea Actions](https://docs.gitea.com/usage/actions/overview), a CI/CD pipeline mechanism compatible with GitHub Actions syntax. 
 
-Pour exécuter ces workflows, j'ai installé un [Gitea runner](https://gitea.com/gitea/act_runner) sur mon serveur, ce qui me permet de créer un workflow automatisé déclenché lorsque je mets à jour le contenu de mes notes, puis de reconstruire et déployer mon blog.
+To run those workflows, I installed a [Gitea runner](https://gitea.com/gitea/act_runner) on my server, allowing me to create an automated workflow triggered when I update content in my notes, which then builds and deploys my blog.
 
 ### Hugo
 
-[Hugo](https://gohugo.io/) est un générateur de sites statiques rapide et flexible, écrit en Go. Il est idéal pour générer du contenu à partir de fichiers Markdown. Hugo est hautement personnalisable, prend en charge les thèmes et peut générer un site web complet en quelques secondes. Il est idéal pour un blog basé sur des notes Obsidian et fonctionne parfaitement dans les pipelines CI/CD grâce à sa rapidité et sa simplicité.
+[Hugo](https://gohugo.io/) is a fast and flexible static site generator written in Go. It’s perfect for generating content from Markdown files. Hugo is highly customizable, supports themes, and can generate a complete website in seconds.
+
+It’s ideal for a blog based on Obsidian notes, and it works beautifully in CI/CD pipelines due to its speed and simplicity.
 
 ---
 ## 🔁 Workflow
 
-L'idée est simple :
-1. J'écris le contenu de mon blog dans mon vault Obsidian, sous un dossier `Blog`.
-2. Une fois le fichier modifié, le plugin Git Obsidian effectue automatiquement les commits et les poussent vers le dépôt Gitea.
-3. Lorsque Gitea reçoit ce push, une première action Gitea est déclenchée.
-4. La première action synchronise le contenu du blog mis à jour avec un autre dépôt [Git distinct](https://git.vezpi.me/Vezpi/blog) qui héberge le contenu.
-5. Dans ce dépôt, une autre action Gitea est déclenchée.
-6. La deuxième action Gitea génère les pages web statiques tout en mettant à jour Hugo si nécessaire.
-7. Le blog est maintenant mis à jour (celui que vous lisez).
+The idea is simple:
+1. I write blog content in my Obsidian vault, under a specific `Blog` folder.
+2. When I'm done editing the file, the Obisdian Git plugin automatically commits and push updates to the Gitea repository
+3. When Gitea receives that push, a first Gitea Action is triggered.
+4. The first action syncs the updated blog content to another separate [Git repository](https://git.vezpi.me/Vezpi/blog) which hosts my blog content.
+5. In that blog repository, another Gitea Action is triggered.
+6. The second Gitea Action generates the static web pages while upgrading Hugo if needed
+7. The blog is now updated (the one you are reading).
 
-De cette façon, je n'ai plus besoin de copier manuellement de fichiers ni de déclencher de déploiements. Tout se déroule comme prévu, de l'écriture de Markdown dans Obsidian au déploiement complet du site web.
+This way, I never need to manually copy files or trigger deployments. Everything flows from writing markdown in Obsidian to having a fully deployed website.
 
 ---
-## ⚙️ Implémentation
+## ⚙️ Implementation
 
-### Étape 1 : Configuration du vault Obsidian
+### Step 1: Obsidian Vault Setup
 
-Dans mon vault Obsidian, j'ai créé un dossier `Blog` contenant mes articles de blog en Markdown. Chaque article inclut les pages de garde Hugo (titre, date, brouillon, etc.). Le plugin Git est configuré pour valider et pousser automatiquement les modifications apportées au dépôt Gitea.
+In my Obsidian vault, I created a `Blog` folder that contains my blog posts in Markdown. Each post includes Hugo frontmatter (`title`, `date`, `draft`, etc.). The Git plugin is configured to commit and push automatically when I make changes to the Gitea repository.
 
-### Étape 2 : Lancer Gitea Runner
+### Step 2: Spin up Gitea Runner
 
-Le vault Obsidian est un dépôt Git privé self-hosted dans Gitea. J'utilise Docker Compose pour gérer cette instance. Pour activer les actions Gitea, j'ai ajouté Gitea Runner à la stack.
+The Obsidian vault is a private Git repository self-hosted in Gitea. I use docker compose to run this instance, to enable the Gitea Actions, I added the Gitea runner in the stack
 ```yaml
   runner:
     image: gitea/act_runner:latest
@@ -84,14 +86,14 @@ Le vault Obsidian est un dépôt Git privé self-hosted dans Gitea. J'utilise Do
       - server
 ```
 
-Le fichier `config.yml` contient uniquement le volume autorisé à monter dans les conteneurs
+The `config.yml` only contains the allowed volume to bind in the containers
 ```yaml
 container:
   valid_volumes:
     - /appli*
 ```
 
-Le runner apparaît dans `Administration Area`, sous `Actions`>`Runners`. Pour obtenir le token d'enrôlement , on clique sur le bouton `Create new Runner` 
+The runner appears in the `Administration Area`, under `Actions`>`Runners`. To obtain the registration token, click on the `Create new Runner` button
 ![Pasted_image_20250502230954.png](img/Pasted_image_20250502230954.png)
 
 ### Step 3: Set up Gitea Actions for Obsidian Repository
@@ -105,11 +107,11 @@ I added this token as secret `REPO_TOKEN` in the repository
 ![Pasted_image_20250501235427.png](img/Pasted_image_20250501235427.png)
 
 I needed to create the workflow that will spin-up a container and do the following:
-- When I push new/updated files in the `Blog` folder
-- Checkout the current repository (Obsidian vault)
-- Clone the blog repository
-- Transfer blog content from Obsidian
-- Commit the change to the blog repository
+1. When I push new/updated files in the `Blog` folder
+2. Checkout the current repository (Obsidian vault)
+3. Clone the blog repository
+4. Transfer blog content from Obsidian
+5. Commit the change to the blog repository
 
 **sync_blog.yml**
 ```yaml
@@ -172,7 +174,7 @@ The blog repository contains the full Hugo site, including the synced content an
 
 Its workflow:
 - Checkout the blog repository
-- Check if the Hugo version is up-to-date. If not, it downloads the latest release and replaces the old binary.
+- Check if the Hugo version is up-to-date. If not, it downloads the latest release.
 - Build the static website using Hugo.
 
 **deploy_blog.yml**

@@ -29,40 +29,43 @@ Cette configuration permet non seulement de sauvegarder toutes mes notes avec le
 
 ### Gitea
 
-[Gitea](https://gitea.io/) is a self-hosted Git service similar to GitHub, but lightweight and easy to maintain. I host my personal repositories there, including my Obsidian vault and my blog.
+[Gitea](https://gitea.io/) est un service Git self-hosted similaire à GitHub, mais léger et facile à maintenir. J'y héberge mes dépôts personnels, notamment mon vault Obsidian et mon blog.
 
-Gitea now supports [Gitea Actions](https://docs.gitea.com/usage/actions/overview), a CI/CD pipeline mechanism compatible with GitHub Actions syntax. 
+Gitea prend désormais en charge [Gitea Actions](https://docs.gitea.com/usage/actions/overview), un mécanisme de pipeline CI/CD compatible avec la syntaxe GitHub Actions.
 
-To run those workflows, I installed a [Gitea runner](https://gitea.com/gitea/act_runner) on my server, allowing me to create an automated workflow triggered when I update content in my notes, which then builds and deploys my blog.
+Pour exécuter ces workflows, j'ai installé un [Gitea runner](https://gitea.com/gitea/act_runner) sur mon serveur, ce qui me permet de créer un workflow automatisé déclenché lorsque je mets à jour le contenu de mes notes, puis de reconstruire et déployer mon blog.
 
 ### Hugo
 
-[Hugo](https://gohugo.io/) is a fast and flexible static site generator written in Go. It’s perfect for generating content from Markdown files. Hugo is highly customizable, supports themes, and can generate a complete website in seconds. It’s ideal for a blog based on Obsidian notes, and it works beautifully in CI/CD pipelines due to its speed and simplicity.
+[Hugo](https://gohugo.io/) est un générateur de sites statiques rapide et flexible, écrit en Go. Il est idéal pour générer du contenu à partir de fichiers Markdown. Hugo est hautement personnalisable, prend en charge les thèmes et peut générer un site web complet en quelques secondes.
+
+Il est idéal pour un blog basé sur des notes Obsidian et fonctionne parfaitement dans les pipelines CI/CD grâce à sa rapidité et sa simplicité.
+
 
 ---
 ## 🔁 Workflow
 
-The idea is simple:
-1. I write blog content in my Obsidian vault, under a specific `Blog` folder.
-2. When I'm done editing the file, the Obisdian Git plugin automatically commits and push updates to the Gitea repository
-3. When Gitea receives that push, a first Gitea Action is triggered.
-4. The first action syncs the updated blog content to another separate [Git repository](https://git.vezpi.me/Vezpi/blog) which hosts my blog content.
-5. In that blog repository, another Gitea Action is triggered.
-6. The second Gitea Action generates the static web pages while upgrading Hugo if needed
-7. The blog is now updated (the one you are reading).
+L'idée est simple :
+1. J'écris le contenu de mon blog dans mon vault Obsidian, sous un dossier `Blog`.
+2. Une fois le fichier modifié, le plugin Git Obsidian effectue automatiquement les commits et les poussent vers le dépôt Gitea.
+3. Lorsque Gitea reçoit ce push, une première Gitea Action est déclenchée.
+4. La première action synchronise le contenu du blog mis à jour avec un autre dépôt [Git distinct](https://git.vezpi.me/Vezpi/blog) qui héberge le contenu.
+5. Dans ce dépôt, une autre Gitea Action est déclenchée.
+6. La deuxième Gitea Action génère les pages web statiques tout en mettant à jour Hugo si nécessaire.
+7. Le blog est maintenant mis à jour (celui que vous lisez).
 
-This way, I never need to manually copy files or trigger deployments. Everything flows from writing markdown in Obsidian to having a fully deployed website.
+De cette façon, je n'ai plus besoin de copier manuellement de fichiers ni de déclencher de déploiements. Tout se déroule comme prévu, de l'écriture de Markdown dans Obsidian au déploiement complet du site web.
 
 ---
-## ⚙️ Implementation
+## ⚙️ Implémentation
 
-### Step 1: Obsidian Vault Setup
+### Étape 1 : Configuration du vault Obsidian
 
-In my Obsidian vault, I created a `Blog` folder that contains my blog posts in Markdown. Each post includes Hugo frontmatter (`title`, `date`, `draft`, etc.). The Git plugin is configured to commit and push automatically when I make changes to the Gitea repository.
+Dans mon vault Obsidian, j'ai créé un dossier `Blog` contenant mes articles de blog en Markdown. Chaque article inclut les pages de garde Hugo (titre, date, brouillon, etc.). Le plugin Git est configuré pour valider et pousser automatiquement les modifications apportées au dépôt Gitea.
 
-### Step 2: Spin up Gitea Runner
+### Étape 2 : Lancer Gitea Runner
 
-The Obsidian vault is a private Git repository self-hosted in Gitea. I use docker compose to run this instance, to enable the Gitea Actions, I added the Gitea runner in the stack
+Le vault Obsidian est un dépôt Git privé self-hosted dans Gitea. J'utilise Docker Compose pour gérer cette instance. Pour activer les Gitea Actions, j'ai ajouté Gitea Runner à la stack.
 ```yaml
   runner:
     image: gitea/act_runner:latest
@@ -84,32 +87,32 @@ The Obsidian vault is a private Git repository self-hosted in Gitea. I use docke
       - server
 ```
 
-The `config.yml` only contains the allowed volume to bind in the containers
+Le fichier `config.yml` contient uniquement le volume autorisé à monter dans les conteneurs
 ```yaml
 container:
   valid_volumes:
     - /appli*
 ```
 
-The runner appears in the `Administration Area`, under `Actions`>`Runners`. To obtain the registration token, click on the `Create new Runner` button
+Le runner apparaît dans `Administration Area`, sous `Actions`>`Runners`. Pour obtenir le token d'enrôlement , on clique sur le bouton `Create new Runner` 
 ![Pasted_image_20250502230954.png](img/Pasted_image_20250502230954.png)
 
-### Step 3: Set up Gitea Actions for Obsidian Repository
+### Étape 3 : Configurer les Gitea Actions pour le dépôt Obsidian
 
-First I enabled the Gitea Actions, this is disabled by default, tick the box `Enable Repository Actions`  in the settings for that repository
+J'ai d'abord activé les Gitea Actions. Celles-ci sont désactivées par défaut. Cochez la case `Enable Repository Actions`  dans les paramètres de ce dépôt.
 
-I created a new PAT (Personal Access Token) with RW permission on the repositories
+J'ai créé un nouveau PAT (Personal Access Token) avec autorisation RW sur les dépôts.
 ![Pasted_image_20250501235521.png](img/Pasted_image_20250501235521.png)
 
-I added this token as secret `REPO_TOKEN` in the repository
+J'ai ajouté le token comme secret `REPO_TOKEN` dans le dépôt.
 ![Pasted_image_20250501235427.png](img/Pasted_image_20250501235427.png)
 
-I needed to create the workflow that will spin-up a container and do the following:
-- When I push new/updated files in the `Blog` folder
-- Checkout the current repository (Obsidian vault)
-- Clone the blog repository
-- Transfer blog content from Obsidian
-- Commit the change to the blog repository
+J'ai dû créer le workflow qui lancera un conteneur et effectuera les opérations suivantes :
+1. Lorsque je crée/met à jour des fichiers du dossier `Blog`
+2. Checkout le dépôt actuel (vault Obsidian)
+3. Clone le dépôt du blog
+4. Transférer le contenu du blog depuis Obsidian
+5. Commit les modifications dans le dépôt du blog
 
 **sync_blog.yml**
 ```yaml
@@ -161,19 +164,19 @@ jobs:
           git push -u origin main
 ```
 
-Obsidian uses wiki-style links for images, like `![image_name.png](img/image_name.png)`, which isn't compatible with Hugo out of the box. Here's how I automated a workaround in a Gitea Actions workflow:
-- I find all used image references in `.md` files.
-- For each referenced image, I update the link in relevant `.md` files like `![image name](img/image_name.png)`.
-- I then copy those used images to the blog's static directory while replacing white-spaces by underscores.
+Obsidian utilise des liens de type wiki pour les images, comme `![nom_image.png](img/nom_image.png)`, ce qui n'est pas compatible avec Hugo par défaut. Voici comment j'ai automatisé une solution de contournement dans un workflow Gitea Actions :
+- Je trouve toutes les références d'images utilisées dans des fichiers `.md`.
+- Pour chaque image référencée, je mets à jour le lien dans les fichiers `.md` correspondants, comme `![nom_image](img/nom_image.png)`.
+- Je copie ensuite ces images utilisées dans le répertoire statique du blog en remplaçant les espaces par des underscores.
 
-### Step 4: Gitea Actions for Blog Repository
+### Étape 4 : Actions Gitea pour le dépôt du blog
 
-The blog repository contains the full Hugo site, including the synced content and theme.
+Le dépôt du blog contient l'intégralité du site Hugo, y compris le contenu synchronisé et le thème.
 
-Its workflow:
-- Checkout the blog repository
-- Check if the Hugo version is up-to-date. If not, it downloads the latest release and replaces the old binary.
-- Build the static website using Hugo.
+Son workflow :
+1. Checkout du dépôt du blog
+2. Vérification de la mise à jour d'Hugo. Si disponible, la dernière version est téléchargée.
+3. Génération du site web statique avec Hugo.
 
 **deploy_blog.yml**
 ```yaml
