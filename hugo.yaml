@@ -11,6 +11,10 @@ languages:
     params:
       sidebar:
         subtitle: "Homelab & Automation"
+      
+      dateFormat:
+        published: "Jan 2, 2006"
+        lastUpdated: "Jan 2, 2006"
     
     menu:
       main:
@@ -33,6 +37,10 @@ languages:
     params:
       sidebar:
         subtitle: "Homelab & Automatisation"
+      
+      dateFormat:
+        published: "2 Jan 2006"
+        lastUpdated: "2 Jan 2006"
     
     menu:
       main:
@@ -67,9 +75,7 @@ params:
     since: 2025
     customText: ""
 
-  dateFormat:
-    published: "Jan 2, 2006"
-    lastUpdated: "Jan 2, 2006"
+  
 
   toc:
     enable: true
@@ -96,6 +102,7 @@ params:
     toggle: true
     default: "dark"
 
+menu:
   social:
     - identifier: "mail"
       name: Mail
@@ -139,7 +146,6 @@ related:
 sitemap:
   ChangeFreq: "weekly"
   Priority: 0.6
-
 
 outputs:
   home:
