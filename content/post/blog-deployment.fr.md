@@ -9,23 +9,23 @@ tags:
 categories:
   - homelab
 ---
-## 💡 Introduction
+## 💡 Intro
 
-I always wanted to share my own experiences to give others ideas or help them on their projects.
+J'ai toujours voulu partager mes expériences pour donner des idées aux autres ou les aider dans leurs projets.
 
-I'm constantly tinkering in my homelab, trying new tools and workflows. Instead of keeping all these experiments in private notes, I decided to create a blog where I can document and publish them easily.
+Je suis constamment en train de bidouiller dans mon lab, testant de nouveaux outils et workflows. Plutôt que de conserver toutes ces expériences dans des notes privées, j'ai décidé de créer un blog où je peux les documenter et les publier facilement.
 
-I wanted the entire process to be automated, self-hosted, and integrated into the tools I already use.
+Je souhaitais que l'ensemble du processus soit automatisé, self-hosted et intégré aux outils que j'utilise déjà.
 
 ---
-## 🔧 Tools
+## 🔧 Outils
 ### Obsidian
 
-Before I was using Notion, but some months ago I switched to [Obsidian](https://obsidian.md/). It's a markdown-based note-taking app that stores everything locally, which gives me more flexibility and control.
+J'utilisais auparavant [Notion](https://www.notion.com), mais il y a quelques mois, je suis passé à [Obsidian](https://obsidian.md/). C'est une application de prise de notes basée sur Markdown qui stocke tout localement, ce qui me donne plus de flexibilité et de contrôle.
 
-To sync my notes between devices, I use the [Obsidian Git plugin](https://github.com/denolehov/obsidian-git), which commits changes to a Git repository hosted on my self-hosted Gitea instance.
+Pour synchroniser mes notes entre mes appareils, j'utilise le [plugin Git Obsidian](https://github.com/denolehov/obsidian-git), qui enregistre les modifications dans un dépôt Git hébergé sur mon instance Gitea self-hosted.
 
-This setup not only allows for versioned backups of all my notes but also opens the door to automation.
+Cette configuration permet non seulement de sauvegarder toutes mes notes avec leurs versions, mais aussi ouvre la porte à l'automatisation.
 
 ### Gitea
 

@@ -9,7 +9,7 @@ tags:
 categories:
   - homelab
 ---
-## 💡 Introduction
+## 💡 Intro
 
 I always wanted to share my own experiences to give others ideas or help them on their projects.
 
@@ -21,7 +21,7 @@ I wanted the entire process to be automated, self-hosted, and integrated into th
 ## 🔧 Tools
 ### Obsidian
 
-Before I was using Notion, but some months ago I switched to [Obsidian](https://obsidian.md/). It's a markdown-based note-taking app that stores everything locally, which gives me more flexibility and control.
+Before I was using  [Notion](https://www.notion.com), but some months ago I switched to [Obsidian](https://obsidian.md/). It's a markdown-based note-taking app that stores everything locally, which gives me more flexibility and control.
 
 To sync my notes between devices, I use the [Obsidian Git plugin](https://github.com/denolehov/obsidian-git), which commits changes to a Git repository hosted on my self-hosted Gitea instance.
 
@@ -29,15 +29,15 @@ This setup not only allows for versioned backups of all my notes but also opens 
 
 ### Gitea
 
-[Gitea](https://gitea.io/) is a self-hosted Git service similar to GitHub, but lightweight and easy to maintain. I host my personal repositories there, including my Obsidian vault and my blog.
+[Gitea](https://gitea.io/) est un service Git self-hosted similaire à GitHub, mais léger et facile à maintenir. J'y héberge mes dépôts personnels, notamment mon vault Obsidian et mon blog.
 
-Gitea now supports [Gitea Actions](https://docs.gitea.com/usage/actions/overview), a CI/CD pipeline mechanism compatible with GitHub Actions syntax. 
+Gitea prend désormais en charge [Gitea Actions](https://docs.gitea.com/usage/actions/overview), un mécanisme de pipeline CI/CD compatible avec la syntaxe GitHub Actions.
 
-To run those workflows, I installed a [Gitea runner](https://gitea.com/gitea/act_runner) on my server, allowing me to create an automated workflow triggered when I update content in my notes, which then builds and deploys my blog.
+Pour exécuter ces workflows, j'ai installé un [Gitea runner](https://gitea.com/gitea/act_runner) sur mon serveur, ce qui me permet de créer un workflow automatisé déclenché lorsque je mets à jour le contenu de mes notes, puis de reconstruire et déployer mon blog.
 
 ### Hugo
 
-[Hugo](https://gohugo.io/) is a fast and flexible static site generator written in Go. It’s perfect for generating content from Markdown files. Hugo is highly customizable, supports themes, and can generate a complete website in seconds. It’s ideal for a blog based on Obsidian notes, and it works beautifully in CI/CD pipelines due to its speed and simplicity.
+[Hugo](https://gohugo.io/) est un générateur de sites statiques rapide et flexible, écrit en Go. Il est idéal pour générer du contenu à partir de fichiers Markdown. Hugo est hautement personnalisable, prend en charge les thèmes et peut générer un site web complet en quelques secondes. Il est idéal pour un blog basé sur des notes Obsidian et fonctionne parfaitement dans les pipelines CI/CD grâce à sa rapidité et sa simplicité.
 
 ---
 ## 🔁 Workflow
