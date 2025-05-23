@@ -44,7 +44,7 @@ Pour exécuter ces workflows, j'ai installé un [Gitea runner](https://gitea.com
 
 L'idée est simple :
 1. J'écris le contenu de mon blog dans mon vault Obsidian, sous un dossier `Blog`.
-2. Une fois le fichier modifié, le plugin Git Obisdian effectue automatiquement les commits et les poussent vers le dépôt Gitea.
+2. Une fois le fichier modifié, le plugin Git Obsidian effectue automatiquement les commits et les poussent vers le dépôt Gitea.
 3. Lorsque Gitea reçoit ce push, une première action Gitea est déclenchée.
 4. La première action synchronise le contenu du blog mis à jour avec un autre dépôt [Git distinct](https://git.vezpi.me/Vezpi/blog) qui héberge le contenu.
 5. Dans ce dépôt, une autre action Gitea est déclenchée.
@@ -60,9 +60,9 @@ De cette façon, je n'ai plus besoin de copier manuellement de fichiers ni de d�
 
 Dans mon vault Obsidian, j'ai créé un dossier `Blog` contenant mes articles de blog en Markdown. Chaque article inclut les pages de garde Hugo (titre, date, brouillon, etc.). Le plugin Git est configuré pour valider et pousser automatiquement les modifications apportées au dépôt Gitea.
 
-### Step 2: Spin up Gitea Runner
+### Étape 2 : Lancer Gitea Runner
 
-The Obsidian vault is a private Git repository self-hosted in Gitea. I use docker compose to run this instance, to enable the Gitea Actions, I added the Gitea runner in the stack
+Le vault Obsidian est un dépôt Git privé self-hosted dans Gitea. J'utilise Docker Compose pour gérer cette instance. Pour activer les actions Gitea, j'ai ajouté Gitea Runner à la stack.
 ```yaml
   runner:
     image: gitea/act_runner:latest
@@ -84,14 +84,14 @@ The Obsidian vault is a private Git repository self-hosted in Gitea. I use docke
       - server
 ```
 
-The `config.yml` only contains the allowed volume to bind in the containers
+Le fichier `config.yml` contient uniquement le volume autorisé à monter dans les conteneurs
 ```yaml
 container:
   valid_volumes:
     - /appli*
 ```
 
-The runner appears in the `Administration Area`, under `Actions`>`Runners`. To obtain the registration token, click on the `Create new Runner` button
+Le runner apparaît dans `Administration Area`, sous `Actions`>`Runners`. Pour obtenir le token d'enrôlement , on clique sur le bouton `Create new Runner` 
 ![Pasted_image_20250502230954.png](img/Pasted_image_20250502230954.png)
 
 ### Step 3: Set up Gitea Actions for Obsidian Repository
