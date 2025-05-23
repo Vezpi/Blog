@@ -4,7 +4,7 @@ description: Who I am
 translationKey: about
 menu:
   main:
-    name: About
+    name: About Me
     weight: 10
     params:
       icon: user

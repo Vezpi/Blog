@@ -4,7 +4,7 @@ description: Qui suis-je
 translationKey: about
 menu:
   main:
-    name: A Propos
+    name: A Propos de Moi
     weight: 10
     params:
       icon: user
