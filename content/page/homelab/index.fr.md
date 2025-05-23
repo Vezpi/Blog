@@ -10,7 +10,7 @@ menu:
     params:
       icon: flask
 ---
-## Introduction
+## Intro
 
 My homelab journey began in 2013 with a humble Raspberry Pi, the very first model. I was needing a cheap machine for my first step into the world of Linux. It helped me a lot to dive into this technology and served me as a basic NAS, thank you Vezpibox (shitty name, I know) 
 

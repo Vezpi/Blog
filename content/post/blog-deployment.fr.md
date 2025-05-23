@@ -1,6 +1,6 @@
 ---
 title: Déploiment du Blog avec Obsidian, Hugo et Gitea Actions
-description: 
+description: Comment j'ai automatisé mon blog self-hosted en utilisant Obsidian, Gitea Actions et Hugo pour publier des articles directement à partir de mes notes personnelles.
 date: 2025-05-02
 draft: false
 tags:
