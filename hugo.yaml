@@ -15,21 +15,6 @@ languages:
       dateFormat:
         published: "Jan 2, 2006"
         lastUpdated: "Jan 2, 2006"
-    
-    menu:
-      main:
-        - identifier: categories
-          name: Categories
-          url: /categories
-          weight: 50
-          params:
-            icon: "categories"
-        - identifier: tags
-          name: Tags
-          url: /tags
-          weight: 60
-          params:
-            icon: "tag"
 
   fr:
     languageName: Français
@@ -41,21 +26,6 @@ languages:
       dateFormat:
         published: "2 Jan 2006"
         lastUpdated: "2 Jan 2006"
-    
-    menu:
-      main:
-        - identifier: categories
-          name: Catégories
-          url: /fr/categories
-          weight: 50
-          params:
-            icon: "categories"
-        - identifier: tags
-          name: Mots Clés
-          url: /fr/tags
-          weight: 60
-          params:
-            icon: "tag"
 
 frontmatter:
   format: "yaml"
