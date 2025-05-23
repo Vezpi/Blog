@@ -1,7 +1,7 @@
 ---
-title: Welcome to My Homelab
+title: Bienvenue dans mon Homelab
 layout: page
-description: The story behind my homelab project
+description: L'histoire derrière mon projet de homelab, d'un Raspberry Pi à un micro datacenter, où j'expérimente Proxmox, Kubernetes, l'automatisation et plus encore.
 showToc: true
 menu:
   main:
