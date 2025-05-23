@@ -42,23 +42,23 @@ Pour exécuter ces workflows, j'ai installé un [Gitea runner](https://gitea.com
 ---
 ## 🔁 Workflow
 
-The idea is simple:
-1. I write blog content in my Obsidian vault, under a specific `Blog` folder.
-2. When I'm done editing the file, the Obisdian Git plugin automatically commits and push updates to the Gitea repository
-3. When Gitea receives that push, a first Gitea Action is triggered.
-4. The first action syncs the updated blog content to another separate [Git repository](https://git.vezpi.me/Vezpi/blog) which hosts my blog content.
-5. In that blog repository, another Gitea Action is triggered.
-6. The second Gitea Action generates the static web pages while upgrading Hugo if needed
-7. The blog is now updated (the one you are reading).
+L'idée est simple :
+1. J'écris le contenu de mon blog dans mon vault Obsidian, sous un dossier `Blog`.
+2. Une fois le fichier modifié, le plugin Git Obisdian effectue automatiquement les commits et les poussent vers le dépôt Gitea.
+3. Lorsque Gitea reçoit ce push, une première action Gitea est déclenchée.
+4. La première action synchronise le contenu du blog mis à jour avec un autre dépôt [Git distinct](https://git.vezpi.me/Vezpi/blog) qui héberge le contenu.
+5. Dans ce dépôt, une autre action Gitea est déclenchée.
+6. La deuxième action Gitea génère les pages web statiques tout en mettant à jour Hugo si nécessaire.
+7. Le blog est maintenant mis à jour (celui que vous lisez).
 
-This way, I never need to manually copy files or trigger deployments. Everything flows from writing markdown in Obsidian to having a fully deployed website.
+De cette façon, je n'ai plus besoin de copier manuellement de fichiers ni de déclencher de déploiements. Tout se déroule comme prévu, de l'écriture de Markdown dans Obsidian au déploiement complet du site web.
 
 ---
-## ⚙️ Implementation
+## ⚙️ Implémentation
 
-### Step 1: Obsidian Vault Setup
+### Étape 1 : Configuration du vault Obsidian
 
-In my Obsidian vault, I created a `Blog` folder that contains my blog posts in Markdown. Each post includes Hugo frontmatter (`title`, `date`, `draft`, etc.). The Git plugin is configured to commit and push automatically when I make changes to the Gitea repository.
+Dans mon vault Obsidian, j'ai créé un dossier `Blog` contenant mes articles de blog en Markdown. Chaque article inclut les pages de garde Hugo (titre, date, brouillon, etc.). Le plugin Git est configuré pour valider et pousser automatiquement les modifications apportées au dépôt Gitea.
 
 ### Step 2: Spin up Gitea Runner
 
