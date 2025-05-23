@@ -18,14 +18,14 @@ In 2015, I upgraded to a Raspberry Pi 2, seeking better performance to run multi
 
 By 2018, the need for more RAM led me to a Raspberry Pi 3, allowing me to run even more applications. My 3 little machines were running happily together, in a quite ordered mess.
 
-Finally, in 2019, my new job made me discover the virtualization, with virtual machines and above all Docker. I wanted to try that at home, I took a significant step forward with a compact yet powerful headless PC that laid the foundation of my homelab.
+Finally, in 2019, my new job made me discover the virtualization, with virtual machines and above all Docker. I wanted to try that at home, I took a significant step forward with a compact yet powerful headless mini PC that laid the foundation of my homelab.
 
 ---
 ## Why a Homelab ?
 
 I wanted my own playground, a space where breaking things was not just okay, but encouraged. It’s the best way to learn how to fix them and, more importantly, to really understand how they work.
 
-My single server was great, but testing anything risky on it became a problem. It was running critical services like home automation and DNS, and believe me, having no lights or internet is a major incident in my household. The server had become indispensable. When it was down, everything was down. Not so fun anymore.
+My single server was great, but testing anything risky on it became a problem. It was running critical services like home automation or DNS, and believe me, having no lights or internet is a major incident in my family. The server had become indispensable. When it was down, everything was down. Not so fun anymore.
 
 The first big challenge I set for myself was building a Kubernetes cluster. Sure, I could run one on a single node, but what’s the point of a cluster with only one node? You could argue that running Kubernetes to control my shutters is overkill, and you’d be right. But that wasn’t the point.
 
@@ -52,7 +52,7 @@ Of course, reality doesn’t always align with ambitions. Here’s what I was up
 - **Noise:** Silence was crucial. This wasn’t going to be tucked away in a garage or basement, it was right in the middle of our living space.
 - **Power Draw:** Running 24/7, the power consumption had to be kept in check. I couldn’t afford to triple my electric bill just to tinker with VMs.
 - **Budget:** I wasn’t going to drop thousands on enterprise-grade hardware. The balance was finding reliable, second-hand gear that wouldn’t break the bank.
-- **Temperature**: I’m not gonna lie, I forgot about it.. Mini PCs don’t generate much heat, but network gear? That’s a different story. Lesson learned.
+- **Temperature**: I’m not gonna lie, I hadn't thought of it... Mini PCs don’t generate much heat, but network gear? That’s a different story. Lesson learned.
 
 ---
 ## Infrastructure Overview
@@ -75,7 +75,7 @@ Regarding hardware, my existing server was powered by an AM4 Ryzen 3 2200G with 
 
 The specifications for the two additional nodes were clear: an AM4 socket for consistency, low power consumption, dual NICs with at least one 2.5Gbps, and sufficient storage options, at least one M.2 NVMe slot and a 2.5" drive bay. Since AM4 is somewhat dated, newer models were off the table, a good news for my budget, as I was able to buy second-hand mini PCs.
 
-Here is the layout of my nodes:
+Here is the specs of my nodes:
 
 | **Node**  | **Vertex**              | **Apex**                | **Zenith**               |
 | --------- | ----------------------- | ----------------------- | ------------------------ |
