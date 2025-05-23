@@ -103,6 +103,7 @@ params:
     default: "dark"
 
 menu:
+  main: []
   social:
     - identifier: "mail"
       name: Mail
