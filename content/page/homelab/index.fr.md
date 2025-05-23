@@ -103,59 +103,58 @@ Voici la configuration réseau finale :
 - **Swtich :** [UniFi Switch Lite 16 PoE](https://eu.store.ui.com/eu/en/category/switching-utility/products/usw-lite-16-poe), 8 ports PoE 1 Gbit/s et 8 ports non PoE.
 - **Swtich :** [UniFi Flex Mini 2,5 G](https://eu.store.ui.com/eu/en/category/switching-utility/products/usw-flex-2-5g-5), 5 ports 2,5 Gbit/s, dont un port PoE entrant.
 - **Point d'accès :** [UniFi U7 Pro Wall](https://eu.store.ui.com/eu/en/category/all-wifi/products/u7-pro-wall), Wi-Fi 7, 2,5 Gbit/s PoE+ entrant.
-### Storage
+### Stockage
 
-While I don't have massive storage requirement, I still needed a flexible setup to either store my homelab workload and my personal media and documents.
+Bien que je n'aie pas besoin d'un stockage important, il me fallait une configuration flexible pour stocker les datas de mon homelab, ainsi que mes médias et documents personnels.
 
-Each Proxmox node is equipped with a **256GB SATA SSD** for the operating system, ISO files, and VM/LXC templates. For the workload storage, I added a **1TB NVMe drive** per node, which forms the basis of my **Ceph cluster**. This gives me distributed, redundant, and high-performance storage for VMs and containers, which allows live migration and high availability across the cluster.
+Chaque nœud Proxmox est équipé d'un SSD SATA de 256 Go pour le système d'exploitation, les fichiers ISO et les templates VM/LXC. Pour le stockage des datas, j'ai ajouté un disque NVMe de 1 To par nœud, qui constitue la base de mon cluster Ceph. Cela me permet d'obtenir un stockage distribué, redondant et performant pour les VM et les conteneurs, ce qui permet une migration à chaud et une haute disponibilité sur l'ensemble du cluster.
 
-Originally, my first server had two **1TB HDDs** installed internally. Because I needed a slot for the SSD, I moved them outside the case using **USB-to-SATA adapters** and reconnected them to the same node. These drives store my photos, Nextcloud documents and backups, less performance-critical data that doesn’t need to sit on Ceph. They are served on the network using a NFS server sitting in a LXC container on that node.
-### Cooling
+À l'origine, mon premier serveur était équipé de deux disques durs de 1 To installés en interne. Comme j'avais besoin d'un emplacement pour le SSD, je les ai déplacés hors du boîtier à l'aide d'adaptateurs USB vers SATA et les ai reconnectés au même nœud. Ces disques stockent mes photos, mes documents Nextcloud et mes sauvegardes, des données moins critiques pour les performances qui n'ont pas besoin de rester sur Ceph. Ils sont servis sur le réseau à l’aide d’un serveur NFS situé dans un conteneur LXC sur ce nœud.
+### Refroidissement
 
-I quickly learned that my network gear was turning my closet into a mini furnace. Fortunately, I started the build in December, so the heat wasn’t too noticeable, but come summer, it was bound to become a real problem.
+J'ai vite compris que mon équipement réseau transformait mon placard en mini-fournaise. Heureusement, j'ai commencé la construction en décembre, donc la chaleur n'était pas trop perceptible, mais avec l'été, elle allait forcément devenir un vrai problème.
 
-Options were limited, there was no way I was going to convince my wife that our servers needed a cooling system. Plus, it had to be silent. Not an easy combo.
+Les options étaient limitées, impossible de convaincre ma femme que nos serveurs avaient besoin d'un système de refroidissement. De plus, il fallait que ce soit silencieux. Une combinaison difficile.
 
-The best solution I came up with was to drill two 40mm holes above the kitchen cabinet. I ran PVC pipes through the wall and installed two small fans, each cushioned with foam to minimize vibrations and keep noise down.
+La meilleure solution que j'ai trouvée a été de percer deux trous de 40 mm au-dessus du meuble de cuisine. J'ai fait passer des tuyaux en PVC dans le mur et installé deux petits ventilateurs, chacun recouvert de mousse pour minimiser les vibrations et le bruit.
 
-Inside the rack, I also added two 80mm fans to help with airflow. To keep everything quiet, I hooked up a PWM controller to regulate fan speeds, striking a balance between airflow and silence.
+À l'intérieur du rack, j'ai également ajouté deux ventilateurs de 80 mm pour améliorer la circulation de l'air. Pour un fonctionnement silencieux, j'ai branché un contrôleur PWM pour réguler la vitesse des ventilateurs, trouvant ainsi un équilibre entre circulation d'air et silence.
 ### Photos
 
-Here what is look like
+Voici à quoi ça ressemble :
 
 ![homelab-rack-legend.png](img/homelab-rack-legend.png)
 ![homelab-enclore-open-closed.png](img/homelab-enclore-open-closed.png)
 
 ---
-## Software Stack
+## Stack Logicielle
 
-With the hardware foundation set, the next step was to decide what software would orchestrate everything, the real engine behind every experiment, deployment, and learning opportunity.
-### Hypervisor
+Une fois les fondations matérielles posées, l'étape suivante consistait à déterminer la partie software qui orchestrerait l'ensemble, véritable moteur de chaque expérience, déploiement et opportunité d'apprentissage.
+### Hyperviseur
 
-At the core of my setup is a 3-node Proxmox VE 8 cluster, a KVM-based hypervisor that also supports LXC containers. Built on Debian, it provides essential features like live migration, HA, and seamless Ceph integration right out of the box.
+Au cœur de ma configuration se trouve un cluster Proxmox VE 8 à 3 nœuds, un hyperviseur basé sur KVM prenant également en charge les conteneurs LXC. Basé sur Debian, il offre des fonctionnalités essentielles telles que la migration à chaud, la haute disponibilité et l'intégration de Ceph, prêtes à l'emploi.
 
-For now, I’m primarily running just one VM and one LXC container. The VM is essentially a clone of my old physical server, hosting most of my applications as Docker containers. The LXC container serves as a simple jump server.
-### Network
+Pour l'instant, j'utilise principalement une seule VM et un seul conteneur LXC. La VM est en quelque sorte un clone de mon ancien serveur physique, hébergeant la plupart de mes applications sous forme de conteneurs Docker. Le conteneur LXC sert de simple jump server.
+### Réseau
 
-The objective for my network was to implement VLANs for segmentation and manage firewall rules directly to simulate more complex setups. 
+L'objectif de mon réseau était d'implémenter des VLAN pour la segmentation et de gérer directement les règles de pare-feu afin de simuler des configurations plus complexes.
+#### Routeur et pare-feu
 
-#### Router and Firewall
+Au cœur de ce réseau se trouve **OPNsense**, fonctionnant dans un boîtier dédié sans ventilateur. Le routeur du FAI est en mode pont et transmet tout le trafic à OPNsense, qui gère toutes les fonctions de routage et de pare-feu. Le trafic inter-VLAN est restreint, des règles de pare-feu explicites sont obligatoires, et seul le VLAN de management a accès aux autres segments.
+#### Réseau L2
 
-At the heart of this network is **OPNsense**, running on a dedicated fanless box. The ISP router is in bridge mode, passing all traffic to OPNsense, which handles all routing and firewall duties. Inter-VLAN traffic is restricted, explicit firewall rules are mandatory, only the management VLAN having access to other segments.  
-#### L2 Network
+Le réseau de couche 2 est géré par des **switchs UniFi**, choisis pour leur interface utilisateur épurée et leur simplicité. Le contrôleur UniFi, qui gère la configuration des appareils, fonctionne en tant que plugin sur OPNsense.
 
-Layer 2 networking is managed by **UniFi switches**, chosen for their sleek UI and simplicity. The UniFi controller, which manages the devices configuration, runs as a plugin on OPNsense.
+Le point d'accès diffuse deux SSID : un pour les ordinateurs et téléphones portables de ma famille (5 et 6 GHz) et l'autre uniquement en 2,4 GHz pour tout le reste (IoT, aspirateur, climatisation, imprimante, Chromecast, etc.).
 
-The access point is broadcasting 2 SSIDs, one for my family's laptops and cellulars (5 and 6Ghz) and the other only in 2.4Ghz for everything else (IoT, vacuum, AC, printer, Chromecast, etc.)
+Un switch UniFi 2,5 Gbit/s est dédié aux communications de Ceph, isolant le trafic de stockage pour éviter les interférences avec d'autres réseaux.
 
-A 2.5Gbps UniFi switch is dedicated to Ceph storage communications, isolating storage traffic to prevent interference with other networks.
+J'ai configuré **LACP** (agrégation de liens) entre le routeur et le commutateur principal à 1 Gbit/s, dans l'espoir de doubler la bande passante. En réalité : une session n'utilise qu'un seul lien, ce qui signifie qu'un téléchargement unique est toujours plafonné à 1 Gbit/s.
+#### VLAN
 
-I set up **LACP** (Link Aggregation) between the router and the main switch at 1Gbps, hoping to double bandwidth. Reality check: a single session will only use one link, meaning that a single download will still cap at 1Gbps.
-#### VLANs
+Pour segmenter le trafic, j'ai divisé le réseau en plusieurs VLAN :
 
-To segment traffic, I divided the network into several VLANs:
-
-| Name      | ID   | Purpose                      |
+| Nom       | ID   | Rôle                         |
 | --------- | ---- | ---------------------------- |
 | User      | 13   | Home network                 |
 | IoT       | 37   | IoT and untrusted equipments |
@@ -166,19 +165,19 @@ To segment traffic, I divided the network into several VLANs:
 | Ceph      | 99   | Ceph                         |
 | VPN       | 1337 | Wireguard network            |
 
-Each VLAN has its own DHCP pool managed by OPNsense, excepted the Heartbeat and Ceph ones.
+Chaque VLAN possède son propre pool DHCP géré par OPNsense, à l'exception des VLAN Heartbeat et Ceph.
 #### DNS
 
-DNS is structured in two layers within OPNsense:
-- ADguard Home:  ads and trackers filters, serves every client on the network over plain DNS on port 53
-- Unbound DNS: recursive DNS, serves only the ADguard Home DNS service locally
+Au sein d'OPNsense, le DNS est structuré en deux couches :
+- ADguard Home : filtres de publicités et de traqueurs, sert chaque client du réseau sur le port DNS standard 53.
+- Unbound DNS : DNS récursif, distribue uniquement le service DNS ADguard Home en interne.
 #### Reverse Proxy
 
-**Caddy** runs as a plugin on OPNsense and acts as the main entry point for web traffic. It routes requests based on subdomains and automatically handles HTTPS certificates and drops internal service access coming from the WAN.
+**Caddy** fonctionne comme un plugin sur OPNsense et sert de point d'entrée principal pour le trafic web. Il achemine les requêtes en fonction des sous-domaines, gère automatiquement les certificats HTTPS et supprime les accès aux services internes provenant du WAN.
 
-Most services are still managed by a **Traefik** instance running on my VM. In those cases, Caddy simply forwards HTTPS requests directly to Traefik.
+La plupart des services sont toujours gérés par une instance **Traefik** exécutée sur ma VM. Dans ce cas, Caddy transfère simplement les requêtes HTTPS directement à Traefik.
 
-This two-layer proxy setup centralizes SSL certificate management in **Caddy** while preserving flexible and dynamic routing internally with **Traefik**.
+Cette configuration de proxy à deux couches centralise la gestion des certificats SSL dans **Caddy** tout en préservant un routage interne flexible et dynamique avec **Traefik**.
 #### VPN
 
 For secure remote access, I configured **WireGuard** on OPNsense. This lightweight VPN provides encrypted connectivity to my lab from anywhere, allowing management of all my services without exposing them all directly to the internet.

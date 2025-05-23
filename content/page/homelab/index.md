@@ -119,7 +119,7 @@ The best solution I came up with was to drill two 40mm holes above the kitchen c
 Inside the rack, I also added two 80mm fans to help with airflow. To keep everything quiet, I hooked up a PWM controller to regulate fan speeds, striking a balance between airflow and silence.
 ### Photos
 
-Here what is look like
+Here what is look like:
 
 ![homelab-rack-legend.png](img/homelab-rack-legend.png)
 ![homelab-enclore-open-closed.png](img/homelab-enclore-open-closed.png)
