@@ -203,7 +203,7 @@ Here’s an overview of what’s currently running in my homelab:
 - **phpIPAM**: IP address management tool for keeping my VLANs and subnets organized.
 #### Docker
 
-Docker was the real game-changer in my self-hosted journey. Before containers, managing multiple services on a single server felt like a constant battle with dependencies and conflicts. Now, every service runs neatly, managed with Docker Compose inside a single VM. Traefik dynamically handles reverse proxy, simplifying access and SSL.
+Docker was the real game-changer in my self-hosted journey. Before containers, managing multiple services on a single server felt like a constant battle with dependencies and conflicts. Now, every service runs neatly, managed with Docker Compose inside a single VM. Traefik dynamically handles reverse proxy, simplifying access and SSL certificates.
 #### Kubernetes
 
 My next big challenge is to take container orchestration to the next level. While Docker Swarm could meet the technical need, my primary goal is to gain hands-on experience with Kubernetes, and there’s no better way to learn than by applying it to real-world use cases.

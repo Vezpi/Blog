@@ -173,48 +173,48 @@ Au sein d'OPNsense, le DNS est structuré en deux couches :
 - Unbound DNS : DNS récursif, distribue uniquement le service DNS ADguard Home en interne.
 #### Reverse Proxy
 
-**Caddy** fonctionne comme un plugin sur OPNsense et sert de point d'entrée principal pour le trafic web. Il achemine les requêtes en fonction des sous-domaines, gère automatiquement les certificats HTTPS et supprime les accès aux services internes provenant du WAN.
+**Caddy** fonctionne comme plugin sur OPNsense et sert de point d'entrée principal pour le trafic web. Il achemine les requêtes en fonction des sous-domaines, gère automatiquement les certificats HTTPS et drop les accès aux services internes provenant du WAN.
 
 La plupart des services sont toujours gérés par une instance **Traefik** exécutée sur ma VM. Dans ce cas, Caddy transfère simplement les requêtes HTTPS directement à Traefik.
 
 Cette configuration de proxy à deux couches centralise la gestion des certificats SSL dans **Caddy** tout en préservant un routage interne flexible et dynamique avec **Traefik**.
 #### VPN
 
-For secure remote access, I configured **WireGuard** on OPNsense. This lightweight VPN provides encrypted connectivity to my lab from anywhere, allowing management of all my services without exposing them all directly to the internet.
-#### Network Diagram
+Pour un accès distant sécurisé, j'ai configuré **WireGuard** sur OPNsense. Ce VPN léger fournit une connectivité chiffrée à mon lab où que je sois, permettant ainsi de gérer tous mes services sans les exposer directement à Internet.
+#### Schéma Réseau
 
 ![homelab-network-schema.png](img/homelab-network-schema.png)
 ### Application
 
-Let's dive into the fun part! What started as a modest setup meant to serve a few personal needs quickly turned into a full ecosystem of open source services, each solving a specific need or just satisfying curiosity.
+Plongeons dans la partie fun ! Ce qui a commencé comme une modeste configuration destinée à répondre à quelques besoins personnels s'est rapidement transformé en un écosystème complet de services open source, chacun répondant à un besoin spécifique ou simplement à la curiosité.
 
-Here’s an overview of what’s currently running in my homelab:
-- **Home Assistant**: Central hub for home automation, integrating smart devices and routines.
-- **Vaultwarden**: Lightweight alternative to Bitwarden for managing and syncing passwords securely.
-- **Nextcloud**: Self-hosted cloud storage.
-- **Gitea**:  Git repository solution for managing my code and projects.
-- **Blog**: My Hugo-based personal blog, which you are reading now.
-- **Immich** – Photo and video management app, similar to Google Photos.
-- **Jellyfin**: Media server for streaming movies and shows.
-- **ARR Stack**: Automated media acquisition tools. (Radarr, Sonarr, Torrent, etc.)
-- **Duplicati**: Encrypted backup solution for my important data and configs.
-- **Prometheus**: Monitoring and metrics collection tool, used with Grafana for dashboards.
-- **Portainer**: Web interface for managing Docker containers and stacks.
-- **Umami**: Privacy-focused analytics for tracking visits on my blog.
-- **phpIPAM**: IP address management tool for keeping my VLANs and subnets organized.
+Voici un aperçu de ce qui fonctionne actuellement dans mon homelab :
+- **Home Assistant** : Plateforme centralisée pour la domotique, intégrant des appareils connectés et des routines.
+- **Vaultwarden** : Alternative légère à Bitwarden pour gérer et synchroniser les mots de passe en toute sécurité.
+- **Nextcloud** : Stockage cloud self-hosted.
+- **Gitea** : Solution de dépôt Git pour gérer mon code et mes projets.
+- **Blog** : Mon blog personnel basé sur Hugo, que vous lisez actuellement.
+- **Immich** : Application de gestion de photos et de vidéos, similaire à Google Photos.
+- **Jellyfin** : Serveur multimédia pour le streaming de films et de séries.
+- **ARR Stack** : Outils d'acquisition multimédia automatisés. (Radarr, Sonarr, Torrent, etc.)
+- **Duplicati** : Solution de sauvegarde chiffrée pour mes données et configurations importantes.
+- **Prometheus** : Outil de surveillance et de collecte de métriques, utilisé avec Grafana pour les tableaux de bord.
+- **Portainer** : Interface web pour la gestion des conteneurs et des stacks Docker.
+- **Umami** : Analyses axées sur la confidentialité pour le suivi des visites sur mon blog.
+- **phpIPAM** : Outil de gestion des adresses IP pour l'organisation de mes VLAN et sous-réseaux.
 #### Docker
 
-Docker was the real game-changer in my self-hosted journey. Before containers, managing multiple services on a single server felt like a constant battle with dependencies and conflicts. Now, every service runs neatly, managed with Docker Compose inside a single VM. Traefik dynamically handles reverse proxy, simplifying access and SSL.
+Docker a véritablement révolutionné mon aventure homelab. Avant les conteneurs, gérer plusieurs services sur un seul serveur était une bataille constante avec les dépendances et les conflits. Aujourd'hui, chaque service fonctionne parfaitement, géré par Docker Compose au sein d'une seule VM. Traefik gère dynamiquement le reverse proxy, simplifiant ainsi l'accès et les certificats SSL.
 #### Kubernetes
 
-My next big challenge is to take container orchestration to the next level. While Docker Swarm could meet the technical need, my primary goal is to gain hands-on experience with Kubernetes, and there’s no better way to learn than by applying it to real-world use cases.
+Mon prochain grand défi est de faire passer l'orchestration des conteneurs au niveau supérieur. Si Docker Swarm pouvait répondre à ce besoin technique, mon objectif principal est d'acquérir une expérience pratique de Kubernetes, et il n'y a pas de meilleur moyen d'apprendre que de l'appliquer à des cas d'utilisation concrets.
 
 ---
 
-## Final Words
+## Derniers Mots
 
-Thank you for taking the time to read through my homelab journey!
+Merci d'avoir pris le temps de lire mon aventure homelab !
 
-Building and refining this setup has been a great source of learning and fun, and I’m always looking for new ways to improve it.
+Construire et peaufiner cette configuration a été une formidable source d'apprentissage et de plaisir, et je suis toujours à la recherche de nouvelles façons de l'améliorer.
 
-If you’ve got ideas, feedback, better solutions, or just want to share your own setup, I’d love to hear from you. Drop me a message, challenge my choices, or inspire me with your story!
+Si vous avez des idées, des commentaires, de meilleures solutions, ou si vous souhaitez simplement partager votre propre configuration, n'hésitez pas à me contacter. Envoyez-moi un message, challengez mes choix ou partagez votre histoire avec moi !
