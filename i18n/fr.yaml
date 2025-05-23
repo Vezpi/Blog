@@ -40,7 +40,7 @@ article:
 
 notFound:
     title:
-        other: Page non trouvée
+        other: Oups !
     subtitle:
         other: Cette page n'existe pas.
 
