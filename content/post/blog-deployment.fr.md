@@ -1,5 +1,6 @@
 ---
 title: Déploiment du Blog avec Obsidian, Hugo et Gitea Actions
+description: 
 date: 2025-05-02
 draft: false
 tags:
@@ -230,6 +231,12 @@ jobs:
 ---
 ## 🚀 Results
 
-This workflow allows me to focus on what matters most: writing and refining my content. By automating the publishing pipeline — from syncing my Obsidian notes to building the blog with Hugo — I no longer need to worry about manually managing content in a CMS.
+This workflow allows me to focus on what matters most: writing and refining my content. By automating the publishing pipeline, from syncing my Obsidian notes to building the blog with Hugo, I no longer need to worry about manually managing content in a CMS.
 
 Every note I draft can evolve naturally into a clear, structured article, and the technical workflow fades into the background. It’s a simple yet powerful way to turn personal knowledge into shareable documentation.
+
+## 🚀 Résultats
+
+Ce workflow me permet de me concentrer sur l'essentiel : rédiger et peaufiner mon contenu. En automatisant le processus de publication, de la synchronisation de mes notes Obsidian à la création du blog avec Hugo, je n'ai plus à me soucier de la gestion manuelle du contenu dans un CMS.
+
+Chaque note que je rédige peut évoluer naturellement vers un article clair et structuré, et la partie technique passe au second plan. C'est un moyen simple et efficace de transformer mes connaissances personnelles en documentation partageable.

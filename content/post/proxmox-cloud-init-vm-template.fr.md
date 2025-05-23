@@ -1,5 +1,6 @@
 ---
 title: Proxmox - Créer un Template de VM Cloud-Init
+description: Découvrez comment créer un template de VM Ubuntu réutilisable avec cloud-init dans Proxmox pour accélérer et simplifier le déploiement de machines virtuelles.
 date: 2025-01-31
 draft: false
 tags:
@@ -8,32 +9,32 @@ tags:
 categories:
   - homelab
 ---
-## Introduction
+## Intro
 
-Creating a reusable VM template in Proxmox using Cloud-init can streamline VM deployments significantly. This post covers the step-by-step process to set up a cloud-init-enabled VM template using Ubuntu for Proxmox.
+Créer un template de VM dans **Proxmox** avec **cloud-init** peut considérablement simplifier les déploiements de VM. Cet article décrit étape par étape la configuration d'un template de VM compatible **cloud-init** avec **Ubuntu** pour **Proxmox**.
 
-Proxmox supports Cloud-init, a tool that allows the automatic configuration of virtual machines right after they are provisioned. This includes setting up networking, SSH keys, and other initial settings.
+Proxmox prend en charge cloud-init, un outil qui permet la configuration automatique des machines virtuelles immédiatement après leur provisionnement. Cela inclut la configuration du réseau, des clés SSH et d'autres paramètres initiaux.
 
-In this guide, we'll create a VM template with Cloud-init enabled, allowing for rapid deployment of pre-configured VMs.
+Dans ce guide, nous allons créer un template de VM avec cloud-init activé, permettant ainsi un déploiement rapide de VM préconfigurées.
 
 ---
-## Why Cloud-init?
+## Pourquoi Cloud-init ?
 
-Cloud-init is a widely used tool for automating the initial configuration of cloud instances. It helps to set up SSH keys, hostname, network configuration, and other parameters during the first boot, making it ideal for creating reusable VM templates in a homelab or production environment.
+Cloud-init est un outil largement utilisé pour automatiser la configuration initiale des instances cloud. Il permet de configurer les clés SSH, le nom d'hôte, la configuration réseau et d'autres paramètres dès le premier démarrage, ce qui le rend idéal pour créer des templates de VM réutilisables en homelab ou en environnement de production.
 
-[Proxmox Cloud-init Documentation](https://pve.proxmox.com/wiki/Cloud-Init_Support)
+[Documentation Proxmox Cloud-init](https://pve.proxmox.com/wiki/Cloud-Init_Support)
 
-## Download the OS Image
+## Télécharger l'Image de l'OS
 
-First, we need to download an image with Cloud-init support. Although Rocky Linux was initially considered, the `.img` format was not available, and the `.qcow2` format caused issues. Instead, we will proceed with the Ubuntu cloud image.
+Tout d'abord, nous devons télécharger une image compatible cloud-init. Bien que Rocky Linux ait été initialement envisagé, le format `.img` n'était pas disponible et le format `.qcow2` posait problème. Nous allons donc utiliser l'image cloud d'Ubuntu.
 
-Find cloud-ready images from the [OpenStack Image Guide](https://docs.openstack.org/image-guide/obtain-images.html).
+Trouvez des images compatibles cloud dans le [Guide des images OpenStack](https://docs.openstack.org/image-guide/obtain-images.html).
 
-In Proxmox, navigate to **Storage > ISO Images > Upload** to upload the downloaded image.
+Dans Proxmox, accédez à **Storage > ISO Images > Upload** pour uploader l'image téléchargée.
 ![Pasted_image_20250131144754.png](img/Pasted_image_20250131144754.png)
-## Create the VM
+## Créer la VM
 
-Next, we create the VM using the command line interface (CLI) with the following command:
+Ensuite, on crée une VM en utilisant la ligne de commande (CLI) depuis le nœud Proxmox avec la commande suivantes :
 
 ```bash
 qm create 900 \
@@ -47,42 +48,42 @@ qm create 900 \
    --name ubuntu-cloud
 ```
 
-This creates a VM with UEFI support, 2GB of RAM, and a single core. The `efidisk0` parameter specifies an EFI disk.
+Cela crée une VM avec le support UEFI, 2GB de RAM, et un seul cœur. Le paramètre `efidisk0` spécifie une disque EFI.
 
-### Import the OS Disk
+### Importer le Disque OS
 
-Now, import the downloaded disk image as the primary disk:
+Maintenant, on importe l'image disque téléchargée comme disque primaire :
 
 ```bash
 qm set 900 --scsi0 ceph-workload:0,import-from=/var/lib/vz/template/iso/noble-server-cloudimg-amd64.img
 ```
 
-### Configure Cloud-init
+### Configurer Cloud-init
 
-Add a Cloud-init CD drive to the VM:
+On ajoute un lecteur CD cloud-init à la VM : 
 
 ```bash
 qm set 900 --scsi1 ceph-workload:cloudinit
 ```
 
-Set the boot order to prioritize the primary disk over the CD:
+On définit l'ordre de démarrage pour donner la priorité au disque principal par rapport au CD :
 
 ```bash
 qm set 900 --boot order=scsi0
 ```
 
-Add a serial port for console access:
+On ajoute un port série pour l'accès console :
 
 ```bash
 qm set 900 --serial0 socket --vga serial0
 ```
 
-## Convert to Template
+## Convertir en Template
 
-After configuring the VM, right-click on the VM in the Proxmox WebUI and select **Convert to template**. This will finalize the template creation.
+Après avoir configuré la VM, on fait un clic droit dessus dans l'interface Web de Proxmox et sélectionnez `Convert to template`. La création du template est alors terminée.
 
 ## Conclusion
 
-This method allows for rapid deployment of pre-configured VMs using Proxmox and Cloud-init.
+Cette méthode permet un déploiement rapide avec Proxmox de VM préconfigurées et cloud-init.
 
-The template can now be used to spawn new instances with custom configurations by providing the necessary Cloud-init parameters. This is particularly useful for deploying multiple instances with consistent baseline configurations quickly.
+Le template peut désormais être utilisé pour générer de nouvelles instances avec des configurations personnalisées en fournissant les paramètres cloud-init nécessaires. Ceci est particulièrement utile pour déployer rapidement plusieurs instances avec des configurations de base similaires.

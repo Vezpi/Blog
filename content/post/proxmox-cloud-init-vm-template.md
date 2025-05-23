@@ -1,5 +1,6 @@
 ---
 title: Proxmox - Create a Cloud-Init VM Template
+description: Learn how to create a reusable Ubuntu VM template with cloud-init in Proxmox to speed up and simplify virtual machine deployment.
 date: 2025-01-31
 draft: false
 tags:
@@ -8,13 +9,13 @@ tags:
 categories:
   - homelab
 ---
-## Introduction
+## Intro
 
-Creating a reusable VM template in Proxmox using Cloud-init can streamline VM deployments significantly. This post covers the step-by-step process to set up a cloud-init-enabled VM template using Ubuntu for Proxmox.
+Creating a VM template in Proxmox using cloud-init can streamline VM deployments significantly. This post covers the step-by-step process to set up a cloud-init-enabled VM template using Ubuntu for Proxmox.
 
-Proxmox supports Cloud-init, a tool that allows the automatic configuration of virtual machines right after they are provisioned. This includes setting up networking, SSH keys, and other initial settings.
+Proxmox supports cloud-init, a tool that allows the automatic configuration of virtual machines right after they are provisioned. This includes setting up networking, SSH keys, and other initial settings.
 
-In this guide, we'll create a VM template with Cloud-init enabled, allowing for rapid deployment of pre-configured VMs.
+In this guide, we'll create a VM template with cloud-init enabled, allowing for rapid deployment of pre-configured VMs.
 
 ---
 ## Why Cloud-init?
@@ -25,7 +26,7 @@ Cloud-init is a widely used tool for automating the initial configuration of clo
 
 ## Download the OS Image
 
-First, we need to download an image with Cloud-init support. Although Rocky Linux was initially considered, the `.img` format was not available, and the `.qcow2` format caused issues. Instead, we will proceed with the Ubuntu cloud image.
+First, we need to download an image with cloud-init support. Although Rocky Linux was initially considered, the `.img` format was not available, and the `.qcow2` format caused issues. Instead, we will proceed with the Ubuntu cloud image.
 
 Find cloud-ready images from the [OpenStack Image Guide](https://docs.openstack.org/image-guide/obtain-images.html).
 
@@ -33,7 +34,7 @@ In Proxmox, navigate to **Storage > ISO Images > Upload** to upload the download
 ![Pasted_image_20250131144754.png](img/Pasted_image_20250131144754.png)
 ## Create the VM
 
-Next, we create the VM using the command line interface (CLI) with the following command:
+Next, we create the VM using the command line interface (CLI) from the Proxmox node with the following command:
 
 ```bash
 qm create 900 \
@@ -59,7 +60,7 @@ qm set 900 --scsi0 ceph-workload:0,import-from=/var/lib/vz/template/iso/noble-se
 
 ### Configure Cloud-init
 
-Add a Cloud-init CD drive to the VM:
+Add a cloud-init CD drive to the VM:
 
 ```bash
 qm set 900 --scsi1 ceph-workload:cloudinit
@@ -83,6 +84,6 @@ After configuring the VM, right-click on the VM in the Proxmox WebUI and select 
 
 ## Conclusion
 
-This method allows for rapid deployment of pre-configured VMs using Proxmox and Cloud-init.
+This method allows for rapid deployment using Proxmox of pre-configured VMs and cloud-init.
 
-The template can now be used to spawn new instances with custom configurations by providing the necessary Cloud-init parameters. This is particularly useful for deploying multiple instances with consistent baseline configurations quickly.
+The template can now be used to spawn new instances with custom configurations by providing the necessary cloud-init parameters. This is particularly useful for deploying multiple instances with consistent baseline configurations quickly.
