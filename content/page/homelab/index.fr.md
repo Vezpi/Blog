@@ -12,13 +12,13 @@ menu:
 ---
 ## Intro
 
-Mon aventure homelab a commencé en 2013 avec un modeste Raspberry Pi, le tout premier modèle. J'avais besoin d'une machine bon marché pour mes premiers pas dans le monde de Linux. Elle m'a beaucoup aidé à me lancer dans cette technologie et m'a servi de NAS de base, merci Vezpibox (nom pourri, je sais).
+Mon aventure homelab a commencé en 2013 avec un modeste Raspberry Pi, le tout premier modèle. J'avais besoin d'une machine bon marché pour mes premiers pas dans le monde de Linux. Elle m'a beaucoup aidé à m’initier dans cette technologie et m'a servi de NAS de base, merci Vezpibox (nom pourri, je sais).
 
-En 2015, je suis passé à un Raspberry Pi 2, à la recherche de meilleures performances pour exécuter plusieurs applications comme XBMC (l'ancien nom de Kodi), CouchPotato, SickBeard, 
+En 2015, je suis passé à un Raspberry Pi 2, à la recherche de meilleures performances pour exécuter plusieurs applications comme XBMC (l'ancien nom de Kodi), CouchPotato, SickBeard... 😇
 
 En 2018, le besoin de plus de RAM m'a conduit à un Raspberry Pi 3, me permettant d'exécuter encore plus d'applications. Mes trois petites machines fonctionnaient harmonieusement ensemble, dans un bordel bien ordonné.
 
-Enfin, en 2019, mon nouveau travail m'a fait découvrir la virtualisation, avec les machines virtuelles et surtout Docker. Je voulais essayer ça à la maison, et j'ai franchi une étape importante avec un mini-PC compact mais puissant qui a posé les bases de mon homelab.
+Enfin, en 2019, mon nouveau travail m'a fait découvrir la virtualisation, avec les machines virtuelles et surtout Docker. Je voulais essayer ça à la maison, et je suis passé a la vitesse supérieure avec un mini-PC compact mais assez puissant qui a posé les bases de mon homelab.
 
 ---
 ## Pourquoi un Homelab ?
