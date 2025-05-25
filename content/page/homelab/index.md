@@ -122,6 +122,7 @@ Inside the rack, I also added two 80mm fans to help with airflow. To keep everyt
 Here what is look like:
 
 ![Front view of my homelab with legend](img/homelab-rack-legend.png)
+
 ![Different views of my homelab with open and closed enclosure](img/homelab-enclore-open-closed.png)
 
 

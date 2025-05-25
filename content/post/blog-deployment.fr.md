@@ -96,17 +96,18 @@ container:
 ```
 
 Le runner apparaît dans `Administration Area`, sous `Actions`>`Runners`. Pour obtenir le token d'enrôlement , on clique sur le bouton `Create new Runner` 
-![Pasted_image_20250502230954.png](img/Pasted_image_20250502230954.png)
+![New runner visible in Gitea](img/gitea-runners-management.png)
 
 ### Étape 3 : Configurer les Gitea Actions pour le dépôt Obsidian
 
 J'ai d'abord activé les Gitea Actions. Celles-ci sont désactivées par défaut. Cochez la case `Enable Repository Actions`  dans les paramètres de ce dépôt.
 
 J'ai créé un nouveau PAT (Personal Access Token) avec autorisation RW sur les dépôts.
-![Pasted_image_20250501235521.png](img/Pasted_image_20250501235521.png)
+![New personal access token creation in Gitea](img/gitea-new-pat.png)
 
 J'ai ajouté le token comme secret `REPO_TOKEN` dans le dépôt.
-![Pasted_image_20250501235427.png](img/Pasted_image_20250501235427.png)
+![Add secret window for repository in Gitea](img/gitea-add-repo-secret.png)
+
 
 J'ai dû créer le workflow qui lancera un conteneur et effectuera les opérations suivantes :
 1. Lorsque je crée/met à jour des fichiers du dossier `Blog`

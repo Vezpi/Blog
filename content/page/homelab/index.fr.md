@@ -123,6 +123,7 @@ La meilleure solution que j'ai trouvée a été de percer deux trous de 40 mm a
 Voici à quoi ça ressemble :
 
 ![Front view of my homelab with legend](img/homelab-rack-legend.png)
+
 ![Different views of my homelab with open and closed enclosure](img/homelab-enclore-open-closed.png)
 
 ---
