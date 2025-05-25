@@ -164,7 +164,7 @@ jobs:
           git push -u origin main
 ```
 
-Obsidian uses wiki-style links for images, like `![image_name.png](img/image_name.png)`, which isn't compatible with Hugo out of the box. Here's how I automated a workaround in a Gitea Actions workflow:
+Obsidian uses wiki-style links for images, like `![[image name.png]]`, which isn't compatible with Hugo out of the box. Here's how I automated a workaround in a Gitea Actions workflow:
 - I find all used image references in `.md` files.
 - For each referenced image, I update the link in relevant `.md` files like `![image name](img/image_name.png)`.
 - I then copy those used images to the blog's static directory while replacing white-spaces by underscores.

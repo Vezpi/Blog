@@ -55,7 +55,7 @@ L'idée est simple :
 6. La deuxième Gitea Action génère les pages web statiques tout en mettant à jour Hugo si nécessaire.
 7. Le blog est maintenant mis à jour (celui que vous lisez).
 
-De cette façon, je n'ai plus besoin de copier manuellement de fichiers ni de déclencher de déploiements. Tout se déroule comme prévu, de l'écriture de Markdown dans Obsidian au déploiement complet du site web.
+De cette façon, je n'ai plus besoin de copier manuellement de fichiers ni de gérer les déploiements. Tout se déroule, de l'écriture de Markdown dans Obsidian au déploiement complet du site web.
 
 ---
 ## ⚙️ Implémentation
@@ -165,7 +165,7 @@ jobs:
           git push -u origin main
 ```
 
-Obsidian utilise des liens de type wiki pour les images, comme `![nom_image.png](img/nom_image.png)`, ce qui n'est pas compatible avec Hugo par défaut. Voici comment j'ai automatisé une solution de contournement dans un workflow Gitea Actions :
+Obsidian utilise des liens de type wiki pour les images, comme `![[nom_image.png]]`, ce qui n'est pas compatible avec Hugo par défaut. Voici comment j'ai automatisé une solution de contournement dans un workflow Gitea Actions :
 - Je trouve toutes les références d'images utilisées dans des fichiers `.md`.
 - Pour chaque image référencée, je mets à jour le lien dans les fichiers `.md` correspondants, comme `![nom_image](img/nom_image.png)`.
 - Je copie ensuite ces images utilisées dans le répertoire statique du blog en remplaçant les espaces par des underscores.
