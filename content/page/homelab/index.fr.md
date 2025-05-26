@@ -1,7 +1,7 @@
 ---
 title: Bienvenue dans mon Homelab
 layout: page
-description: L'histoire derrière mon projet de homelab, d'un Raspberry Pi à un micro datacenter, où j'expérimente Proxmox, Kubernetes, l'automatisation et plus encore.
+description: L'histoire derrière mon projet de homelab, d'un Raspberry Pi à un mini datacenter, où j'expérimente Proxmox, Kubernetes, l'automatisation et plus encore.
 showToc: true
 menu:
   main:
@@ -183,7 +183,8 @@ Cette configuration de proxy à deux couches centralise la gestion des certifica
 Pour un accès distant sécurisé, j'ai configuré **WireGuard** sur OPNsense. Ce VPN léger fournit une connectivité chiffrée à mon lab où que je sois, permettant ainsi de gérer tous mes services sans les exposer directement à Internet.
 #### Schéma Réseau
 
-![homelab-network-schema.png](img/homelab-network-schema.png)
+![Diagram of my home network ](img/homelab-network-schema.png)
+
 ### Application
 
 Plongeons dans la partie fun ! Ce qui a commencé comme une modeste configuration destinée à répondre à quelques besoins personnels s'est rapidement transformé en un écosystème complet de services open source, chacun répondant à un besoin spécifique ou simplement à la curiosité.

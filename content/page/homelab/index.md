@@ -184,7 +184,7 @@ This two-layer proxy setup centralizes SSL certificate management in **Caddy** w
 For secure remote access, I configured **WireGuard** on OPNsense. This lightweight VPN provides encrypted connectivity to my lab from anywhere, allowing management of all my services without exposing them all directly to the internet.
 #### Network Diagram
 
-![homelab-network-schema.png](img/homelab-network-schema.png)
+![Diagram of my home network ](img/homelab-network-schema.png)
 ### Application
 
 Let's dive into the fun part! What started as a modest setup meant to serve a few personal needs quickly turned into a full ecosystem of open source services, each solving a specific need or just satisfying curiosity.
