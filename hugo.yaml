@@ -10,18 +10,19 @@ languages:
     languageName: English
     weight: 1
     menu:
-      - identifier: categories
-        name: Categories
-        weight: 40
-        pageRef: /en/categories
-        params:
-          icon: categories
-      - identifier: tags
-        name: Tags
-        weight: 50
-        pageRef: /en/tags
-        params:
-          icon: tag
+      main:
+        - identifier: categories
+          name: Categories
+          weight: 40
+          pageRef: /en/categories
+          params:
+            icon: categories
+        - identifier: tags
+          name: Tags
+          weight: 50
+          pageRef: /en/tags
+          params:
+            icon: tag
     params:
       sidebar:
         subtitle: "Homelab & Automation"
@@ -34,18 +35,19 @@ languages:
     languageName: Français
     weight: 2
     menu:
-      - identifier: categories
-        name: Catégories
-        weight: 40
-        pageRef: /fr/categories
-        params:
-          icon: categories
-      - identifier: tags
-        name: Mots Clés
-        weight: 50
-        pageRef: /fr/tags
-        params:
-          icon: tag
+      main:
+        - identifier: categories
+          name: Catégories
+          weight: 40
+          pageRef: /fr/categories
+          params:
+            icon: categories
+        - identifier: tags
+          name: Mots Clés
+          weight: 50
+          pageRef: /fr/tags
+          params:
+            icon: tag
     params:
       sidebar:
         subtitle: "Homelab & Automatisation"
