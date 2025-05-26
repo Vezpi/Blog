@@ -74,7 +74,15 @@ params:
     default: "dark"
 
 menu:
-  main: []
+  main:
+    - identifier: categories
+      weight: 40
+      params:
+        icon: categories
+    - identifier: tags
+      weight: 50
+      params:
+        icon: tag
   social:
     - identifier: "mail"
       name: Mail
