@@ -3,6 +3,7 @@ title: "Vezpi Lab"
 theme: "stack"
 languageCode: "en-us"
 DefaultContentLanguage: "en"
+defaultContentLanguageInSubdir: true
 
 languages:
   en:
