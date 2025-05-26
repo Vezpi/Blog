@@ -31,7 +31,7 @@ Tout d'abord, nous devons télécharger une image compatible cloud-init. Bien qu
 Trouvez des images compatibles cloud dans le [Guide des images OpenStack](https://docs.openstack.org/image-guide/obtain-images.html).
 
 Dans Proxmox, accédez à **Storage > ISO Images > Upload** pour uploader l'image téléchargée.
-![Download window for ISO images in Proxmox](img/proxmox-download-iso-img.png)
+![Pasted_image_20250131144754.png](img/Pasted_image_20250131144754.png)
 ## Créer la VM
 
 Ensuite, on crée une VM en utilisant la ligne de commande (CLI) depuis le nœud Proxmox avec la commande suivantes :

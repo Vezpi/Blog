@@ -1,7 +1,7 @@
 ---
 title: Bienvenue dans mon Homelab
 layout: page
-description: L'histoire derrière mon projet de homelab, d'un Raspberry Pi à un mini datacenter, où j'expérimente Proxmox, Kubernetes, l'automatisation et plus encore.
+description: L'histoire derrière mon projet de homelab, d'un Raspberry Pi à un micro datacenter, où j'expérimente Proxmox, Kubernetes, l'automatisation et plus encore.
 showToc: true
 menu:
   main:
@@ -18,16 +18,16 @@ En 2015, je suis passé à un Raspberry Pi 2, à la recherche de meilleures perf
 
 En 2018, le besoin de plus de RAM m'a conduit à un Raspberry Pi 3, me permettant d'exécuter encore plus d'applications. Mes trois petites machines fonctionnaient harmonieusement ensemble, dans un bordel bien ordonné.
 
-Enfin, en 2019, mon nouveau travail m'a fait expérimenter la virtualisation, avec les machines virtuelles et surtout Docker. Je voulais essayer ça à la maison, et je suis passé a la vitesse supérieure avec un mini-PC compact mais assez puissant qui a posé les bases de mon homelab.
+Enfin, en 2019, mon nouveau travail m'a fait découvrir la virtualisation, avec les machines virtuelles et surtout Docker. Je voulais essayer ça à la maison, et je suis passé a la vitesse supérieure avec un mini-PC compact mais assez puissant qui a posé les bases de mon homelab.
 
 ---
 ## Pourquoi un Homelab ?
 
-Je voulais mon propre terrain de jeu, un espace où je pouvais construire mais aussi casser des choses sans risques, apprendre à les réparer et mieux comprendre leur fonctionnement.
+Je voulais mon propre terrain de jeu, un espace où je pouvais monter mais aussi casser des choses en toute sécurité, apprendre à les réparer et mieux comprendre leur fonctionnement.
 
-Mon unique serveur était génial, mais tester quoi que ce soit de risqué dessus était devenu problématique. Il exécutait des services critiques comme la domotique ou le DNS, lorsqu'il était en panne, tout était en panne. Le serveur était devenu indispensable, et croyez-moi, ne pas avoir de lumières ni d'internet était un incident majeur pour ma famille. Plus aussi fun.
+Mon unique serveur était génial, mais tester quoi que ce soit de risqué dessus était devenu problématique. Il exécutait des services critiques comme la domotique ou le DNS, et croyez-moi, ne pas avoir de lumières ni d'internet était un incident majeur pour ma famille. Le serveur était devenu indispensable. Lorsqu'il était en panne, tout était en panne. Plus aussi fun.
 
-Le premier grand défi que je me suis lancé a été de créer un cluster Kubernetes. Bien sûr, j'aurais pu en exécuter un sur un seul nœud, mais à quoi bon un cluster avec un seul nœud ? On pourrait dire qu'utiliser Kubernetes pour contrôler mes volets est overkill, et vous auriez raison. Mais ce n'était pas le sujet.
+Le premier grand défi que je me suis lancé a été de créer un cluster Kubernetes. Bien sûr, je pouvais en exécuter un sur un seul nœud, mais à quoi bon un cluster avec un seul nœud ? On pourrait dire qu'utiliser Kubernetes pour contrôler mes volets est excessif, et vous auriez raison. Mais ce n'était pas le sujet.
 
 Je voulais aussi créer de nouvelles machines virtuelles à volonté, les reconstruire de zéro et appliquer les principes de l'Infrastructure as Code. J'aurais pu faire tout cela dans le cloud, mais je voulais un contrôle total.
 
@@ -43,16 +43,16 @@ Cela impliquait :
 - **Haute disponibilité** : Trois nœuds pour garantir qu'aucun point de défaillance ne puisse tout interrompre.
 - **Stockage distribué** : Redondance des données entre les nœuds, non seulement pour garantir la disponibilité, mais aussi pour apprendre le fonctionnement des systèmes de stockage d'entreprise.
 - **Segmentation du réseau** : Plusieurs VLAN pour imiter les topologies de réseau réelles, isoler les services et pratiquer la mise en réseau avancée.
+
+En résumé, je souhaitais construire un mini datacenter dans un placard.
 ### Contraintes
 
 Bien sûr, la réalité ne correspond pas toujours aux ambitions. Voici ce à quoi je me suis heurté :
-- **Espace** : Mon lab devait tenir dans un petit espace de service cachée au milieu de mon appartement. Pas vraiment une salle de serveurs.
+- **Espace** : Mon labo devait tenir dans une petite armoire de service cachée au milieu de mon appartement. Pas vraiment une salle de serveurs.
 - **Bruit** : Le silence était crucial. Ce n'était pas un endroit caché dans un garage ou un sous-sol, mais en plein cœur de notre espace de vie.
 - **Consommation électrique** : Fonctionnant 24/7, la consommation électrique devait être maîtrisée. Je ne pouvais pas me permettre de tripler ma facture d'électricité juste pour bricoler des machines virtuelles.
 - **Budget** : Je n'allais pas dépenser des milliers d'euros pour du matériel professionnel. L'équilibre résidait dans la recherche d'un équipement d'occasion fiable et abordable.
 - **Température** : Franchement, je n'y avais pas pensé… Les mini-PC ne chauffent pas beaucoup, mais le matériel réseau ? C'est une autre histoire. Leçon apprise.
-
-En un mot, je souhaitais construire un mini datacenter dans un placard.
 
 ---
 
@@ -87,8 +87,9 @@ Voici les spec de mes nœuds :
 | **NIC**   | 1Gbps (+ 2.5Gbps)       | 1Gbps + 2.5Gbps         | 1Gbps + 2.5Gbps          |
 | **M.2**   | 2                       | 1                       | 1                        |
 | **2,5"**  | 2                       | 2                       | 1                        |
+|           |                         |                         |                          |
 
-Chaque nœud a la même configuration de disque : un SSD de 256 Go dans la baie 2,5" pour le système d’exploitation et un disque NVMe de 1 To pour le stockage des données.
+Chaque nœud a la même configuration de disque : un SSD de 256 Go dans la baie 2,5 pouces pour le système d’exploitation et un disque NVMe de 1 To pour le stockage des données.
 ### Réseau
 
 Pour le réseau, j’avais deux objectifs principaux : implémenter des VLAN pour la segmentation du réseau et gérer mon pare-feu pour un contrôle plus précis. Mes nœuds étant équipés de cartes réseau 2,5 Gbit/s, j’avais besoin de switchs capables de gérer ces débits, ainsi que de quelques ports Power over Ethernet (PoE) pour mon antenne Zigbee et ses futures fonctionnalités.
@@ -122,9 +123,8 @@ La meilleure solution que j'ai trouvée a été de percer deux trous de 40 mm a
 
 Voici à quoi ça ressemble :
 
-![Front view of my homelab with legend](img/homelab-rack-legend.png)
-
-![Different views of my homelab with open and closed enclosure](img/homelab-enclore-open-closed.png)
+![homelab-rack-legend.png](img/homelab-rack-legend.png)
+![homelab-enclore-open-closed.png](img/homelab-enclore-open-closed.png)
 
 ---
 ## Stack Logicielle
@@ -183,8 +183,7 @@ Cette configuration de proxy à deux couches centralise la gestion des certifica
 Pour un accès distant sécurisé, j'ai configuré **WireGuard** sur OPNsense. Ce VPN léger fournit une connectivité chiffrée à mon lab où que je sois, permettant ainsi de gérer tous mes services sans les exposer directement à Internet.
 #### Schéma Réseau
 
-![Diagram of my home network ](img/homelab-network-schema.png)
-
+![homelab-network-schema.png](img/homelab-network-schema.png)
 ### Application
 
 Plongeons dans la partie fun ! Ce qui a commencé comme une modeste configuration destinée à répondre à quelques besoins personnels s'est rapidement transformé en un écosystème complet de services open source, chacun répondant à un besoin spécifique ou simplement à la curiosité.

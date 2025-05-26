@@ -18,14 +18,14 @@ In 2015, I upgraded to a Raspberry Pi 2, seeking better performance to run multi
 
 By 2018, the need for more RAM led me to a Raspberry Pi 3, allowing me to run even more applications. My 3 little machines were running happily together, in a quite ordered mess.
 
-Finally, in 2019, my new job made me experiment the virtualization, with virtual machines and above all Docker. I wanted to try that at home, I took a significant step forward with a compact yet quite powerful headless mini PC that laid the foundation of my homelab.
+Finally, in 2019, my new job made me discover the virtualization, with virtual machines and above all Docker. I wanted to try that at home, I took a significant step forward with a compact yet quite powerful headless mini PC that laid the foundation of my homelab.
 
 ---
 ## Why a Homelab ?
 
 I wanted my own playground, a space where I could build but also safely break things, learn to fix them, and gain a deeper understanding of how they work.
 
-My single server was great, but testing anything risky on it became a problem. It was running critical services like home automation or DNS, when it was down, everything was down. The server had become indispensable, and believe me, having no lights or internet is a major incident in my family. Not so fun anymore.
+My single server was great, but testing anything risky on it became a problem. It was running critical services like home automation or DNS, and believe me, having no lights or internet is a major incident in my family. The server had become indispensable. When it was down, everything was down. Not so fun anymore.
 
 The first big challenge I set for myself was building a Kubernetes cluster. Sure, I could run one on a single node, but what’s the point of a cluster with only one node? You could argue that running Kubernetes to control my shutters is overkill, and you’d be right. But that wasn’t the point.
 
@@ -43,6 +43,8 @@ That meant:
 - **High Availability:** Three nodes to ensure that no single point of failure would bring everything down.
 - **Distributed Storage:** Data redundancy across nodes, not just for uptime but also to learn how enterprise-grade storage systems work.
 - **Network Segmentation:** Multiple VLANs to mimic real-world network topologies, isolate services, and practice advanced networking.
+
+Basically, I wanted to build a tiny datacenter in a closet.
 ### Constraints
 
 Of course, reality doesn’t always align with ambitions. Here’s what I was up against:
@@ -51,8 +53,6 @@ Of course, reality doesn’t always align with ambitions. Here’s what I was up
 - **Power Draw:** Running 24/7, the power consumption had to be kept in check. I couldn’t afford to triple my electric bill just to tinker with VMs.
 - **Budget:** I wasn’t going to drop thousands on enterprise-grade hardware. The balance was finding reliable, second-hand gear that wouldn’t break the bank.
 - **Temperature**: I’m not gonna lie, I hadn't thought of it... Mini PCs don’t generate much heat, but network gear? That’s a different story. Lesson learned.
-
-In a nutshell, I wanted to build a tiny datacenter in a closet.
 
 ---
 ## Infrastructure Overview
@@ -121,10 +121,8 @@ Inside the rack, I also added two 80mm fans to help with airflow. To keep everyt
 
 Here what is look like:
 
-![Front view of my homelab with legend](img/homelab-rack-legend.png)
-
-![Different views of my homelab with open and closed enclosure](img/homelab-enclore-open-closed.png)
-
+![homelab-rack-legend.png](img/homelab-rack-legend.png)
+![homelab-enclore-open-closed.png](img/homelab-enclore-open-closed.png)
 
 ---
 ## Software Stack
@@ -184,7 +182,7 @@ This two-layer proxy setup centralizes SSL certificate management in **Caddy** w
 For secure remote access, I configured **WireGuard** on OPNsense. This lightweight VPN provides encrypted connectivity to my lab from anywhere, allowing management of all my services without exposing them all directly to the internet.
 #### Network Diagram
 
-![Diagram of my home network ](img/homelab-network-schema.png)
+![homelab-network-schema.png](img/homelab-network-schema.png)
 ### Application
 
 Let's dive into the fun part! What started as a modest setup meant to serve a few personal needs quickly turned into a full ecosystem of open source services, each solving a specific need or just satisfying curiosity.

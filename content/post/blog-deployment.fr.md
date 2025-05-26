@@ -55,7 +55,7 @@ L'idée est simple :
 6. La deuxième Gitea Action génère les pages web statiques tout en mettant à jour Hugo si nécessaire.
 7. Le blog est maintenant mis à jour (celui que vous lisez).
 
-De cette façon, je n'ai plus besoin de copier manuellement de fichiers ni de gérer les déploiements. Tout se déroule, de l'écriture de Markdown dans Obsidian au déploiement complet du site web.
+De cette façon, je n'ai plus besoin de copier manuellement de fichiers ni de déclencher de déploiements. Tout se déroule comme prévu, de l'écriture de Markdown dans Obsidian au déploiement complet du site web.
 
 ---
 ## ⚙️ Implémentation
@@ -96,18 +96,17 @@ container:
 ```
 
 Le runner apparaît dans `Administration Area`, sous `Actions`>`Runners`. Pour obtenir le token d'enrôlement , on clique sur le bouton `Create new Runner` 
-![New runner visible in Gitea](img/gitea-runners-management.png)
+![Pasted_image_20250502230954.png](img/Pasted_image_20250502230954.png)
 
 ### Étape 3 : Configurer les Gitea Actions pour le dépôt Obsidian
 
 J'ai d'abord activé les Gitea Actions. Celles-ci sont désactivées par défaut. Cochez la case `Enable Repository Actions`  dans les paramètres de ce dépôt.
 
 J'ai créé un nouveau PAT (Personal Access Token) avec autorisation RW sur les dépôts.
-![New personal access token creation in Gitea](img/gitea-new-pat.png)
+![Pasted_image_20250501235521.png](img/Pasted_image_20250501235521.png)
 
 J'ai ajouté le token comme secret `REPO_TOKEN` dans le dépôt.
-![Add secret window for repository in Gitea](img/gitea-add-repo-secret.png)
-
+![Pasted_image_20250501235427.png](img/Pasted_image_20250501235427.png)
 
 J'ai dû créer le workflow qui lancera un conteneur et effectuera les opérations suivantes :
 1. Lorsque je crée/met à jour des fichiers du dossier `Blog`
@@ -166,7 +165,7 @@ jobs:
           git push -u origin main
 ```
 
-Obsidian utilise des liens de type wiki pour les images, comme `![[nom_image.png]]`, ce qui n'est pas compatible avec Hugo par défaut. Voici comment j'ai automatisé une solution de contournement dans un workflow Gitea Actions :
+Obsidian utilise des liens de type wiki pour les images, comme `![nom_image.png](img/nom_image.png)`, ce qui n'est pas compatible avec Hugo par défaut. Voici comment j'ai automatisé une solution de contournement dans un workflow Gitea Actions :
 - Je trouve toutes les références d'images utilisées dans des fichiers `.md`.
 - Pour chaque image référencée, je mets à jour le lien dans les fichiers `.md` correspondants, comme `![nom_image](img/nom_image.png)`.
 - Je copie ensuite ces images utilisées dans le répertoire statique du blog en remplaçant les espaces par des underscores.
