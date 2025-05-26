@@ -1,8 +1,7 @@
-section:
-    categories: 
-        other: Catgories
-    tags: 
-        other: Tags
+menu_categories: 
+    other: Catgories
+menu_tags: 
+    other: Tags
     
 toggleMenu:
     other: Toggle Menu

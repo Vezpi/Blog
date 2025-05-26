@@ -75,12 +75,12 @@ params:
 
 menu:
   main:
-    - identifier: categories
+    - identifier: menu_categories
       weight: 40
       pageRef: /categories
       params:
         icon: categories
-    - identifier: tags
+    - identifier: menu_tags
       weight: 50
       pageRef: /tags
       params:
