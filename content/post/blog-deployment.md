@@ -95,17 +95,18 @@ container:
 ```
 
 The runner appears in the `Administration Area`, under `Actions`>`Runners`. To obtain the registration token, click on the `Create new Runner` button
-![Pasted_image_20250502230954.png](img/Pasted_image_20250502230954.png)
+![New runner visible in Gitea](img/gitea-runners-management.png)
 
 ### Step 3: Set up Gitea Actions for Obsidian Repository
 
 First I enabled the Gitea Actions, this is disabled by default, tick the box `Enable Repository Actions`  in the settings for that repository
 
 I created a new PAT (Personal Access Token) with RW permission on the repositories
-![Pasted_image_20250501235521.png](img/Pasted_image_20250501235521.png)
+![New personal access token creation in Gitea](img/gitea-new-pat.png)
 
 I added this token as secret `REPO_TOKEN` in the repository
-![Pasted_image_20250501235427.png](img/Pasted_image_20250501235427.png)
+![Add secret window for repository in Gitea](img/gitea-add-repo-secret.png)
+
 
 I needed to create the workflow that will spin-up a container and do the following:
 1. When I push new/updated files in the `Blog` folder
@@ -164,7 +165,7 @@ jobs:
           git push -u origin main
 ```
 
-Obsidian uses wiki-style links for images, like `![image_name.png](img/image_name.png)`, which isn't compatible with Hugo out of the box. Here's how I automated a workaround in a Gitea Actions workflow:
+Obsidian uses wiki-style links for images, like `![[image name.png]]`, which isn't compatible with Hugo out of the box. Here's how I automated a workaround in a Gitea Actions workflow:
 - I find all used image references in `.md` files.
 - For each referenced image, I update the link in relevant `.md` files like `![image name](img/image_name.png)`.
 - I then copy those used images to the blog's static directory while replacing white-spaces by underscores.
