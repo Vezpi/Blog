@@ -77,12 +77,12 @@ menu:
   main:
     - identifier: categories
       weight: 40
-      url: /categories/
+      pageRef: /categories
       params:
         icon: categories
     - identifier: tags
       weight: 50
-      url: /tags/
+      pageRef: /tags
       params:
         icon: tag
   social:
