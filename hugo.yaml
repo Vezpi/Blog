@@ -128,7 +128,6 @@ params:
     since: 2025
     customText: ""
 
-  
 
   toc:
     enable: true
@@ -157,7 +156,6 @@ params:
 
 menu:
   main: []
-  
 
 taxonomies:
   category: "categories"
