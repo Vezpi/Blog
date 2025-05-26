@@ -1,7 +1,8 @@
-categories: 
-    other: Catégories
-tags: 
-    other: Mots Clés
+section:
+    categories: 
+        other: Catégories
+    tags: 
+        other: Mots Clés
 
 toggleMenu:
     other: Afficher le menu
