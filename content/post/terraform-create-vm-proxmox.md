@@ -17,6 +17,7 @@ In my homelab, one of the big project I had in mind was to be able to create my 
 In this article I will show you how 
 My first project is to create simple VM on [[Proxmox]] with Terraform, based of a [[cloud-init]] VM template
 
+From LXC container
 Add the link to the homelab GitHub repository
 
 ---
@@ -39,6 +40,10 @@ I chose the `bpg/proxmox` provider because it’s better maintained at the time 
 
 ---
 ## Prepare the Environment
+
+### Create a Cloud-init VM Template in Proxmox
+
+Check out my previous article on [Proxmox - Create a Cloud-Init VM Template]({{< relref "post/proxmox-cloud-init-vm-template" >}}).
 
 ### Install Terraform
 
