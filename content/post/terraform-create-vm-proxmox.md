@@ -38,7 +38,11 @@ To use Terraform, you’ll need a provider, a plugin that lets Terraform interac
 I chose the `bpg/proxmox` provider because it’s better maintained at the time of writing and I needed to retrieve nodes values, such as their hostname.
 
 ---
-## Create a Dedicated Terraform User on Proxmox
+## Prepare the Environment
+
+### Install Terraform
+
+### Create a Dedicated Terraform User on Proxmox
 
 Before Terraform can interact with your Proxmox cluster, you want to create a dedicated user with limited privileges. You could use the `root@pam` but I wouldn't recommended it for security perspectives.
 
@@ -88,7 +92,7 @@ pveum user token add terraformer@pve terraform -expire 0 -privsep 0 -comment "Te
 
 ⚠️ Copy and save the token given!
 
-
+### Install SSH Keys on Proxmox Nodes
 
 ---
 ## Deploy your First VM
