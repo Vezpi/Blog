@@ -42,12 +42,39 @@ I chose the `bpg/proxmox` provider because it’s better maintained at the time 
 
 ### Install Terraform
 
+For the Terraform installation, I followed the [documentation](https://developer.hashicorp.com/terraform/tutorials/aws-get-started/install-cli) to install it into my LXC container.
+
+```bash
+# Ensure that your system is up to date and you have installed the `gnupg`, `software-properties-common`, and `curl` packages installed. You will use these packages to verify HashiCorp's GPG signature and install HashiCorp's Debian package repository.
+apt-get update && apt-get install -y gnupg software-properties-common
+
+# Install the HashiCorp [GPG key](https://apt.releases.hashicorp.com/gpg).
+
+wget -O- <https://apt.releases.hashicorp.com/gpg> | gpg --dearmor | tee /usr/share/keyrings/hashicorp-archive-keyring.gpg > /dev/null
+
+# Verify the key's fingerprint.
+
+gpg --no-default-keyring --keyring /usr/share/keyrings/hashicorp-archive-keyring.gpg --fingerprint
+
+# Add the official HashiCorp repository to your system. The `lsb_release -cs` command finds the distribution release codename for your current system, such as `buster`, `groovy`, or `sid`.
+
+echo "deb [signed-by=/usr/share/keyrings/hashicorp-archive-keyring.gpg] <https://apt.releases.hashicorp.com> $(lsb_release -cs) main" | tee /etc/apt/sources.list.d/hashicorp.list
+
+# Download the package information from HashiCorp.
+
+apt update
+
+# Install Terraform from the new repository.
+
+apt-get install terraform
+```
+
 ### Create a Dedicated Terraform User on Proxmox
 
 Before Terraform can interact with your Proxmox cluster, you want to create a dedicated user with limited privileges. You could use the `root@pam` but I wouldn't recommended it for security perspectives.
 
-From any of your Proxmox node, log into the console as priviledged user, `root` in that case.
-1. **Create the Role `TerraformUser`**:
+From any of your Proxmox nodes, log into the console as priviledged user, `root` in that case.
+1. **Create the Role `TerraformUser`**
 ```bash
 pveum role add TerraformUser -privs "\
   Datastore.Allocate \
@@ -75,7 +102,7 @@ pveum role add TerraformUser -privs "\
   SDN.Use"
 ```
 
-2. **Create the User `terraformer`**:
+2. **Create the User `terraformer`**
 ```bash
 pveum user add terraformer@pve --password <password>
 ```
@@ -93,6 +120,8 @@ pveum user token add terraformer@pve terraform -expire 0 -privsep 0 -comment "Te
 ⚠️ Copy and save the token given!
 
 ### Install SSH Keys on Proxmox Nodes
+
+
 
 ---
 ## Deploy your First VM
