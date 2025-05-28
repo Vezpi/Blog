@@ -12,13 +12,11 @@ categories:
 ---
 ## Intro
 
-One of my key goals I had in mind for my homelab was using Infrastructure as Code (IaC) to build everything from scratch, and Terraform was the perfect tool for the job.
+One of the most satisfying parts of building a homelab is getting to apply production-grade tooling to a personal setup. I’ve been working on defining my entire infrastructure as code, and the first piece I tackled was VM deployment with **Terraform** on **Proxmox**.
 
-In this article, I’ll walk you through creating a simple VM on Proxmox using Terraform, based on a [[cloud-init]] template I covered in [this article]({{< relref "post/proxmox-cloud-init-vm-template" >}}).
+In this article, I’ll walk you through creating a simple VM on Proxmox using Terraform, based on a **cloud-init** template I covered in [this article]({{< relref "post/proxmox-cloud-init-vm-template" >}}). Everything runs from a dedicated LXC container where I manage my whole infrastructure.
 
-I will run Terraform from a LXC container where my homelab repo lives
-
-All the code used in this article is available in my [Homelab GitHub repository](https://github.com/Vezpi/Homelab) 
+📝 The full code used in this article is available in my [Homelab GitHub repository](https://github.com/Vezpi/Homelab) 
 
 ---
 ## What is Terraform?
