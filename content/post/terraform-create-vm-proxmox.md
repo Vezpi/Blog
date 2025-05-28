@@ -117,7 +117,7 @@ pveum aclmod / -user terraformer@pve -role TerraformUser
 pveum user token add terraformer@pve terraform -expire 0 -privsep 0 -comment "Terraform token"
 ```
 
-⚠️ Copy and save the token given!
+⚠️ **Copy** and save **the** token given!
 
 ### Install SSH Keys on your Proxmox Nodes
 
@@ -619,7 +619,8 @@ Outputs:
 vm_ip = "192.168.66.156"
 ```
 
-We've done it! We create our first VM on Proxmox using Terraform!
+We've done it! We create our first VM on Proxmox using Terraform in a couple a minutes
+
 ![Summary of the newly created VM on Proxmox](img/proxmox-terraform-new-vm.png)
 
 ### SSH Connection
