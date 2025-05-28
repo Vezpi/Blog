@@ -12,28 +12,28 @@ categories:
 ---
 ## Intro
 
-In my homelab, one of the big project I had in mind was to be able to create my whole infrastructure using IaC and more precisely Terraform.
+One of my key goals I had in mind for my homelab was using Infrastructure as Code (IaC) to build everything from scratch, and Terraform was the perfect tool for the job.
 
-In this article I will show you how 
-My first project is to create simple VM on [[Proxmox]] with Terraform, based of a [[cloud-init]] VM template
+In this article, I’ll walk you through creating a simple VM on Proxmox using Terraform, based on a [[cloud-init]] template I covered in [this article]({{< relref "post/proxmox-cloud-init-vm-template" >}}).
 
-From LXC container
-Add the link to the homelab GitHub repository
+I will run Terraform from a LXC container where my homelab repo lives
+
+All the code used in this article is available in my [Homelab GitHub repository](https://github.com/Vezpi/Homelab) 
 
 ---
 ## What is Terraform?
 
 Terraform is an open-source IaC tool developed by **HashiCorp**. It lets you define and provision infrastructure using a high-level configuration language called **HCL** (HashiCorp Configuration Language). With Terraform, you can manage cloud services, VMs, networks, DNS records, and more.
 
-In my homelab, Terraform can simplify VM deployment and make my environment reproducible. You can define everything once in code and re-deploy it easily from scratch as will.
+In my homelab, Terraform can simplify VM deployment and make my environment reproducible and easily re-deploy everything from scratch as needed.
 
-A quick mention of **OpenTofu**, it is a community-driven fork of Terraform that emerged after some licensing changes. It's almost fully compatible with Terraform and could be a great alternative down the line. But for now I still with Terraform.
+A quick mention of **OpenTofu**, it is a community-driven fork of Terraform that emerged after some licensing changes. It's almost fully compatible with Terraform and could be a great alternative down the line. But for now, I’m sticking with Terraform.
 
 ---
 ## Proxmox Terraform Providers
 
 To use Terraform, you’ll need a provider, a plugin that lets Terraform interact with your infrastructure, in the case of Proxmox, it will interact with the Proxmox API. There are currently two providers:
-- [**Telmate/proxmox**](https://registry.terraform.io/providers/Telmate/proxmox/latest): One of the original providers. It’s widely used but not very actively maintained. It is simple to use and you can find many documentations of internet, but has limited features, with only 4 resources are available and no data sources: I couldn't get the node's resources for example.
+- [**Telmate/proxmox**](https://registry.terraform.io/providers/Telmate/proxmox/latest): One of the original providers. It’s widely used but not very actively maintained. It’s simple to use, with plenty of documentation available online, but has limited features, with only 4 resources are available and no data sources: for example, I wasn’t able to retrieve node resource details.
 - [**bpg/proxmox**](https://registry.terraform.io/providers/bpg/proxmox/latest): A newer and more actively developed provider, apparently developed by a single guy, with cleaner syntax and much wider resources support. It was harder to setup but I found it mature enough to work with it.
 
 I chose the `bpg/proxmox` provider because it’s better maintained at the time of writing and I needed to retrieve nodes values, such as their hostname.
@@ -73,7 +73,8 @@ apt-get install terraform
 
 Before Terraform can interact with your Proxmox cluster, you want to create a dedicated user with limited privileges. You could use the `root@pam` but I wouldn't recommended it for security perspectives.
 
-From any of your Proxmox nodes, log into the console as priviledged user, `root` in that case.
+SSH into any Proxmox node using a privileged account, `root` in this case.
+
 1. **Create the Role `TerraformUser`**
 ```bash
 pveum role add TerraformUser -privs "\
@@ -117,11 +118,12 @@ pveum aclmod / -user terraformer@pve -role TerraformUser
 pveum user token add terraformer@pve terraform -expire 0 -privsep 0 -comment "Terraform token"
 ```
 
-⚠️ **Copy** and save **the** token given!
+> ⚠️ **Copy** and save **the** token given!
 
 ### Install SSH Keys on your Proxmox Nodes
 
-This step is required, if you are using some specific resources, to execute commands on the node to perform actions that are not supported by Proxmox API, detailed [here](https://registry.terraform.io/providers/bpg/proxmox/latest/docs#ssh-connection), this would be the case for our setup with cloud-init.
+
+This step is required if you’re using certain resources that need to run commands directly on the node to perform actions that are not supported by Proxmox API, detailed [here](https://registry.terraform.io/providers/bpg/proxmox/latest/docs#ssh-connection), this would be the case for our setup with cloud-init.
 
 We could either use a SSH-agent or a SSH key, I preferred the latter, so we have to generate a ssh-key and install it on your Proxmox nodes. You generate these keys from where Terraform is installed.
 
@@ -138,23 +140,28 @@ ssh-copy-id root@<your Proxmox node>
 ---
 ## Deploy your First VM
 
-Let's now dive into the fun part! Now we have our environment ready to deploy VM using Terraform on Proxmox, let's code!
+Let's dive into the fun part! Now we have our environment ready to deploy VM using Terraform on Proxmox, let's code!
 ### Terraform Code
 
-📌 Reminder, you can find all the code I have written in my [Homelab repo](https://git.vezpi.me/Vezpi/Homelab/), the following code is located [here](https://git.vezpi.me/Vezpi/Homelab/src/commit/22f64034175a6a4642a2c7b6656688f16ece5ba1/terraform/projects/simple-vm). Don't forget to match your variables with your environment!
+> 📌 Reminder, you can find all the code I have written in my [Homelab repo](https://github.com/Vezpi/Homelab), the following code is located [here](https://github.com/Vezpi/Homelab/tree/main/terraform/projects/simple-vm). Don't forget to match your variables with your environment!
 #### Code Structure
 
 Here is the code structure, you can keep all your code in a single `.tf` file but I prefer to keep it clean.
 ```plaintext
-simple-vm
-|-- credentials.auto.tfvars
-|-- main.tf
-|-- provider.tf
-|-- terraform.tfvars
-`-- variables.tf
+terraform
+`-- projects
+    `-- simple-vm
+        |-- credentials.auto.tfvars
+        |-- main.tf
+        |-- provider.tf
+        |-- terraform.tfvars
+        `-- variables.tf
 ```
 
 #### `provider.tf`
+
+Defines the provider configuration (e.g., Proxmox) and how Terraform connects to it.
+
 ```hcl
 # Define the required Terraform provider block
 terraform {
@@ -181,98 +188,126 @@ provider "proxmox" {
 ```
 
 #### `main.tf`
-```tf
+
+Contains the core infrastructure logic, such as resources and modules to be deployed.
+
+```hcl
+# Retrieve VM templates available in Proxmox that match the specified name
 data "proxmox_virtual_environment_vms" "template" {
   filter {
     name   = "name"
-    values = ["${var.vm_template}"]
+    values = ["${var.vm_template}"] # The name of the template to clone from
   }
 }
 
+# Create a cloud-init configuration file as a Proxmox snippet
 resource "proxmox_virtual_environment_file" "cloud_config" {
-  content_type = "snippets"
-  datastore_id = "local"
-  node_name    = var.node_name
+  content_type = "snippets"        # Cloud-init files are stored as snippets in Proxmox
+  datastore_id = "local"           # Local datastore used to store the snippet
+  node_name    = var.node_name     # The Proxmox node where the file will be uploaded
+
   source_raw {
-    file_name = "vm.cloud-config.yaml"
+    file_name = "vm.cloud-config.yaml" # The name of the snippet file
     data      = <<-EOF
     #cloud-config
     hostname: ${var.vm_name}
     package_update: true
     package_upgrade: true
     packages:
-      - qemu-guest-agent
+      - qemu-guest-agent           # Ensures the guest agent is installed
     users:
       - default
       - name: ${var.vm_user}
         groups: sudo
         shell: /bin/bash
         ssh-authorized-keys:
-          - "${var.vm_user_sshkey}"
+          - "${var.vm_user_sshkey}" # Inject user's SSH key
         sudo: ALL=(ALL) NOPASSWD:ALL
     runcmd:
       - systemctl enable qemu-guest-agent 
-      - reboot
+      - reboot                     # Reboot the VM after provisioning
     EOF
   }
 }
 
+# Define and provision a new VM by cloning the template and applying initialization
 resource "proxmox_virtual_environment_vm" "vm" {
-  name      = var.vm_name
-  node_name = var.node_name
-  tags      = var.vm_tags
+  name      = var.vm_name           # VM name
+  node_name = var.node_name         # Proxmox node to deploy the VM
+  tags      = var.vm_tags           # Optional VM tags for categorization
+
   agent {
-    enabled = true
+    enabled = true                  # Enable the QEMU guest agent
   }
-  stop_on_destroy = true
+
+  stop_on_destroy = true            # Ensure VM is stopped gracefully when destroyed
+
   clone {
-    vm_id     = data.proxmox_virtual_environment_vms.template.vms[0].vm_id
-    node_name = data.proxmox_virtual_environment_vms.template.vms[0].node_name
+    vm_id     = data.proxmox_virtual_environment_vms.template.vms[0].vm_id     # ID of the source template
+    node_name = data.proxmox_virtual_environment_vms.template.vms[0].node_name # Node of the source template
   }
-  bios    = var.vm_bios
-  machine = var.vm_machine
+
+  bios    = var.vm_bios             # BIOS type (e.g., seabios or ovmf)
+  machine = var.vm_machine          # Machine type (e.g., q35)
+
   cpu {
-    cores = var.vm_cpu
-    type  = "host"
+    cores = var.vm_cpu              # Number of CPU cores
+    type  = "host"                  # Use host CPU type for best compatibility/performance
   }
+
   memory {
-    dedicated = var.vm_ram
+    dedicated = var.vm_ram          # RAM in MB
   }
+
   disk {
-    datastore_id = var.node_datastore
-    interface    = "scsi0"
-    size         = 4
+    datastore_id = var.node_datastore # Datastore to hold the disk
+    interface    = "scsi0"             # Primary disk interface
+    size         = 4                   # Disk size in GB
   }
+
   initialization {
-    user_data_file_id = proxmox_virtual_environment_file.cloud_config.id
+    user_data_file_id = proxmox_virtual_environment_file.cloud_config.id # Link the cloud-init file
     datastore_id      = var.node_datastore
-    interface         = "scsi1"
+    interface         = "scsi1"             # Separate interface for cloud-init
     ip_config {
       ipv4 {
-        address = "dhcp"
+        address = "dhcp"            # Get IP via DHCP
       }
     }
   }
+
   network_device {
-    bridge  = "vmbr0"
-    vlan_id = var.vm_vlan
+    bridge  = "vmbr0"               # Use the default bridge
+    vlan_id = var.vm_vlan           # VLAN tagging if used
   }
+
   operating_system {
-    type = "l26"
+    type = "l26"                    # Linux 2.6+ kernel
   }
+
   vga {
-    type = "std"
+    type = "std"                    # Standard VGA type
+  }
+
+  lifecycle {
+    ignore_changes = [              # Ignore initialization section after first depoloyment for idempotency
+      initialization
+    ]
   }
 }
 
+# Output the assigned IP address of the VM after provisioning
 output "vm_ip" {
-  value       = proxmox_virtual_environment_vm.vm.ipv4_addresses[1][0]
+  value       = proxmox_virtual_environment_vm.vm.ipv4_addresses[1][0] # Second network interface's first IP
   description = "VM IP"
 }
 ```
 
 #### `variables.tf`
-```
+
+Declares all input variables, their types, descriptions, and optional default values.
+
+```hcl
 variable "proxmox_endpoint" {
   description = "Proxmox URL endpoint"
   type        = string
@@ -355,7 +390,10 @@ variable "vm_tags" {
 }
 ```
 #### `terraform.tfvars`
-```
+
+Automatically loaded variable values that override defaults, used to customize deployments.
+
+```hcl
 node_name = "zenith"     # Name of the Proxmox node where the VM will be deployed
 vm_name   = "zenith-vm"  # Desired name for the new virtual machine
 vm_cpu    = 2            # Number of CPU cores to allocate to the VM
@@ -363,9 +401,11 @@ vm_ram    = 2048         # Amount of RAM in MB (2 GB)
 vm_vlan   = 66           # VLAN ID for network segmentation
 ```
 
-The last file is not in the repository so you will have to create it manually, it contains sensitive datas.
 #### `credentials.auto.tfvars`
-```
+
+Automatically loads sensitive variables like API tokens or credentials at runtime, it is not in the repository so you will have to create it manually.
+
+```hcl
 proxmox_endpoint  = <your Proxox endpoint>
 proxmox_api_token = <your Proxmox API token for the user terraformer>
 ```
@@ -619,13 +659,13 @@ Outputs:
 vm_ip = "192.168.66.156"
 ```
 
-We've done it! We create our first VM on Proxmox using Terraform in a couple a minutes
+✅ Done! We’ve successfully created our first VM on Proxmox using Terraform in just a few minutes.
 
 ![Summary of the newly created VM on Proxmox](img/proxmox-terraform-new-vm.png)
 
 ### SSH Connection
 
-Cherry on the cake, the output gives us the IP address and we have injected my user's SSH-key, let's test to connect with SSH
+Cherry on the cake: Terraform gives us the IP address, and thanks to cloud-init, SSH is ready to go.
 
 ```bash
 $ ssh 192.168.66.156
@@ -669,13 +709,265 @@ See "man sudo_root" for details.
 vez@zenith-vm:~$
 ```
 
-This works like a charm, wonderful
+This works like a charm, wonderful. We can see that my user is already created, it has all sudo permissions and the system is up-to-date.
 
+### Idempotency
 
----
-## Develop a Terraform Module
-Explain how I transform my project into a reusable module
+Idempotency is a core principle in Terraform that ensures running your code multiple times won't create duplicates or unexpected changes. Terraform checks what’s already running and only makes updates if something has actually changed. If nothing has changed, Terraform simply exits without modifying your infrastructure. This makes your deployments safe, repeatable, and easy to trust.
+
+So let's `terraform apply` a second time to see what is happening
+
+```bash
+$ terraform apply
+data.proxmox_virtual_environment_vms.template: Reading...
+proxmox_virtual_environment_file.cloud_config: Refreshing state... [id=local:snippets/vm.cloud-config.yaml]
+data.proxmox_virtual_environment_vms.template: Read complete after 1s [id=bc1b25f0-77d5-4b6a-b1a6-21cf39fbda17]
+proxmox_virtual_environment_vm.vm: Refreshing state... [id=103]
+
+No changes. Your infrastructure matches the configuration.
+
+Terraform has compared your real infrastructure against your configuration and found no differences, so no changes are needed.
+
+Apply complete! Resources: 0 added, 0 changed, 0 destroyed.
+
+Outputs:
+
+vm_ip = "192.168.66.156"
+```
+
+✅ No change as expected! 
+
+### Remove your infrastructure
+
+To remove a Terraform-managed infrastructure, simply run the command `terraform destroy`.
+
+Terraform will show you a detailed plan of everything it’s about to delete, and ask for confirmation before proceeding. Once confirmed, it removes all resources it previously created
+
+```bash
+$ terraform destroy
+data.proxmox_virtual_environment_vms.template: Reading...
+proxmox_virtual_environment_file.cloud_config: Refreshing state... [id=local:snippets/vm.cloud-config.yaml]
+data.proxmox_virtual_environment_vms.template: Read complete after 1s [id=d5b47a57-8074-4ddf-83cd-a99dceab0232]
+proxmox_virtual_environment_vm.vm: Refreshing state... [id=103]
+
+Terraform used the selected providers to generate the following execution plan. Resource actions are indicated with the following symbols:
+  - destroy
+
+Terraform will perform the following actions:
+
+  # proxmox_virtual_environment_file.cloud_config will be destroyed
+  - resource "proxmox_virtual_environment_file" "cloud_config" {
+      - content_type   = "snippets" -> null
+      - datastore_id   = "local" -> null
+      - file_name      = "vm.cloud-config.yaml" -> null
+      - id             = "local:snippets/vm.cloud-config.yaml" -> null
+      - node_name      = "zenith" -> null
+      - overwrite      = true -> null
+      - timeout_upload = 1800 -> null
+
+      - source_raw {
+          - data      = <<-EOT
+                #cloud-config
+                hostname: zenith-vm
+                package_update: true
+                package_upgrade: true
+                packages:
+                  - qemu-guest-agent           # Ensures the guest agent is installed
+                users:
+                  - default
+                  - name: vez
+                    groups: sudo
+                    shell: /bin/bash
+                    ssh-authorized-keys:
+                      - "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAID62LmYRu1rDUha3timAIcA39LtcIOny1iAgFLnxoBxm vez@bastion" # Inject user's SSH key
+                    sudo: ALL=(ALL) NOPASSWD:ALL
+                runcmd:
+                  - systemctl enable qemu-guest-agent
+                  - reboot                     # Reboot the VM after provisioning
+            EOT -> null
+          - file_name = "vm.cloud-config.yaml" -> null
+          - resize    = 0 -> null
+        }
+    }
+
+  # proxmox_virtual_environment_vm.vm will be destroyed
+  - resource "proxmox_virtual_environment_vm" "vm" {
+      - acpi                    = true -> null
+      - bios                    = "ovmf" -> null
+      - id                      = "103" -> null
+      - ipv4_addresses          = [
+          - [
+              - "127.0.0.1",
+            ],
+          - [
+              - "192.168.66.156",
+            ],
+        ] -> null
+      - ipv6_addresses          = [
+          - [
+              - "::1",
+            ],
+          - [
+              - "fe80::be24:11ff:feca:dc3f",
+            ],
+        ] -> null
+      - keyboard_layout         = "en-us" -> null
+      - mac_addresses           = [
+          - "00:00:00:00:00:00",
+          - "BC:24:11:CA:DC:3F",
+        ] -> null
+      - machine                 = "q35" -> null
+      - migrate                 = false -> null
+      - name                    = "zenith-vm" -> null
+      - network_interface_names = [
+          - "lo",
+          - "eth0",
+        ] -> null
+      - node_name               = "zenith" -> null
+      - on_boot                 = true -> null
+      - protection              = false -> null
+      - reboot                  = false -> null
+      - reboot_after_update     = true -> null
+      - scsi_hardware           = "virtio-scsi-pci" -> null
+      - started                 = true -> null
+      - stop_on_destroy         = true -> null
+      - tablet_device           = true -> null
+      - tags                    = [
+          - "test",
+        ] -> null
+      - template                = false -> null
+      - timeout_clone           = 1800 -> null
+      - timeout_create          = 1800 -> null
+      - timeout_migrate         = 1800 -> null
+      - timeout_move_disk       = 1800 -> null
+      - timeout_reboot          = 1800 -> null
+      - timeout_shutdown_vm     = 1800 -> null
+      - timeout_start_vm        = 1800 -> null
+      - timeout_stop_vm         = 300 -> null
+      - vm_id                   = 103 -> null
+
+      - agent {
+          - enabled = true -> null
+          - timeout = "15m" -> null
+          - trim    = false -> null
+          - type    = "virtio" -> null
+        }
+
+      - clone {
+          - full         = true -> null
+          - node_name    = "apex" -> null
+          - retries      = 1 -> null
+          - vm_id        = 900 -> null
+            # (1 unchanged attribute hidden)
+        }
+
+      - cpu {
+          - cores        = 2 -> null
+          - flags        = [] -> null
+          - hotplugged   = 0 -> null
+          - limit        = 0 -> null
+          - numa         = false -> null
+          - sockets      = 1 -> null
+          - type         = "host" -> null
+          - units        = 1024 -> null
+            # (2 unchanged attributes hidden)
+        }
+
+      - disk {
+          - aio               = "io_uring" -> null
+          - backup            = true -> null
+          - cache             = "none" -> null
+          - datastore_id      = "ceph-workload" -> null
+          - discard           = "ignore" -> null
+          - file_format       = "raw" -> null
+          - interface         = "scsi0" -> null
+          - iothread          = false -> null
+          - path_in_datastore = "vm-103-disk-1" -> null
+          - replicate         = true -> null
+          - size              = 4 -> null
+          - ssd               = false -> null
+            # (2 unchanged attributes hidden)
+        }
+
+      - initialization {
+          - datastore_id         = "ceph-workload" -> null
+          - interface            = "scsi1" -> null
+          - user_data_file_id    = "local:snippets/vm.cloud-config.yaml" -> null
+            # (4 unchanged attributes hidden)
+
+          - ip_config {
+              - ipv4 {
+                  - address = "dhcp" -> null
+                    # (1 unchanged attribute hidden)
+                }
+            }
+
+          - user_account {
+              - keys     = [
+                  - "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQCepytMtegvj8pf89dC8mWoGVAlvdpCkIThLcOiGW39ZCyRY9yXloAniaMXTAC8PHKbe4yPX4N0OovM5jNS5ofa1HQ1xEimgn9y185aSEf/J9msEW8LLy/+yb38vsDj5vYpRaurjUXfDVFti8rO1UWZ8zKuFvXJ18nBFJpViA8mHqwxUFnoNRyAMs4O8Fh3V8EnELOxb+T8p+nTTzBnYhUgYNPt61S3iAqD6QYHjelUzs8VxcxOdP/qO664jxQ7N96/zNsaTuV13FR286BuAelg3LUCpjZ2fy2mrSeKM6xOIY1mwPPCoglPiiHLTxZzo33pR0MAnDV9A3rJb3jBBifB vez-key",
+                ] -> null
+              - password = (sensitive value) -> null
+              - username = "vez" -> null
+            }
+        }
+
+      - memory {
+          - dedicated      = 2048 -> null
+          - floating       = 0 -> null
+          - keep_hugepages = false -> null
+          - shared         = 0 -> null
+            # (1 unchanged attribute hidden)
+        }
+
+      - network_device {
+          - bridge       = "vmbr0" -> null
+          - disconnected = false -> null
+          - enabled      = true -> null
+          - firewall     = false -> null
+          - mac_address  = "BC:24:11:CA:DC:3F" -> null
+          - model        = "virtio" -> null
+          - mtu          = 0 -> null
+          - queues       = 0 -> null
+          - rate_limit   = 0 -> null
+          - vlan_id      = 66 -> null
+            # (1 unchanged attribute hidden)
+        }
+
+      - operating_system {
+          - type = "l26" -> null
+        }
+
+      - vga {
+          - memory    = 16 -> null
+          - type      = "std" -> null
+            # (1 unchanged attribute hidden)
+        }
+    }
+
+Plan: 0 to add, 0 to change, 2 to destroy.
+
+Changes to Outputs:
+  - vm_ip = "192.168.66.156" -> null
+
+Do you really want to destroy all resources?
+  Terraform will destroy all your managed infrastructure, as shown above.
+  There is no undo. Only 'yes' will be accepted to confirm.
+
+  Enter a value: yes
+
+proxmox_virtual_environment_vm.vm: Destroying... [id=103]
+proxmox_virtual_environment_vm.vm: Destruction complete after 5s
+proxmox_virtual_environment_file.cloud_config: Destroying... [id=local:snippets/vm.cloud-config.yaml]
+proxmox_virtual_environment_file.cloud_config: Destruction complete after 0s
+
+Destroy complete! Resources: 2 destroyed.
+```
+
+💣 **Boom**! The VM has been destroyed and we can redeploy another instance at will!
 
 ---
 ## Conclusion
-Sum up what we realized and what are the next steps, use the module for my future project for kubernetes and associate it with Ansible
+
+In this post, we explored how to deploy a VM on Proxmox using Terraform, starting from a cloud-init template and ending with a working virtual machine you can SSH into. With this setup in place, I now have a reliable way to deploy and destroy VMs quickly and consistently.
+
+My next step is to turn this foundation into a reusable module and use it as a base for future projects, like integrating with Ansible for further automation and even deploying my Kubernetes cluster. Stay tuned!
