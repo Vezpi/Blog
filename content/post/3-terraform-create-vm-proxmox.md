@@ -1,4 +1,5 @@
 ---
+slug: terraform-create-vm-proxmox
 title: Deploy VM on Proxmox with Terraform
 description: Learn how to deploy a VM on Proxmox using Terraform and a cloud-init template, making your infrastructure reproducible and easy to manage.
 date: 2025-05-25

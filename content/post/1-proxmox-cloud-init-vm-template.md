@@ -1,4 +1,5 @@
 ---
+slug: proxmox-cloud-init-vm-template
 title: Proxmox - Create a Cloud-Init VM Template
 description: Learn how to create a reusable Ubuntu VM template with cloud-init in Proxmox to speed up and simplify virtual machine deployment.
 date: 2025-03-31

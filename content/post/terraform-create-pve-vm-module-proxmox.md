@@ -1,4 +1,5 @@
 ---
+slug: 
 title: Template
 description: 
 date: 
