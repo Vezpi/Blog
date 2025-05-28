@@ -1,6 +1,6 @@
 ---
 title: Deploy VM on Proxmox with Terraform
-description: Learn how to deploy a VM on Proxmox using Terraform and a cloud-init template, making your infrastructure reproducible and easy to manage.
+description: Découvrez comment déployer une VM sur Proxmox à l’aide de Terraform et d’un template cloud-init, rendant votre infrastructure reproductible et facile à gérer.
 date: 2025-05-25
 draft: false
 tags:
@@ -12,40 +12,41 @@ categories:
 ---
 ## Intro
 
-One of the most satisfying parts of building a homelab is getting to apply production-grade tooling to a personal setup. I’ve been working on defining my entire infrastructure as code, and the first piece I tackled was VM deployment with **Terraform** on **Proxmox**.
+L’un des aspects les plus satisfaisant de la création de mon homelab, c’est de pouvoir y appliquer des outils production-grade. J’ai voulu définir toute mon infrastructure as code, et la première étape que j’ai abordée est le déploiement de Machines Virtuelles avec **Terraform** sur **Proxmox**.
 
-In this article, I’ll walk you through creating a simple VM on Proxmox using Terraform, based on a **cloud-init** template I covered in [this article]({{< relref "post/proxmox-cloud-init-vm-template" >}}). Everything runs from a dedicated LXC container where I manage my whole infrastructure.
+Dans cet article, je vous guide pas à pas pour créer une simple VM sur Proxmox en utilisant Terraform, basée sur un template **cloud-init** que j’ai détaillé dans [cet article]({{< relref "post/proxmox-cloud-init-vm-template" >}}). L’exécution se fait depuis un conteneur LXC dédié qui centralise toute la gestion de mon infrastructure.
 
-📝 The full code used in this article is available in my [Homelab GitHub repository](https://github.com/Vezpi/Homelab) 
-
----
-## What is Terraform?
-
-Terraform is an open-source IaC tool developed by **HashiCorp**. It lets you define and provision infrastructure using a high-level configuration language called **HCL** (HashiCorp Configuration Language). With Terraform, you can manage cloud services, VMs, networks, DNS records, and more.
-
-In my homelab, Terraform can simplify VM deployment and make my environment reproducible and easily re-deploy everything from scratch as needed.
-
-A quick mention of **OpenTofu**, it is a community-driven fork of Terraform that emerged after some licensing changes. It's almost fully compatible with Terraform and could be a great alternative down the line. But for now, I’m sticking with Terraform.
+📝 Le code complet utilisé dans cet article est disponible dans mon [dépôt GitHub Homelab](https://github.com/Vezpi/Homelab)
 
 ---
-## Proxmox Terraform Providers
+## Qu’est-ce que Terraform ?
 
-To use Terraform, you’ll need a provider, a plugin that lets Terraform interact with your infrastructure, in the case of Proxmox, it will interact with the Proxmox API. There are currently two providers:
-- [**Telmate/proxmox**](https://registry.terraform.io/providers/Telmate/proxmox/latest): One of the original providers. It’s widely used but not very actively maintained. It’s simple to use, with plenty of documentation available online, but has limited features, with only 4 resources are available and no data sources: for example, I wasn’t able to retrieve node resource details.
-- [**bpg/proxmox**](https://registry.terraform.io/providers/bpg/proxmox/latest): A newer and more actively developed provider, apparently developed by a single guy, with cleaner syntax and much wider resources support. It was harder to setup but I found it mature enough to work with it.
+Terraform est un outil open-source d’IaC (Infrastructure as Code) développé par **HashiCorp**. Il permet de définir et de provisionner de l’infrastructure à l’aide d’un langage de configuration haut niveau appelé **HCL** (HashiCorp Configuration Language). Grâce à Terraform, on peut gérer des services cloud, des VMs, des réseaux, des enregistrements DNS, etc.
 
-I chose the `bpg/proxmox` provider because it’s better maintained at the time of writing and I needed to retrieve nodes values, such as their hostname, etc.
+Dans mon homelab, Terraform simplifie considérablement le déploiement de VMs et rend mon environnement reproductible, permettant de tout redéployer facilement si nécessaire.
+
+Un petit mot sur **OpenTofu**, un fork communautaire de Terraform apparu suite à des changements de licence. Il est presque entièrement compatible avec Terraform et pourrait être une bonne alternative à l’avenir. Mais pour le moment, je reste sur Terraform.
 
 ---
-## Prepare the Environment
+## Les Providers Terraform pour Proxmox
 
-### Create a Cloud-init VM Template in Proxmox
+Pour utiliser Terraform, il faut un provider, un plugin permettant à Terraform d’interagir avec l’infrastructure. Dans le cas de Proxmox, le provider va utiliser son API. Il en existe actuellement deux :
+- [**Telmate/proxmox**](https://registry.terraform.io/providers/Telmate/proxmox/latest) : L’un des premiers providers disponibles. Il est très utilisé mais peu maintenu. Facile à utiliser, avec pas mal de documentation, mais limité en fonctionnalités, avec seulement 4 ressources disponibles et aucun data source. Par exemple, je n’ai pas pu récupérer les informations sur les nœuds.
+- [**bpg/proxmox**](https://registry.terraform.io/providers/bpg/proxmox/latest) : Un provider plus récent, développé activement (apparemment par une seule personne), avec une syntaxe plus propre et un support plus étendu. Il a été un peu plus complexe à mettre en place, mais suffisamment mature à mon goût.
 
-Check out my previous article on [Proxmox - Create a Cloud-Init VM Template]({{< relref "post/proxmox-cloud-init-vm-template" >}}).
+J’ai choisi `bpg/proxmox` car il est mieux maintenu à l’heure où j’écris ces lignes, et je voulais pouvoir récupérer certaines infos sur les nœuds comme leur hostname, etc.
 
-### Install Terraform
+---
 
-For the Terraform installation into my LXC container, I followed the [documentation](https://developer.hashicorp.com/terraform/tutorials/aws-get-started/install-cli).
+## Préparer l’Environnement
+
+### Créer un Template Cloud-init sur Proxmox
+
+Consultez mon précédent article sur [Proxmox - Créer un Template de VM Cloud-Init]({{< relref "post/proxmox-cloud-init-vm-template" >}}).
+
+### Installer Terraform
+
+Pour l'installation de Terraform dans mon conteneur LXC, je me suis basé sur la [documentation officielle](https://developer.hashicorp.com/terraform/tutorials/aws-get-started/install-cli).
 
 ```bash
 # Ensure that your system is up to date and you have installed the `gnupg`, `software-properties-common`, and `curl` packages installed. You will use these packages to verify HashiCorp's GPG signature and install HashiCorp's Debian package repository.
@@ -66,14 +67,13 @@ apt update
 # Install Terraform from the new repository.
 apt-get install terraform
 ```
+### Créer un utilisateur Terraform dédié dans Proxmox
 
-### Create a Dedicated Terraform User on Proxmox
+Avant que Terraform puisse interagir avec votre cluster Proxmox, il est préférable de créer un utilisateur dédié avec des permissions limitées. Vous pouvez utiliser `root@pam`, mais ce n’est pas recommandé pour des raisons de sécurité.
 
-Before Terraform can interact with your Proxmox cluster, you want to create a dedicated user with limited privileges. You could use the `root@pam` but I wouldn't recommended it for security perspectives.
+Connectez-vous en SSH sur un nœud Proxmox avec un compte ayant les droits nécessaires, `root` dans ce cas.
 
-SSH into any Proxmox node using a privileged account, `root` in this case.
-
-1. **Create the Role `TerraformUser`**
+1. **Créer le Rôle `TerraformUser`**
 ```bash
 pveum role add TerraformUser -privs "\
   Datastore.Allocate \
@@ -101,50 +101,51 @@ pveum role add TerraformUser -privs "\
   SDN.Use"
 ```
 
-2. **Create the User `terraformer`**
+2. **Créer l'Utilisateur `terraformer`**
 ```bash
 pveum user add terraformer@pve --password <password>
 ```
 
-3. **Assign the Role `TerraformUser` to the User `terraformer`**
+3. **Assigner le Rôle `TerraformUser` à l'Utilisateur `terraformer`**
 ```bash
 pveum aclmod / -user terraformer@pve -role TerraformUser
 ```
 
-4. **Create API Token for the user `terraformer`**
+4. Créer le Jeton API pour l'Utilisateur `terraformer`**
 ```bash
 pveum user token add terraformer@pve terraform -expire 0 -privsep 0 -comment "Terraform token"
 ```
 
-> ⚠️ **Copy** and save **the** token given!
+> ⚠️ **Copiez** et **conservez** bien le jeton généré !
 
-### Install SSH Keys on your Proxmox Nodes
+### Installer des Clés SSH sur vos Nœuds Proxmox
 
+Cette étape est nécessaire pour certaines ressources qui exécutent des commandes directement sur les nœuds, lorsque l’API Proxmox ne suffit pas, comme expliqué [ici](https://registry.terraform.io/providers/bpg/proxmox/latest/docs#ssh-connection). C’est le cas avec cloud-init.
 
-This step is required if you’re using certain resources that need to run commands directly on the node to perform actions that are not supported by Proxmox API, detailed [here](https://registry.terraform.io/providers/bpg/proxmox/latest/docs#ssh-connection), this would be the case for our setup with cloud-init.
+On peut utiliser un agent SSH ou une clé SSH classique. J’ai choisi la clé SSH, donc on doit en générer une et l’installer sur les nœuds. Depuis la machine qui exécute Terraform.
 
-We could either use a SSH-agent or a SSH key, I preferred the latter, so we have to generate a ssh-key and install it on your Proxmox nodes. You generate these keys from where Terraform is installed.
-
-1. **Generate the SSH key pair**
+1. **Générer une paire de clés SSH**
 ```bash
 ssh-keygen
 ```
 
-2. **Install it on your Proxmox node(s) for the root user**
+2. **L'Installer sur le(s) nœud(s) Proxmox pour l'utilisateur root**
 ```bash
 ssh-copy-id root@<your Proxmox node>
 ```
 
 ---
-## Deploy your First VM
+## Déployer votre Première VM
 
-Let's dive into the fun part! Now we have our environment ready to deploy VM using Terraform on Proxmox, let's code!
-### Terraform Code
+Passons à la partie fun ! Maintenant que tout est prêt, on peut déployer une VM avec Terraform sur Proxmox. C’est parti pour le code !
 
-> 📌 Reminder, you can find all the code I have written in my [Homelab repo](https://github.com/Vezpi/Homelab), the following code is located [here](https://github.com/Vezpi/Homelab/tree/main/terraform/projects/simple-vm). Don't forget to match your variables with your environment!
-#### Code Structure
+### Code Terraform
 
-Here is the code structure, you can keep all your code in a single `.tf` file but I prefer to keep it clean.
+> 📌 Pour rappel, tout le code est disponible dans mon [dépôt Homelab](https://github.com/Vezpi/Homelab), le projet utilisé ici se trouve [ici](https://github.com/Vezpi/Homelab/tree/main/terraform/projects/simple-vm). N’oubliez pas d’adapter les variables à votre environnement.
+
+#### Structure du projet
+
+Voici l’arborescence du code. Vous pouvez tout mettre dans un seul fichier `.tf`, mais je préfère l'organiser proprement.
 ```plaintext
 terraform
 `-- projects
@@ -158,7 +159,7 @@ terraform
 
 #### `provider.tf`
 
-Defines the provider configuration (e.g., Proxmox) and how Terraform connects to it.
+Définit la configuration du provider (par exemple, Proxmox) et la manière dont Terraform s'y connecte.
 
 ```hcl
 # Define the required Terraform provider block
@@ -187,7 +188,7 @@ provider "proxmox" {
 
 #### `main.tf`
 
-Contains the core infrastructure logic, such as resources and modules to be deployed.
+Contient la logique principale de l'infrastructure , telle que les ressources et les modules à déployer.
 
 ```hcl
 # Retrieve VM templates available in Proxmox that match the specified name
@@ -303,7 +304,7 @@ output "vm_ip" {
 
 #### `variables.tf`
 
-Declares all input variables, their types, descriptions, and optional default values.
+Déclare toutes les variables d'entrée, leurs types, leurs descriptions et leurs valeurs par défaut facultatives.
 
 ```hcl
 variable "proxmox_endpoint" {
@@ -389,7 +390,7 @@ variable "vm_tags" {
 ```
 #### `terraform.tfvars`
 
-Automatically loaded variable values that override defaults, used to customize deployments.
+Valeurs de variables chargées automatiquement qui remplacent les valeurs par défaut, utilisées pour personnaliser les déploiements.
 
 ```hcl
 node_name = "zenith"     # Name of the Proxmox node where the VM will be deployed
@@ -401,22 +402,22 @@ vm_vlan   = 66           # VLAN ID for network segmentation
 
 #### `credentials.auto.tfvars`
 
-Automatically loads sensitive variables like API tokens or credentials at runtime, it is not in the repository so you will have to create it manually.
+Charge automatiquement les variables sensibles telles que les jetons API ou les informations d'identification au moment de l'exécution, elles ne se trouvent pas dans le dépôt, vous devrez donc les créer manuellement.
 
 ```hcl
 proxmox_endpoint  = <your Proxox endpoint>
 proxmox_api_token = <your Proxmox API token for the user terraformer>
 ```
 
-> 💡 To improve readability, you can automatically formats your Terraform code `terraform fmt`, to follow standard style conventions, making it clean and consistent.
+>💡 Pour améliorer la lisibilité, vous pouvez formater automatiquement votre code Terraform `terraform fmt`, pour appliquer les conventions de style standard, le rendant propre et cohérent.
 
-### Initialize your Workspace
+### Initialiser l’espace de travail
 
-The first step when working with Terraform is to initialize your workspace. You will do that with the `terraform init` command, which will:
-- Initializes the working directory
-- Downloads required providers
-- Installs modules
-- Sets up the backend
+Avant de faire quoi que ce soit, commencez par initialiser votre environnement avec `terraform init`. Cette commande va :
+- Initialiser le répertoire
+- Télécharger les providers
+- Installer les modules
+- Préparer le backend
 
 ```bash
 $ terraform init
@@ -444,11 +445,11 @@ rerun this command to reinitialize your working directory. If you forget, other
 commands will detect it and remind you to do so if necessary.
 ```
 
-### Deploy your Terraform Infrastructure
+### Déployer votre VM avec Terraform
 
-Great, we now have our environment ready for deployment! Before creating your VM, you can run `terraform plan` against your code and Terraform will tell you what it will do with it!
+Super, notre environnement est maintenant prêt pour le déploiement ! Avant de créer votre VM, vous pouvez exécuter `terraform plan` sur votre code et Terraform vous indiquera ce qu'il en fera !
 
-To actually launch it, you will need to launch `terraform apply`
+Pour le lancer, vous devrez lancer `terraform apply`.
 
 ```bash
 $ terraform apply
@@ -657,13 +658,13 @@ Outputs:
 vm_ip = "192.168.66.156"
 ```
 
-✅ Done! We’ve successfully created our first VM on Proxmox using Terraform in just a few minutes.
+✅ Voilà, on vient de créer une VM sur Proxmox en quelques minutes.
 
 ![Résumé de la nouvelle VM crée sur Proxmox](img/proxmox-terraform-new-vm.png)
 
-### SSH Connection
+### Connexion SSH
 
-🍒 Cherry on the cake: Terraform gives us the IP address, and thanks to cloud-init, SSH is ready to go.
+🍒 Cerise sur le gâteau : Terraform nous donne l’adresse IP, et grâce à cloud-init, la connexion SSH fonctionne immédiatement.
 
 ```bash
 $ ssh 192.168.66.156
@@ -707,13 +708,13 @@ See "man sudo_root" for details.
 vez@zenith-vm:~$
 ```
 
-✅ This works like a charm, wonderful. We can see that my user is already created, it has all sudo permissions and the system is up-to-date.
+✅ Tout fonctionne à merveille. Mon utilisateur est bien présent, avec les droits sudo, et le système est à jour.
 
-### Idempotency
+### Idempotence
 
-Idempotency is a core principle in Terraform that ensures running your code multiple times won't create duplicates or unexpected changes. Terraform checks what’s already running and only makes updates if something has actually changed. If nothing has changed, Terraform simply exits without modifying your infrastructure. This makes your deployments safe, repeatable, and easy to trust.
+L'idempotence est un principe fondamental de Terraform : elle garantit que l'exécution répétée de votre code ne crée pas de doublons ni de modifications inattendues. Terraform vérifie ce qui est déjà en cours d'exécution et n'effectue de mises à jour qu'en cas de modification. Si rien n'a changé, Terraform se termine simplement sans modifier votre infrastructure. Vos déploiements sont ainsi sécurisés, reproductibles et fiables.
 
-So let's `terraform apply` a second time to see what is happening
+Testons ça avec un second `terraform apply`.
 
 ```bash
 $ terraform apply
@@ -733,13 +734,13 @@ Outputs:
 vm_ip = "192.168.66.156"
 ```
 
-✅ No change as expected! 
+✅ Aucun changement, comme prévu !
 
-### Remove your Infrastructure
+### Supprimer l’Infrastructure
 
-To remove a Terraform-managed infrastructure, simply run the command `terraform destroy`.
+Pour supprimer une infrastructure gérée par Terraform, exécutez simplement la commande `terraform destroy`.
 
-Terraform will show you a detailed plan of everything it’s about to delete, and ask for confirmation before proceeding. Once confirmed, it removes all resources it previously created.
+Terraform vous présentera un plan détaillé de tout ce qu'il va supprimer et vous demandera confirmation avant de poursuivre. Une fois la confirmation effectuée, toutes les ressources précédemment créées seront supprimées.
 
 ```bash
 $ terraform destroy
@@ -961,11 +962,11 @@ proxmox_virtual_environment_file.cloud_config: Destruction complete after 0s
 Destroy complete! Resources: 2 destroyed.
 ```
 
-💣 **Boom**! The VM has been destroyed and we can now redeploy another instance at will!
+💣 **Boom** ! La VM est supprimée, prête à être redéployée si besoin.
 
 ---
 ## Conclusion
 
-In this post, we explored how to deploy a VM on Proxmox using Terraform, starting from a cloud-init template and ending with a working virtual machine you can SSH into. With this setup in place, I now have a reliable way to deploy and destroy VMs quickly and consistently.
+Dans cet article, on a vu comment déployer une VM sur Proxmox avec Terraform : depuis un template cloud-init jusqu’à une machine fonctionnelle accessible en SSH. Cette base me donne un environnement fiable, rapide à reconstruire.
 
-My next step is to turn this foundation into a reusable module and use it as a base for future projects, like integrating with Ansible for further automation and even deploying my Kubernetes cluster. Stay tuned!
+Prochaine étape : transformer ce projet en module réutilisable, l’intégrer avec Ansible pour aller plus loin, et préparer le terrain pour déployer mon cluster Kubernetes. À suivre !
