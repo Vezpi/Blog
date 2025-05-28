@@ -171,6 +171,7 @@ related:
       - name: categories
         weight: 20
 
+enableRobotsTXT: true
 sitemap:
   ChangeFreq: "weekly"
   Priority: 0.6
