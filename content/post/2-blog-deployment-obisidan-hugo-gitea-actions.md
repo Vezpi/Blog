@@ -57,6 +57,8 @@ The idea is simple:
 
 This way, I never need to manually copy files or trigger deployments. Everything flows from writing markdown in Obsidian to having a fully deployed website.
 
+![Workflow depuis l'écriture de notes sur Obsidian au Blog publié](img/obsidian-blog-gitea-actions-workflow.png)
+
 ---
 ## ⚙️ Implementation
 
