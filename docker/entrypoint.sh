@@ -10,7 +10,7 @@ echo "Cloning $REPO_URL (branch: $BRANCH)..."
 git clone --depth 1 --recurse-submodules --branch "$BRANCH" "$REPO_URL" "$CLONE_DIR"
 
 echo "Building site with Hugo $HUGO_VERSION..."
-hugo --source "$CLONE_DIR" --destination "$HUGO_DEST" --cleanDestinationDir --gc --verbose --panicOnWarning --printI18nWarnings --templateMetrics --templateMetricsHints
+hugo --source "$CLONE_DIR" --destination "$HUGO_DEST" --logLevel info --cleanDestinationDir --gc --panicOnWarning --printI18nWarnings --templateMetrics --templateMetricsHints
 
 
 echo "Starting Nginx..."
