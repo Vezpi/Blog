@@ -1,11 +1,15 @@
-FROM nginx:alpine
+FROM nginx:stable
 
 ARG HUGO_VERSION
 ENV HUGO_VERSION=${HUGO_VERSION}
 ENV HUGO_DEST=/usr/share/nginx/html
 
-# Install git and curl
-RUN apk add --no-cache git curl
+# Install dependencies
+RUN apt-get update && apt-get install -y \
+    curl \
+    git \
+    ca-certificates \
+    && rm -rf /var/lib/apt/lists/*
 
 # Download Hugo
 RUN curl -sSL https://github.com/gohugoio/hugo/releases/download/v${HUGO_VERSION}/hugo_extended_${HUGO_VERSION}_Linux-64bit.tar.gz \
