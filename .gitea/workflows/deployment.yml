@@ -1,13 +1,13 @@
-name: Staging Blog Deployment
+name: Blog Deployment
 
 on:
   push:
     branches:
       - preview
+
 env:
   DOCKER_IMAGE: vezpi-blog
-  CONTAINER_NAME: blog_staging
-  URL: "https://blog-dev.vezpi.com/en/"
+
 jobs:
   check-hugo-version:
     runs-on: docker
@@ -19,20 +19,20 @@ jobs:
       current_hugo_version: ${{ steps.get_current.outputs.version }}
       newer_version_available: ${{ steps.compare.outputs.version }}
     steps:
-      - name: Check latest Hugo version
+      - name: Check Latest Hugo Version
         id: get_latest
         run: |
           apk add curl
           latest_version=$(curl -s https://api.github.com/repos/gohugoio/hugo/releases/latest | grep tag_name | sed -E 's/.*"v([^"]+)".*/\1/')
           echo "version=$latest_version" | tee -a $GITEA_OUTPUT
 
-      - name: Check current Hugo version
+      - name: Check Current Hugo Version
         id: get_current
         run: |
           current_version=$(docker image ls ${DOCKER_IMAGE} --format '{{.Tag}}' | head -n1)
           echo "version=$current_version" | tee -a $GITEA_OUTPUT
 
-      - name: Compare current and latest Hugo versions
+      - name: Compare Current and Latest Hugo Versions
         id: compare
         run: |
           if [ "${{ steps.get_latest.outputs.version }}" != "${{ steps.get_current.outputs.version }}" ]; then
@@ -52,7 +52,7 @@ jobs:
       run:
         shell: sh
     steps:
-      - name: Checkout repository
+      - name: Checkout Repository
         run: git clone --branch preview https://${{ secrets.REPO_TOKEN }}@git.vezpi.me/Vezpi/blog.git .
 
       - name: Build Docker Image
@@ -64,7 +64,7 @@ jobs:
             .
           docker tag ${DOCKER_IMAGE}:${{ needs.check-hugo-version.outputs.latest_hugo_version }} ${DOCKER_IMAGE}:latest
 
-  deploy:
+  deploy-staging:
     needs: 
       - check-hugo-version
       - build
@@ -76,8 +76,10 @@ jobs:
     defaults:
       run:
         shell: sh
+    env:
+      CONTAINER_NAME: blog_staging
     steps:
-      - name: Restart ${CONTAINER_NAME} container
+      - name: Launch Blog Deployment
         run: |
           cd /blog
           docker compose down ${CONTAINER_NAME} 
@@ -86,11 +88,13 @@ jobs:
           echo "- Displaying container logs"
           docker compose logs ${CONTAINER_NAME}
 
-  test:
-    needs: deploy
+  test-staging:
+    needs: deploy-staging
     runs-on: ubuntu
+    env:
+      URL: "https://blog-dev.vezpi.com/en/"
     steps:
-      - name: Check HTTP response
+      - name: Check HTTP Response
         run: |
           code=$(curl -s -o /dev/null -w "%{http_code}" "$URL")
           echo "HTTP response code: $code"
@@ -106,26 +110,65 @@ jobs:
     needs: test
     runs-on: ubuntu
     steps:
-      - name: Checkout repository
+      - name: Checkout Repository
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
           ref: main
       
-      - name: Merge preview branch on main
+      - name: Merge preview Branch on main
         run: |
           git merge --ff-only origin/preview
           git push origin main
+
+  deploy-production:
+    needs: merge
+    runs-on: docker
+    container:
+      volumes:
+        - /appli/docker/blog:/blog
+    defaults:
+      run:
+        shell: sh
+    env:
+      CONTAINER_NAME: blog_production
+    steps:
+      - name: Launch Blog Deployment
+        run: |
+          cd /blog
+          docker compose down ${CONTAINER_NAME} 
+          docker compose up -d ${CONTAINER_NAME}
+          sleep 5
+          echo "- Displaying container logs"
+          docker compose logs ${CONTAINER_NAME}
+
+  test-production:
+    needs: deploy-production
+    runs-on: ubuntu
+    env:
+      URL: "https://blog.vezpi.com/en/"
+    steps:
+      - name: Check HTTP Response
+        run: |
+          code=$(curl -s -o /dev/null -w "%{http_code}" "$URL")
+          echo "HTTP response code: $code"
+
+          if [ "$code" -ne 200 ]; then
+            echo "❌ Service is not healthy (HTTP $code)"
+            exit 1
+          else
+            echo "✅ Service is healthy"
+          fi
 
   clean:
     needs:
       - check-hugo-version
       - build
-      - merge
+      - test-production
     runs-on: docker
     defaults:
       run:
         shell: sh
     steps:
-      - name: Checkout repository
+      - name: Checkout Repository
         run: docker image rm vezpi-blog:${{ needs.check-hugo-version.outputs.current_hugo_version }} --force
