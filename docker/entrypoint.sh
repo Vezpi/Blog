@@ -16,6 +16,8 @@ fi
 echo "- Cloning $REPO_URL (branch: $BRANCH)..."
 git clone --depth 1 --recurse-submodules --branch "$BRANCH" "$REPO_URL" "$CLONE_DIR"
 
+exit 1
+
 echo "- Building site with Hugo v$HUGO_VERSION in $HUGO_DEST..."
 hugo --source "$CLONE_DIR" --destination "$HUGO_DEST" --baseURL "$URL" $DRAFTS --logLevel info --cleanDestinationDir --gc --panicOnWarning --printI18nWarnings
 
