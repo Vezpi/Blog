@@ -1,0 +1,131 @@
+name: Staging Blog Deployment
+
+on:
+  push:
+    branches:
+      - preview
+env:
+  DOCKER_IMAGE: vezpi-blog
+  CONTAINER_NAME: blog_staging
+  URL: "https://blog-dev.vezpi.com/en/"
+jobs:
+  check-hugo-version:
+    runs-on: docker
+    defaults:
+      run:
+        shell: sh
+    outputs:
+      latest_hugo_version: ${{ steps.get_latest.outputs.version }}
+      current_hugo_version: ${{ steps.get_current.outputs.version }}
+      newer_version_available: ${{ steps.compare.outputs.version }}
+    steps:
+      - name: Check latest Hugo version
+        id: get_latest
+        run: |
+          apk add curl
+          latest_version=$(curl -s https://api.github.com/repos/gohugoio/hugo/releases/latest | grep tag_name | sed -E 's/.*"v([^"]+)".*/\1/')
+          echo "version=$latest_version" | tee -a $GITEA_OUTPUT
+
+      - name: Check current Hugo version
+        id: get_current
+        run: |
+          current_version=$(docker image ls ${DOCKER_IMAGE} --format '{{.Tag}}' | head -n1)
+          echo "version=$current_version" | tee -a $GITEA_OUTPUT
+
+      - name: Compare current and latest Hugo versions
+        id: compare
+        run: |
+          if [ "${{ steps.get_latest.outputs.version }}" != "${{ steps.get_current.outputs.version }}" ]; then
+            new_version_available=true
+            echo "New version available: ${{ steps.get_latest.outputs.version }}"
+          else
+            new_version_available=false
+            echo "Current version is the latest: ${{ steps.get_latest.outputs.version }}"
+          fi
+          echo "version=$new_version_available" | tee -a $GITEA_OUTPUT
+
+  build:
+    needs: check-hugo-version
+    if: needs.check-hugo-version.outputs.newer_version_available == 'true'
+    runs-on: docker
+    defaults:
+      run:
+        shell: sh
+    steps:
+      - name: Checkout repository
+        run: git clone --branch preview https://${{ secrets.REPO_TOKEN }}@git.vezpi.me/Vezpi/blog.git .
+
+      - name: Build Docker Image
+        run: |  
+          cd docker
+          docker build \
+            --build-arg HUGO_VERSION=${{ needs.check-hugo-version.outputs.latest_hugo_version }} \
+            --tag ${DOCKER_IMAGE}:${{ needs.check-hugo-version.outputs.latest_hugo_version }} \
+            .
+          docker tag ${DOCKER_IMAGE}:${{ needs.check-hugo-version.outputs.latest_hugo_version }} ${DOCKER_IMAGE}:latest
+
+  deploy:
+    needs: 
+      - check-hugo-version
+      - build
+    if: always() && needs.check-hugo-version.result == 'success' && (needs.build.result == 'skipped' || needs.build.result == 'success')
+    runs-on: docker
+    container:
+      volumes:
+        - /appli/docker/blog:/blog
+    defaults:
+      run:
+        shell: sh
+    steps:
+      - name: Restart ${CONTAINER_NAME} container
+        run: |
+          cd /blog
+          docker compose down ${CONTAINER_NAME} 
+          docker compose up -d ${CONTAINER_NAME}
+          sleep 5
+          echo "- Displaying container logs"
+          docker compose logs ${CONTAINER_NAME}
+
+  test:
+    needs: deploy
+    runs-on: ubuntu
+    steps:
+      - name: Check HTTP response
+        run: |
+          code=$(curl -s -o /dev/null -w "%{http_code}" "$URL")
+          echo "HTTP response code: $code"
+
+          if [ "$code" -ne 200 ]; then
+            echo "❌ Service is not healthy (HTTP $code)"
+            exit 1
+          else
+            echo "✅ Service is healthy"
+          fi
+
+  merge:
+    needs: test
+    runs-on: ubuntu
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: main
+      
+      - name: Merge preview branch on main
+        run: |
+          git merge --ff-only origin/preview
+          git push origin main
+
+  clean:
+    needs:
+      - check-hugo-version
+      - build
+      - merge
+    runs-on: docker
+    defaults:
+      run:
+        shell: sh
+    steps:
+      - name: Checkout repository
+        run: docker image rm vezpi-blog:${{ needs.check-hugo-version.outputs.current_hugo_version }} --force
