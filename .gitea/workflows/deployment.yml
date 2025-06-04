@@ -107,7 +107,7 @@ jobs:
           fi
 
   merge:
-    needs: test
+    needs: test-staging
     runs-on: ubuntu
     steps:
       - name: Checkout Repository
