@@ -233,11 +233,6 @@ jobs:
 ```
 
 ---
-## 🚀 Results
-
-This workflow allows me to focus on what matters most: writing and refining my content. By automating the publishing pipeline, from syncing my Obsidian notes to building the blog with Hugo, I no longer need to worry about manually managing content in a CMS.
-
-Every note I draft can evolve naturally into a clear, structured article, and the technical workflow fades into the background. It’s a simple yet powerful way to turn personal knowledge into shareable documentation.
 
 ## 🚀 Résultats
 
