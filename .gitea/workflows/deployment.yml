@@ -22,7 +22,7 @@ jobs:
     steps:
       - name: Checkout Repository
         run: git clone --branch preview https://${{ secrets.REPO_TOKEN }}@git.vezpi.me/Vezpi/blog.git .
-              
+
       - name: Check Latest Hugo Version
         id: get_latest
         run: |
@@ -51,7 +51,7 @@ jobs:
       - name: Check Changes in the Docker Folder
         id: docker_folder
         run: |
-          if git diff --name-only main | grep -q '^docker/'; 
+          if git diff --name-only origin/main | grep -q '^docker/'; 
           then 
             docker_folder_changed=true
             echo "Change detected in the /docker folder"
