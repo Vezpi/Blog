@@ -1,9 +1,10 @@
 name: Production Blog Deployment
 
 on:
-  push:
-    branches:
-      - main
+  workflow_run:
+    workflows: ["Staging Blog Deployment"]
+    types: [completed]
+
 env:
   CONTAINER_NAME: blog_production
   URL: "https://blog.vezpi.com/en/"
