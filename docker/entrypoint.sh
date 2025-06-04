@@ -12,6 +12,8 @@ DRAFTS=""
 if [ $BRANCH == "preview" ]; then
   echo "- Adding draft pages for the site"
   DRAFTS="--buildDrafts"
+else
+  echo "BRANCH= $BRANCH"
 fi
 
 # Clone repo
