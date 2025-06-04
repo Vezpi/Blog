@@ -9,7 +9,7 @@ env:
   DOCKER_IMAGE: vezpi-blog
 
 jobs:
-  check-hugo-version:
+  check-rebuild:
     runs-on: docker
     defaults:
       run:
@@ -18,7 +18,8 @@ jobs:
       latest_hugo_version: ${{ steps.get_latest.outputs.version }}
       current_hugo_version: ${{ steps.get_current.outputs.version }}
       newer_version_available: ${{ steps.compare.outputs.version }}
-    steps:
+      docker_folder_changed: ${{ steps.docker_folder.outputs.changed }}
+    steps:      
       - name: Check Latest Hugo Version
         id: get_latest
         run: |
@@ -31,7 +32,7 @@ jobs:
         run: |
           current_version=$(docker image ls ${DOCKER_IMAGE} --format '{{.Tag}}' | head -n1)
           echo "version=$current_version" | tee -a $GITEA_OUTPUT
-
+      
       - name: Compare Current and Latest Hugo Versions
         id: compare
         run: |
@@ -44,9 +45,22 @@ jobs:
           fi
           echo "version=$new_version_available" | tee -a $GITEA_OUTPUT
 
+      - name: Check Changes in the Docker Folder
+        id: docker_folder
+        run: |
+          if git diff --name-only main | grep -q '^docker/'; 
+          then 
+            docker_folder_changed=true
+            echo "Change detected in the /docker folder"
+          else 
+            docker_folder_changed=false
+            echo "No change in the /docker folder"
+          fi
+          echo "changed=$docker_folder_changed" | tee -a $GITEA_OUTPUT
+
   build:
-    needs: check-hugo-version
-    if: needs.check-hugo-version.outputs.newer_version_available == 'true'
+    needs: check-rebuild
+    if: needs.check-rebuild.outputs.newer_version_available == 'true' || needs.check-rebuild.outputs.docker_folder_changed == 'true'
     runs-on: docker
     defaults:
       run:
@@ -59,16 +73,16 @@ jobs:
         run: |  
           cd docker
           docker build \
-            --build-arg HUGO_VERSION=${{ needs.check-hugo-version.outputs.latest_hugo_version }} \
-            --tag ${DOCKER_IMAGE}:${{ needs.check-hugo-version.outputs.latest_hugo_version }} \
+            --build-arg HUGO_VERSION=${{ needs.check-rebuild.outputs.latest_hugo_version }} \
+            --tag ${DOCKER_IMAGE}:${{ needs.check-rebuild.outputs.latest_hugo_version }} \
             .
-          docker tag ${DOCKER_IMAGE}:${{ needs.check-hugo-version.outputs.latest_hugo_version }} ${DOCKER_IMAGE}:latest
+          docker tag ${DOCKER_IMAGE}:${{ needs.check-rebuild.outputs.latest_hugo_version }} ${DOCKER_IMAGE}:latest
 
   deploy-staging:
     needs: 
-      - check-hugo-version
+      - check-rebuild
       - build
-    if: always() && needs.check-hugo-version.result == 'success' && (needs.build.result == 'skipped' || needs.build.result == 'success')
+    if: always() && needs.check-rebuild.result == 'success' && (needs.build.result == 'skipped' || needs.build.result == 'success')
     runs-on: docker
     container:
       volumes:
@@ -162,7 +176,7 @@ jobs:
 
   clean:
     needs:
-      - check-hugo-version
+      - check-rebuild
       - build
       - test-production
     runs-on: docker
@@ -171,4 +185,4 @@ jobs:
         shell: sh
     steps:
       - name: Checkout Repository
-        run: docker image rm vezpi-blog:${{ needs.check-hugo-version.outputs.current_hugo_version }} --force
+        run: docker image rm vezpi-blog:${{ needs.check-rebuild.outputs.current_hugo_version }} --force
