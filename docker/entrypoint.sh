@@ -9,11 +9,9 @@ CLONE_DIR="${CLONE_DIR:-/blog}"
 DRAFTS=""
 
 # Add drafts for preview
-if [ $BRANCH == "preview" ]; then
-  echo "- Adding draft pages for the site"
+if [ "$BRANCH" = "preview" ]; then
+  echo "- Adding draft pages to be generated"
   DRAFTS="--buildDrafts"
-else
-  echo "BRANCH= $BRANCH"
 fi
 
 # Clone repo
