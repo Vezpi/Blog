@@ -4,6 +4,8 @@ on:
   workflow_run:
     workflows: ["Staging Blog Deployment"]
     types: [completed]
+    branches:
+      - 'preview'
 
 env:
   CONTAINER_NAME: blog_production
