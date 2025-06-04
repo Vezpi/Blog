@@ -19,7 +19,10 @@ jobs:
       current_hugo_version: ${{ steps.get_current.outputs.version }}
       newer_version_available: ${{ steps.compare.outputs.version }}
       docker_folder_changed: ${{ steps.docker_folder.outputs.changed }}
-    steps:      
+    steps:
+      - name: Checkout Repository
+        run: git clone --branch preview https://${{ secrets.REPO_TOKEN }}@git.vezpi.me/Vezpi/blog.git .
+              
       - name: Check Latest Hugo Version
         id: get_latest
         run: |
