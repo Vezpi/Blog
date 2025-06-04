@@ -182,6 +182,7 @@ jobs:
       - check-rebuild
       - build
       - test-production
+    if: needs.check-rebuild.outputs.newer_version_available == 'true'
     runs-on: docker
     defaults:
       run:
