@@ -9,7 +9,7 @@ env:
   DOCKER_IMAGE: vezpi-blog
 
 jobs:
-  check-rebuild:
+  Check-Rebuild:
     runs-on: docker
     defaults:
       run:
@@ -61,9 +61,9 @@ jobs:
           fi
           echo "changed=$docker_folder_changed" | tee -a $GITEA_OUTPUT
 
-  build:
-    needs: check-rebuild
-    if: needs.check-rebuild.outputs.newer_version_available == 'true' || needs.check-rebuild.outputs.docker_folder_changed == 'true'
+  Build:
+    needs: Check-Rebuild
+    if: needs.Check-Rebuild.outputs.newer_version_available == 'true' || needs.Check-Rebuild.outputs.docker_folder_changed == 'true'
     runs-on: docker
     defaults:
       run:
@@ -76,16 +76,16 @@ jobs:
         run: |  
           cd docker
           docker build \
-            --build-arg HUGO_VERSION=${{ needs.check-rebuild.outputs.latest_hugo_version }} \
-            --tag ${DOCKER_IMAGE}:${{ needs.check-rebuild.outputs.latest_hugo_version }} \
+            --build-arg HUGO_VERSION=${{ needs.Check-Rebuild.outputs.latest_hugo_version }} \
+            --tag ${DOCKER_IMAGE}:${{ needs.Check-Rebuild.outputs.latest_hugo_version }} \
             .
-          docker tag ${DOCKER_IMAGE}:${{ needs.check-rebuild.outputs.latest_hugo_version }} ${DOCKER_IMAGE}:latest
+          docker tag ${DOCKER_IMAGE}:${{ needs.Check-Rebuild.outputs.latest_hugo_version }} ${DOCKER_IMAGE}:latest
 
-  deploy-staging:
+  Deploy-Staging:
     needs: 
-      - check-rebuild
-      - build
-    if: always() && needs.check-rebuild.result == 'success' && (needs.build.result == 'skipped' || needs.build.result == 'success')
+      - Check-Rebuild
+      - Build
+    if: always() && needs.Check-Rebuild.result == 'success' && (needs.Build.result == 'skipped' || needs.Build.result == 'success')
     runs-on: docker
     container:
       volumes:
@@ -105,8 +105,8 @@ jobs:
           echo "- Displaying container logs"
           docker compose logs ${CONTAINER_NAME}
 
-  test-staging:
-    needs: deploy-staging
+  Test-Staging:
+    needs: Deploy-Staging
     runs-on: ubuntu
     env:
       URL: "https://blog-dev.vezpi.com/en/"
@@ -123,8 +123,8 @@ jobs:
             echo "✅ Service is healthy"
           fi
 
-  merge:
-    needs: test-staging
+  Merge:
+    needs: Test-Staging
     runs-on: ubuntu
     steps:
       - name: Checkout Repository
@@ -138,8 +138,8 @@ jobs:
           git merge --ff-only origin/preview
           git push origin main
 
-  deploy-production:
-    needs: merge
+  Deploy-Production:
+    needs: Merge
     runs-on: docker
     container:
       volumes:
@@ -159,8 +159,8 @@ jobs:
           echo "- Displaying container logs"
           docker compose logs ${CONTAINER_NAME}
 
-  test-production:
-    needs: deploy-production
+  Test-Production:
+    needs: Deploy-Production
     runs-on: ubuntu
     env:
       URL: "https://blog.vezpi.com/en/"
@@ -177,16 +177,16 @@ jobs:
             echo "✅ Service is healthy"
           fi
 
-  clean:
+  Clean:
     needs:
-      - check-rebuild
-      - build
-      - test-production
-    if: needs.check-rebuild.outputs.newer_version_available == 'true'
+      - Check-Rebuild
+      - Build
+      - Test-Production
+    if: needs.Check-Rebuild.outputs.newer_version_available == 'true'
     runs-on: docker
     defaults:
       run:
         shell: sh
     steps:
       - name: Checkout Repository
-        run: docker image rm vezpi-blog:${{ needs.check-rebuild.outputs.current_hugo_version }} --force
+        run: docker image rm vezpi-blog:${{ needs.Check-Rebuild.outputs.current_hugo_version }} --force
