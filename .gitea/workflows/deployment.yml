@@ -18,6 +18,7 @@ jobs:
       latest_hugo_version: ${{ steps.get_latest.outputs.version }}
       current_hugo_version: ${{ steps.get_current.outputs.version }}
       newer_version_available: ${{ steps.compare.outputs.version }}
+      current_docker_image: ${{ steps.current_docker.outputs.image }}
       docker_folder_changed: ${{ steps.docker_folder.outputs.changed }}
     steps:
       - name: Checkout Repository
@@ -47,6 +48,12 @@ jobs:
             echo "Current version is the latest: ${{ steps.get_latest.outputs.version }}"
           fi
           echo "version=$new_version_available" | tee -a $GITEA_OUTPUT
+
+      - name: Get Current Docker Image ID
+        id: current_docker
+        run: |
+          current_image=$(docker image ls ${DOCKER_IMAGE}:latest --format '{{.ID}}' | head -n1)
+          echo "image=$current_image" | tee -a $GITEA_OUTPUT
 
       - name: Check Changes in the Docker Folder
         id: docker_folder
@@ -182,11 +189,16 @@ jobs:
       - Check-Rebuild
       - Build
       - Test-Production
-    if: needs.Check-Rebuild.outputs.newer_version_available == 'true'
     runs-on: docker
     defaults:
       run:
         shell: sh
     steps:
-      - name: Checkout Repository
-        run: docker image rm vezpi-blog:${{ needs.Check-Rebuild.outputs.current_hugo_version }} --force
+      # - name: Remove Old Docker Image
+      #   if: needs.Check-Rebuild.outputs.newer_version_available == 'true'
+      #   run: |
+      #     docker image rm vezpi-blog:${{ needs.Check-Rebuild.outputs.current_hugo_version }} --force
+
+      - name: Remove Old Docker Image
+        run: docker image rm {{ needs.Check-Rebuild.outputs.current_docker_image }} --force
+          
