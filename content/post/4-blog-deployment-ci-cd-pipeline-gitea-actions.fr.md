@@ -1,7 +1,7 @@
 ---
 slug: blog-deployment-ci-cd-pipeline-gitea-actions
-title: Blog Deployment CI/CD Pipeline using Gitea Actions
-description: How I secured the automated deployment of my self-hosted blog built with Hugo by setting up a CI/CD pipeline using Gitea Actions
+title: Pipeline CI/CD du Déploiment du Blog avec Gitea Actions
+description: Comment j'ai sécurisé le déploiement automatisé de mon blog self-hosted construit avec Hugo en mettant en place un pipeline CI/CD à l'aide de Gitea Actions
 date: 2025-06-05
 draft: true
 tags:
@@ -14,39 +14,39 @@ categories:
 ---
 ## Intro
 
-Now that my blog is live, I can’t really afford to break it with every single change. I did have a "preview" version of the blog that was generated alongside the public version, but it relied on the same content and only allowed me to view pages in draft mode.
+Maintenant que mon blog est en ligne, je ne peux plus vraiment me permettre de le faire tomber à la moindre modification. J'avais bien une version "preview" de mon blog qui était générée en même temps que la version publique, mais celle-ci reposait sur le même contenu et me permettait uniquement de voir les pages en mode brouillon.
 
-Since the blog is automatically redeployed every time I modify content in Obsidian, as explained in [this article]({{< ref "post/2-blog-deployment-obisidan-hugo-gitea-actions" >}}), I don't always check whether the deployment failed or not. So I needed a way to protect it from my mistakes.
+Le blog étant redéployé de façon automatique à chaque modification du contenu dans Obsidian, détaillé dans [cet article]({{< ref "post/2-blog-deployment-obisidan-hugo-gitea-actions" >}}), je ne vérifie pas systématiquement si le déploiement s'est planté ou non. Je devais donc trouver une solution pour le protéger de mes bêtises. 
 
-## Securing the Blog Deployment
+## Sécuriser le Déploiement du Blog
 
-Currently, my blog redeploys automatically on every change to the `main` branch of the [Git repository](https://git.vezpi.me/Vezpi/Blog) hosted on my **Gitea** instance, using a **Gitea Actions** workflow. Every change made in my **Obsidian** vault is automatically pushed to this branch.
+Aujourd'hui mon blog se redéploie automatiquement à chaque modification de la branche `main` du [dépôt Git](https://git.vezpi.me/Vezpi/Blog) de mon instance **Gitea** via une **Gitea Actions**. Chaque modification apportée à mon vault **Obsidian** est poussée automatiquement dans cette branche.
 
 ![Workflow depuis l'écriture de notes sur Obsidian au Blog publié](img/obsidian-blog-gitea-actions-workflow.png)
 
-### Create a New Branch
+### Créer une Nouvelle Branche
 
-The first and easiest step was to create a new branch to receive these changes. So I created a `preview` branch in this repository and then updated the target branch in the workflow of my Obsidian Git repo.
+La première partie, la plus simple, a donc été de créer une nouvelle branche qui allait recevoir ces modifications. J'ai donc crée la branche `preview` dans ce dépôt. Ensuite j'ai modifié la branche cible recevant les modifications dans le workflow de mon dépôt Git Obsidian.
 
 ![Create the preview branch from the main branch in Gitea](img/gitea-create-new-branch.png)
 
-### Containerize the Blog
+### Containeriser le Blog
 
-The blog generated with **Hugo**, is made of static files stored on the filesystem of my Virtual Machine `dockerVM`, and mounted as a volume in an `nginx` container.
+Le blog généré avec **Hugo** est sous forme de fichiers statiques, qui sont localisés sur un filesystem de ma Machine Virtuelle `dockerVM`, et montés sous forme de volume dans un conteneur `nginx`.
 
-I wanted to stop using mounted volumes and instead have the files generated at container startup, allowing me to run multiple independent instances of the blog.
+Je ne voulais plus avoir ces fichiers montés dans un volume, mais qu'ils soient générés au lancement du conteneur, ainsi je pourrai faire vivre plusieurs instances indépendantes de mon blog.
 
-So the second part was to build a **Docker** image that would:
-1. Download the `hugo` binary.
-2. Clone my blog’s Git repository.
-3. Generate static pages with `hugo`.
-4. Serve the web pages.
+Pour la 2ème partie, il me faut donc construire une image **Docker** qui doit réaliser ces opérations:
+1. Télécharger le binaire `hugo`.
+2. Cloner le dépôt Git de mon blog.
+3. Générer les pages statiques avec `hugo`.
+4. Servir les pages web.
 
-#### Build the Docker Image
+#### Construire l'Image Docker
 
-A Docker container is based on an image, a template that already contains pre-executed instructions. When the container starts, it can then execute a new set of actions like running a server or script.
+Un conteneur Docker est basé sur une image, un modèle contenant déjà des instructions exécutées à l'avance. Une fois le conteneur démarré, il peut alors exécuter une autre série d’actions, comme lancer un serveur ou un script.
 
-To build a Docker image, you need a file called `Dockerfile` which defines the actions to perform during the build. You can also add other files, like a script named `entrypoint.sh` that will be executed when the container starts.
+Pour construire une image Docker, il faut un fichier appelé `Dockerfile` qui regroupe les actions a effectuer pour sa construction, on peut également y ajouter d'autres fichiers, comme ici un script nommé `entrypoint.sh` qui sera alors le processus lancé au démarrage du conteneur.
 ```plaintext
 docker/
 ├── Dockerfile
@@ -56,7 +56,7 @@ docker/
 
 ##### Dockerfile
 
-In my case, I wanted the image, based on `nginx`, to include the web server configuration, the `hugo` binary, the ability to clone my Git repo, and to run a script on startup.
+Dans mon cas je voulais que l'image, basé sur `nginx`, contienne la configuration du serveur web, le binaire `hugo`, qu'elle soit capable de cloner mon dépôt Git et qu'elle lance un script à son exécution.
 ```Dockerfile
 FROM nginx:stable
 
@@ -90,7 +90,7 @@ ENTRYPOINT ["/entrypoint.sh"]
 
 ##### entrypoint.sh
 
-By default, a `nginx` container simply starts the web server. But here I wanted it to first clone a specific branch of my blog repository, and then generate the static files using `hugo`.
+Par défaut, au lancement d'un conteneur `nginx`, il se contente de lancer le serveur web. Ici je voulais qu'avant cela, qu'il clone une branche du dépôt Git de mon blog et qu'à partir de cette branche, il génère les fichiers statiques avec `hugo`.
 ```sh
 #!/bin/sh
 set -e
@@ -121,9 +121,9 @@ echo "- Starting Nginx..."
 exec nginx -g 'daemon off;'
 ```
 
-I’ve configured `hugo` to fail if any warning occurs, this way, the container won’t start if something goes wrong, making problems easier to catch.
+Je spécifie ici à `hugo` de sortir en erreur dès qu'un warning est généré, cela empêchera le conteneur de démarré correctement et pouvoir identifier un éventuel problème.
 
-I can now build my Docker image and pass the desired Hugo version as a build argument:
+Je peux maintenant construire mon image Docker, avec comme argument, la version d'Hugo désiré :
 ```bash
 $ docker build --build-arg HUGO_VERSION=0.147.6 .
 [+] Building 4.3s (11/11) FINISHED
@@ -145,32 +145,32 @@ $ docker build --build-arg HUGO_VERSION=0.147.6 .
  => => writing image sha256:07cbeea704f3af16dc71a0890539776c87a95972a6c8f7d4fb24ea0eeab17032
 ```
 
-✅ Now that I have my image, I can launch new instances of my blog without worrying about what's on the filesystem of my VM. I can also choose which Git branch the content should be generated from.
+✅ Maintenant que j'ai mon image, je peux lancer une nouvelle instance de mon blog, sans me préoccuper de ce que j'ai actuellement sur le FS de ma VM. Je peux également choisir à partir de quelle branche de mon dépôt Git, le contenu sera généré.
 
-But I still can’t guarantee that these instances actually work, I need a way to **test** and then **deploy** them automatically.
+Mais je ne peux toujours pas prédire si ces instances sont fonctionnelles, il me faut pouvoir les **tester** et enfin les **déployer**.
 
-To do that, I’m going to build a **CI/CD Pipeline**.
+Afin d'automatiser ce déploiement, je vais construire un **Pipeline CI/CD**.
 
-### CI/CD Pipeline
+### Pipeline CI/CD
 
-A CI/CD pipeline is a series of automated steps to test, build, and deploy an application. The **CI (Continuous Integration)** part checks that the code works with every change (e.g., by running tests), while the **CD (Continuous Deployment)** part automatically delivers the code to a test or production environment. This makes updates faster, more reliable, and more frequent.
+Un pipeline CI/CD est une suite d'étapes automatisées qui permettent de tester, construire et déployer une application. La partie **CI (Intégration Continue)** vérifie que le code fonctionne bien à chaque modification (par exemple en lançant des tests), tandis que la **CD (Déploiement Continu)** s’occupe de livrer automatiquement ce code vers un environnement de test ou de production. Cela rend les mises à jour plus rapides, fiables et régulières.
 
-There are different types of tools:
-- **CI**: Jenkins, Travis CI, etc.
-- **CD**: Argo CD, Flux CD, etc.
-- **CI/CD**: GitLab CI/CD, GitHub Actions, etc.
+Il existe plusieurs outils :
+- **CI** : Jenkins, Travis CI, etc.
+- **CD** Argo CD, Flux CD, etc.
+- **CI/CD** : GitLab CI/CD, GitHub Actions, etc.
 
-In my case, I’m reusing **Gitea Actions**, which is very similar to GitHub Actions. It’s a CI/CD platform built into **Gitea**, using `YAML` workflow files stored in the Git repository.
+Dans mon cas je vais réutiliser les **Gitea Actions** très similaire à GitHub Actions, une plateforme CI/CD intégré à **Gitea**, qui fonctionne avec des workflows définis dans des fichiers `YAML` placés dans le dépôt Git.
 
-Every time an event occurs, like a push or a tag), Gitea Actions automatically runs a set of steps (tests, build, deploy…) in an isolated environment based on Docker containers.
+À chaque événement, comme un push ou une création de tag, Gitea Actions va lancer automatiquement une série d’étapes (tests, build, déploiement…) dans un environnement isolé, basé sur des conteneurs Docker.
 
 #### Gitea Runners
 
-Gitea Actions workflows run through **Gitea Runners**. These fetch the jobs and execute them inside Docker containers, providing a clean and isolated environment for each step.
+Les workflows Gitea Actions utilisent des **Gitea Runners**, ils récupèrent les jobs et les lancent dans des conteneurs Docker, assurant un environnement propre et isolé pour chaque étape.
 
-Since my blog instances are managed by `docker` (specifically `docker compose`), I needed the runner to interact with the Docker daemon on `dockerVM`. To achieve this, I added the `docker:cli` image to the runner catalog and gave it access to the VM’s `docker.socket`.
+Comme les instances de mon blog sont gérées par `docker` (précisément par `docker compose`), je voulais que le `runner` puisse interagir avec le démon Docker de `dockerVM`. Pour ce faire, j'ai du ajouter au catalogue de mon `runner` l'image `docker:cli` et lui donner accès au `docker.socket` de la VM.
 
-Here is the new configuration of my `runner` in my Gitea stack, also managed via `docker compose`:
+Voici la nouvelle configuration de mon `runner` dans ma stack Gitea, gérée par `docker compose` également :
 ```yaml
   runner:
     image: gitea/act_runner:latest
@@ -194,28 +194,28 @@ Here is the new configuration of my `runner` in my Gitea stack, also managed via
 
 #### Workflow
 
-Previously, I had a simple workflow triggered on every push to the `main` branch of my blog’s Git repository. It did:
-1. Checkout the Git repo into the `dockerVM` filesystem.
-2. Download the latest Hugo binary if needed.
-3. Generate the static blog files with Hugo.
+Avant j'utilisais un workflow simple qui était déclenché à chaque push sur la branche `main` du dépôt Git de mon blog, voici ce qu'il faisait :
+1. Checkout de mon dépôt Git dans le FS de ma VM `dockerVM`.
+2. Télécharge le binaire `hugo` si une nouvelle version était disponible.
+3. Génère les fichiers statiques du blog avec `hugo`.
 
-Now, here’s what the new workflow does:
-1. **Check-Rebuild**: Checks if a new Hugo version is available and if the `docker` folder in the repo has changed.
-2. **Build**: If the previous job requires it, rebuilds the Docker image `vezpi-blog` and tags it with the Hugo version.
-3. **Deploy-Staging**: Deploys the blog using the `preview` branch to a test URL via `docker compose`.
-4. **Test-Staging**: Verifies that the `preview` version of the blog responds and works
-5. **Merge**: Merges the `preview` branch into `main`.
-6. **Deploy-Production**: Deploys the blog using the `main` branch (public version) with `docker compose`.
-7. **Test-Production**: Verifies that the public blog is up and working.
-8. **Clean**: Deletes the old Docker image.
+Maintenant voici ce que le nouveau workflow fait :
+1. **Check-Rebuild** : Vérifie si une nouvelle version d'Hugo est disponible et vérifie si le dossier `docker` du dépôt a été modifié.
+2. **Build** : Si le job précédent le suggère, reconstruit l'image Docker `vezpi-blog` et la tag avec la version d'Hugo.
+3. **Deploy-Staging** : Déploie le blog avec la branche `preview` sur une URL de test avec `docker compose`.
+4. **Test-Staging** : Vérifie que le blog en version `preview` répond et fonctionne.
+5. **Merge** : Merge la branche `preview` avec la branche `main`.
+6. **Deploy-Production** : Déploie le blog avec la branche  `main`, la version publique avec `docker compose`.
+7. **Test-Production** : Vérifie que le blog en version `main` répond et fonctionne.
+8. **Clean** : Supprime l'ancienne image Docker.
 
-Here’s an example of a deployment triggered by an automatic commit from **Obsidian**. You can see that the Docker image wasn’t rebuilt because no new Hugo version was available and the `docker` folder hadn’t changed, so the final `Clean` job wasn’t necessary either.
+Voici un exemple de déploiement après un commit automatique généré par **Obsidian**, on peut voir ici que l'image Docker n'a pas été reconstruire car il n'y avait pas de nouvelle version d'Hugo disponible et que le dossier `docker` n'avait pas été modifié, de ce fait, le dernier job `Clean` n'était pas non plus nécessaire.
 
 ![Gitea Actions workflow for blog deployment](img/gitea-actions-deploy-blog-workflow.png)
 
 #### Code
 
-The workflow is written in `YAML` and must be located in the `.gitea/workflows/` folder of the Git repository.
+Le workflow est écrit en `YAML` et doit être localisé dans le répertoire `.gitea/workflows/` du dépôt Git.
 ```yaml
 name: Blog Deployment
 
@@ -418,8 +418,8 @@ jobs:
           docker image rm ${{ needs.Check-Rebuild.outputs.current_docker_image }} --force
           
 ```
-## Results
+## Résultats
 
-With this new workflow and CI/CD pipeline, I feel much more confident when editing my content in Markdown with Obsidian or tweaking my `hugo` config.
+Avec ce nouveau workflow et ce pipeline CI/CD, je suis beaucoup plus serein lorsque je modifie le contenu de mes pages depuis Obsidian en Markdown ou lorsque je modifie la configuration d'`hugo`.
 
-The next step will be to improve the testing phase, a simple `curl` isn’t enough to truly verify that the blog is working properly. I also want to add a notification system to alert me when the workflow fails. See you soon!
+La prochaine étape sera de renforcer l'étape des tests, un simple `curl` n'est clairement pas suffisant pour s'assurer le bon fonctionnement du blog. Je veux aussi rajouter un système de notification pour m'alerter lorsque le workflow se plante. A bientôt !
