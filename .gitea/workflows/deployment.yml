@@ -195,5 +195,7 @@ jobs:
         shell: sh
     steps:
       - name: Remove Old Docker Image
-        run: docker image rm ${{ needs.Check-Rebuild.outputs.current_docker_image }} --force
+        run: |
+          docker image rm ${{ needs.Check-Rebuild.outputs.current_docker_image }} --force
+          docker image prune -f
           

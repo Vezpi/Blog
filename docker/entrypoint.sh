@@ -8,6 +8,7 @@ BRANCH="${BRANCH:-preview}"
 CLONE_DIR="${CLONE_DIR:-/blog}"
 DRAFTS=""
 
+
 # Add drafts for preview
 if [ "$BRANCH" = "preview" ]; then
   echo "- Adding draft pages to be generated"
