@@ -1,6 +1,6 @@
 ---
 title: Recherche
-slug: recherche
+slug: search
 layout: search
 outputs:
   - html
