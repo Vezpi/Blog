@@ -194,11 +194,6 @@ jobs:
       run:
         shell: sh
     steps:
-      # - name: Remove Old Docker Image
-      #   if: needs.Check-Rebuild.outputs.newer_version_available == 'true'
-      #   run: |
-      #     docker image rm vezpi-blog:${{ needs.Check-Rebuild.outputs.current_hugo_version }} --force
-
       - name: Remove Old Docker Image
-        run: docker image rm {{ needs.Check-Rebuild.outputs.current_docker_image }} --force
+        run: docker image rm ${{ needs.Check-Rebuild.outputs.current_docker_image }} --force
           

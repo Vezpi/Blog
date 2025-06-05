@@ -14,8 +14,6 @@ if [ "$BRANCH" = "preview" ]; then
   DRAFTS="--buildDrafts"
 fi
 
-#removeme
-
 # Clone repo
 echo "- Cloning $REPO_URL (branch: $BRANCH)..."
 git clone --depth 1 --recurse-submodules --branch "$BRANCH" "$REPO_URL" "$CLONE_DIR"
