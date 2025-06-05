@@ -117,7 +117,7 @@ params:
   mainSections: ["post"]
   description: "A blog documenting my homelab journey, covering automation, self-hosted services, and hands-on experiments with open source technologies."
   favicon: "/favicon-32x32.png"
-  excludedFromSitemap: ["/tags/", "/categories/", "/search/"]
+  sitemapFilter: ["/tags/", "/categories/", "/search/"]
 
   sidebar:
     avatar:
