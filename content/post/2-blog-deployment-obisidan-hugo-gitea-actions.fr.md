@@ -8,8 +8,10 @@ tags:
   - obsidian
   - hugo
   - gitea
+  - gitea-actions
+  - docker
 categories:
-  - homelab
+  - blog
 ---
 ## 💡 Intro
 
