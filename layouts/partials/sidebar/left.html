@@ -8,7 +8,7 @@
     <header>
         {{ with .Site.Params.sidebar.avatar }}
             {{ if (default true .enabled) }}
-            <figure class="site-avatar" style="text-align: center;">
+            <figure class="site-avatar">
                 <a href="{{ .Site.BaseURL | relLangURL }}">
                 {{ if not .local }}
                     <img src="{{ .src }}" width="300" height="300" class="site-logo" loading="lazy" alt="Avatar">
@@ -18,7 +18,7 @@
                     {{ if $avatar }}
                         {{ $avatarResized := $avatar.Resize "300x" }}
                         <img src="{{ $avatarResized.RelPermalink }}" width="{{ $avatarResized.Width }}"
-                            height="{{ $avatarResized.Height }}" class="site-logo" loading="lazy" alt="Avatar">
+                            height="{{ $avatarResized.Height }}" class="site-logo" style="display: block; margin: 0 auto;" loading="lazy" alt="Avatar">
                     {{ else }}
                         {{ errorf "Failed loading avatar from %q" . }}
                     {{ end }}
