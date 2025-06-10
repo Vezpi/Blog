@@ -8,7 +8,7 @@
     <header>
         {{ with .Site.Params.sidebar.avatar }}
             {{ if (default true .enabled) }}
-            <figure class="site-avatar">
+            <figure class="site-avatar" style="margin-left: auto; margin-right: auto;">
                 <a href="{{ .Site.BaseURL | relLangURL }}">
                 {{ if not .local }}
                     <img src="{{ .src }}" width="300" height="300" class="site-logo" loading="lazy" alt="Avatar">
