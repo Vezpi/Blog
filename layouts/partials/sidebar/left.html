@@ -78,13 +78,14 @@
             <ol class="menu">
                 {{- $currentLang := .Language.Lang -}}
                 {{- range .Site.Home.AllTranslations }}
-                {{- if ne .Language.Lang $currentLang }}
-                  <li id="i18n-switch">
-                    <a href="{{ .Permalink }}" title="{{ .Language.LanguageName }}">
-                      {{ partial "helper/icon" "language" }}
-                      {{ .Language.LanguageName }}
-                    </a>
-                  </li>
+                  {{- if ne .Language.Lang $currentLang }}
+                    <li id="i18n-switch">
+                      <a href="{{ .Permalink }}" title="{{ .Language.LanguageName }}">
+                        {{ partial "helper/icon" "language" }}
+                        {{ .Language.LanguageName }}
+                      </a>
+                    </li>
+                  {{- end }}
                 {{- end }}
 
                 {{ if (default false .Site.Params.colorScheme.toggle) }}
