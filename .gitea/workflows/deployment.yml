@@ -212,14 +212,14 @@ jobs:
           if [ "${{ success() }}" == "true" ]; then
             curl -H "Priority: min" \
                  -H "Tags: white_check_mark" \
-                 -H "Actions: view, View Run, "${{ gitea.server_url }}/${{ gitea.repository }}/actions/runs/${{ gitea.run_id }}" \
+                 -H "Actions: view, View Run, ${{ gitea.server_url }}/${{ gitea.repository }}/actions/runs/${{ gitea.run_id }}" \
                  -d "Blog workflow completed successfully!" \
                  -u ${NTFY_TOKEN} \
                  ${NTFY_URL}/${NTFY_TOPIC}
           else
             curl -H "Priority: high" \
                  -H "Tags: x" \
-                 -H "Actions: view, View Run, "${{ gitea.server_url }}/${{ gitea.repository }}/actions/runs/${{ gitea.run_id }}" \
+                 -H "Actions: view, View Run, ${{ gitea.server_url }}/${{ gitea.repository }}/actions/runs/${{ gitea.run_id }}" \
                  -d "Blog workflow failed somewhere in the pipeline." \
                  -u ${NTFY_TOKEN} \
                  ${NTFY_URL}/${NTFY_TOPIC}
