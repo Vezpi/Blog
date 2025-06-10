@@ -16,7 +16,7 @@ fi
 
 # Clone repo
 echo "- Cloning $REPO_URL (branch: $BRANCH)..."
-git clone --depth 1 --recurse-submodules --branch "$BRANCH" "$REPO_URL" "$CLONE_DIR"
+git clone --recurse-submodules --branch "$BRANCH" "$REPO_URL" "$CLONE_DIR"
 
 # Generate static files with hugo
 echo "- Building site with Hugo v$HUGO_VERSION in $HUGO_DEST..."
