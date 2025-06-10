@@ -11,7 +11,7 @@ DRAFTS=""
 # Add drafts for preview
 if [ "$BRANCH" = "preview" ]; then
   echo "- Adding draft pages to be generated"
-  DRAFTS="--buildDrafts"
+  DRAFTS="--buildDrafts --buildFuture"
 fi
 
 # Clone repo
@@ -20,7 +20,7 @@ git clone --recurse-submodules --branch "$BRANCH" "$REPO_URL" "$CLONE_DIR"
 
 # Generate static files with hugo
 echo "- Building site with Hugo v$HUGO_VERSION in $HUGO_DEST..."
-hugo --source "$CLONE_DIR" --destination "$HUGO_DEST" --baseURL="https://${URL}" "$DRAFTS" --logLevel info --cleanDestinationDir --gc --panicOnWarning --printI18nWarnings
+hugo --source "$CLONE_DIR" --destination "$HUGO_DEST" --baseURL="https://${URL}" ${DRAFTS} --logLevel info --cleanDestinationDir --gc --panicOnWarning --printI18nWarnings
 
 # Start nginx
 echo "- Starting Nginx..."
