@@ -128,6 +128,7 @@ jobs:
             exit 1
           else
             echo "✅ Service is healthy"
+            exit 1
           fi
 
   Merge:
