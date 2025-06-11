@@ -210,15 +210,15 @@ jobs:
     steps:
       - name: Notify Workflow Result
         run: |
-          if [[ \
-            "${{ needs.Check-Rebuild.result }}" == "success" && \
-           ("${{ needs.Build.result }}" == "success" || "${{ needs.Build.result }}" == "skipped") && \
-            "${{ needs.Deploy-Staging.result }}" == "success" && \ 
-            "${{ needs.Test-Staging.result }}" == "success" && \ 
-            "${{ needs.Merge.result }}" == "success" && \ 
-            "${{ needs.Deploy-Production.result }}" == "success" && \ 
-            "${{ needs.Test-Production.result }}" == "success" && \ 
-           ("${{ needs.Clean.result }}" == "success" || "${{ needs.Clean.result }}" == "skipped") \
+          if [[
+            "${{ needs.Check-Rebuild.result }}" == "success" &&
+           ("${{ needs.Build.result }}" == "success" || "${{ needs.Build.result }}" == "skipped") &&
+            "${{ needs.Deploy-Staging.result }}" == "success" &&
+            "${{ needs.Test-Staging.result }}" == "success" && 
+            "${{ needs.Merge.result }}" == "success" &&
+            "${{ needs.Deploy-Production.result }}" == "success" &&
+            "${{ needs.Test-Production.result }}" == "success" &&
+           ("${{ needs.Clean.result }}" == "success" || "${{ needs.Clean.result }}" == "skipped")
           ]]; then
             curl -H "Priority: min" \
                  -H "Tags: white_check_mark" \
