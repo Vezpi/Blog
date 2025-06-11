@@ -210,20 +210,16 @@ jobs:
     steps:
       - name: Notify Workflow Result
         run: |
-          echo "starting"
-          all_ok() {
-            for job in Check-Rebuild Build Deploy-Staging Test-Staging Merge Deploy-Production Test-Production Clean; do
-              echo "result=${{ needs.${job}.result }}""
-              result="${{ needs.${job}.result }}"
-              if not [[ "$result" == "success" || "$result" == "skipped" ]]; then
-                echo "job $job returned 1"
-                return 1
-              fi
-            echo "all ok"
-            done
-          }
-
-          if all_ok; then
+          if [[ 
+            "${{ needs.Check-Rebuild.result }}" == "success" && \
+           ("${{ needs.Build.result }}" == "success" || "${{ needs.Build.result }}" == "skipped") && \
+            "${{ needs.Deploy-Staging.result }}" == "success" && \ 
+            "${{ needs.Test-Staging.result }}" == "success" && \ 
+            "${{ needs.Merge.result }}" == "success" && \ 
+            "${{ needs.Deploy-Production.result }}" == "success" && \ 
+            "${{ needs.Test-Production.result }}" == "success" && \ 
+           ("${{ needs.Clean.result }}" == "success" || "${{ needs.Clean.result }}" == "skipped") \
+          ]]; then
             curl -H "Priority: min" \
                  -H "Tags: white_check_mark" \
                  -H "Actions: view, View Run, ${{ gitea.server_url }}/${{ gitea.repository }}/actions/runs/${{ gitea.run_number }}" \
