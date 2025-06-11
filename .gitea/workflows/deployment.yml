@@ -228,7 +228,7 @@ jobs:
           else
             curl -H "Priority: high" \
                  -H "Tags: x" \
-                 -H "Actions: view, View Run, ${{ gitea.server_url }}/${{ gitea.repository }}/actions/runs/${{ gitea.run_number }}" \ 
+                 -H "Actions: view, View Run, ${{ gitea.server_url }}/${{ gitea.repository }}/actions/runs/${{ gitea.run_number }}" \
                  -d "Blog workflow failed!" \
                  -u ${NTFY_TOKEN} \
                  ${NTFY_URL}/${NTFY_TOPIC}
