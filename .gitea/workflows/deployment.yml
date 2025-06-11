@@ -212,10 +212,13 @@ jobs:
         run: |
           all_ok() {
             for job in Check-Rebuild Build Deploy-Staging Test-Staging Merge Deploy-Production Test-Production Clean; do
+              echo "result=${{ needs.${job}.result }}""
               result="${{ needs.${job}.result }}"
               if not [[ "$result" == "success" || "$result" == "skipped" ]]; then
+                echo "job $job returned 1"
                 return 1
               fi
+            echo "all ok"
             done
           }
 
