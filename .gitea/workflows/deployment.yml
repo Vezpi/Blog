@@ -89,9 +89,7 @@ jobs:
           docker tag ${DOCKER_IMAGE}:${{ needs.Check-Rebuild.outputs.latest_hugo_version }} ${DOCKER_IMAGE}:latest
 
   Deploy-Staging:
-    needs: 
-      - Check-Rebuild
-      - Build
+    needs: [Check-Rebuild, Build]
     if: always() && needs.Check-Rebuild.result == 'success' && (needs.Build.result == 'skipped' || needs.Build.result == 'success')
     runs-on: docker
     container:
@@ -128,7 +126,6 @@ jobs:
             exit 1
           else
             echo "✅ Service is healthy"
-            exit 1
           fi
 
   Merge:
@@ -186,10 +183,7 @@ jobs:
           fi
 
   Clean:
-    needs:
-      - Check-Rebuild
-      - Build
-      - Test-Production
+    needs: [Check-Rebuild, Build, Test-Production]
     runs-on: docker
     defaults:
       run:
