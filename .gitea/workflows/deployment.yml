@@ -210,7 +210,7 @@ jobs:
     steps:
       - name: Notify Workflow Result
         run: |
-          if [[ 
+          if [[ \
             "${{ needs.Check-Rebuild.result }}" == "success" && \
            ("${{ needs.Build.result }}" == "success" || "${{ needs.Build.result }}" == "skipped") && \
             "${{ needs.Deploy-Staging.result }}" == "success" && \ 
