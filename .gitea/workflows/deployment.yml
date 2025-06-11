@@ -4,6 +4,8 @@ on:
   push:
     branches:
       - preview
+  schedule:
+    - cron: '0 3 * * *'
 
 env:
   DOCKER_IMAGE: vezpi-blog
