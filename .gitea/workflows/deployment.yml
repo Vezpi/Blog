@@ -222,15 +222,14 @@ jobs:
           ]]; then
             curl -H "Priority: min" \
                  -H "Tags: white_check_mark" \
-                 -H "Actions: view, View Run, ${{ gitea.server_url }}/${{ gitea.repository }}/actions/runs/${{ gitea.run_number }}" \
-                 -d "Blog workflow completed successfully!" \
+                 -d "Blog workflow completed successfully." \
                  -u ${NTFY_TOKEN} \
                  ${NTFY_URL}/${NTFY_TOPIC}
           else
             curl -H "Priority: high" \
                  -H "Tags: x" \
                  -H "Actions: view, View Run, ${{ gitea.server_url }}/${{ gitea.repository }}/actions/runs/${{ gitea.run_number }}" \
-                 -d "Blog workflow failed somewhere in the pipeline." \
+                 -d "Blog workflow failed!" \
                  -u ${NTFY_TOKEN} \
                  ${NTFY_URL}/${NTFY_TOPIC}
           fi
