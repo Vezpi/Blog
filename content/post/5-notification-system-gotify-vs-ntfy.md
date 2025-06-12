@@ -1,13 +1,14 @@
 ---
 slug: notification-system-gotify-vs-ntfy
-title: Template
-description: 
+title: Testing Gotify and Ntfy, a Self-Hosted Notification System
+description: Gotify or Ntfy? I tested both to create a reliable, self-hosted notification system for my homelab and integrated it with CI/CD pipeline.
 date: 2025-06-13
-draft: true
+draft: false
 tags:
   - notification
   - ntfy
   - gotify
+  - ci-cd
 categories:
   - homelab
 ---
@@ -308,7 +309,7 @@ user android_s25u (role: user, tier: none)
 - read-only access to topic *
 ```
 
-✅ After setting up the user on the Ntfy Android App, I can read my messages on the `blog` and on the testing one.
+✅ After setting up the user on the Ntfy Android App, I can read my messages on `https://ntfy.vezpi.me/blog` and also on the testing one.
 
 ### Implementation
 
@@ -319,7 +320,7 @@ Now my users are setup, I want to add a `Notify` job in my CI/CD pipeline for th
 To allow my Gitea Runner to use my `gitea_blog` user in its job, I want to create a secret. I explore the `Blog` Gitea repository `Settings`, then `Actions` > `Secrets` > `Add Secret`. Here I set the secret value with the `<user>:<password>` format:
 ![Add a secret in the blog Gitea repository](img/gitea-blog-ntfy-credentials.png)
 
-### Write the `Notify` code
+### Write the `Notify` Code
 
 Now I can write the code which will send me a message when a new deployment occurs.
 
@@ -366,7 +367,7 @@ If anything fails, I want to be notified on my mobile with higher priority. Ntfy
           fi
 ```
 
-✅ Testing both cases work as expected
+✅ Testing both cases, work as expected:
 ![Checking both test scenario in Ntfy WebUI](img/ntfy-testing-blog-notifications.png)
 
 ## Conclusion

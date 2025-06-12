@@ -1,13 +1,14 @@
 ---
 slug: notification-system-gotify-vs-ntfy
-title: Template
-description: 
+title: Test de Gotify et Ntfy, un système de notifications self-hosted
+description: Gotify ou Ntfy ? J'ai testé les deux pour créer un système de notifications fiable et self-hosted pour mon homelab, et intégré à un pipeline CI/CD.
 date: 2025-06-13
-draft: true
+draft: false
 tags:
   - notification
   - ntfy
   - gotify
+  - ci-cd
 categories:
   - homelab
 ---
@@ -294,11 +295,11 @@ Je tente aussi un envoi sur mon topic de test :
 $ curl -u gitea_blog:<password> -d "Message test from gitea_blog!" https://ntfy.vezpi.me/potato
 {"code":40301,"http":403,"error":"forbidden","link":"https://ntfy.sh/docs/publish/#authentication"}
 ```
-❌ Denied as expected.
+❌ Refusé comme attendu.
 
-#### Android Device User
+#### Utilisateur Android
 
-From my Android device I only want to receive messages, but on all topics. I create the user `android_s25u`:
+Depuis mon appareil Android, je veux uniquement recevoir les messages, mais sur tous les topics. Je crée l’utilisateur `android_s25u` :
 ```bash
 $ ntfy user add android_s25u
 user android_s25u added with role user
@@ -309,26 +310,26 @@ user android_s25u (role: user, tier: none)
 - read-only access to topic *
 ```
 
-✅ After setting up the user on the Ntfy Android App, I can read my messages on the `blog` and on the testing one.
+✅ Après avoir configuré l’utilisateur dans l’application Android Ntfy, je peux lire mes messages sur `https://ntfy.vezpi.me/blog` et aussi sur le topic de test.
 
-### Implementation
+### Implémentation
 
-Now my users are setup, I want to add a `Notify` job in my CI/CD pipeline for the blog deployment in **Gitea**, you can find the full workflow in [this article]({{< ref "post/4-blog-deployment-ci-cd-pipeline-gitea-actions" >}}).
+Maintenant que mes utilisateurs sont prêts, je veux ajouter un job `Notify` dans mon pipeline CI/CD pour le déploiement du blog dans **Gitea**, vous pouvez retrouver le workflow complet dans [cet article]({{< ref "post/4-blog-deployment-ci-cd-pipeline-gitea-actions" >}}).
 
-#### Create a Secret
+#### Créer un Secret
 
-To allow my Gitea Runner to use my `gitea_blog` user in its job, I want to create a secret. I explore the `Blog` Gitea repository `Settings`, then `Actions` > `Secrets` > `Add Secret`. Here I set the secret value with the `<user>:<password>` format:
+Pour permettre à mon Gitea Runner d’utiliser l’utilisateur `gitea_blog` dans ses jobs, je veux créer un secret. J’explore le dépôt Gitea `Blog` dans `Settings`, puis `Actions` > `Secrets` > `Add Secret`. J’y mets la valeur du secret au format `<utilisateur>:<password>` :  
 ![Add a secret in the blog Gitea repository](img/gitea-blog-ntfy-credentials.png)
 
-### Write the `Notify` code
+### Écrire le Code `Notify`
 
-Now I can write the code which will send me a message when a new deployment occurs.
+Je peux maintenant écrire le code qui m’enverra un message quand un nouveau déploiement se produit.
 
-If the deployment is successful, the priority would be minimal, no notifications needed on my mobile, just for me to view the events in the Android Ntfy App if I need to.
+Si le déploiement est un succès, la priorité sera minimale, pas besoin de notification sur mon mobile, juste pour garder une trace dans l’application Android Ntfy si besoin.
 
-If anything fails, I want to be notified on my mobile with higher priority. Ntfy allows me to add actions on my notifications, I will create 2 actions:
-- **View Run**: Direct link to the workflow run in Gitea to see what happened.
-- **Verify Blog**: Link to the blog to make sure it is still online.
+Si quelque chose échoue, je veux être notifié sur mon mobile avec une priorité plus élevée. Ntfy me permet d’ajouter des actions sur mes notifications, je vais en créer 2 :
+- **View Run** : Lien direct vers le workflow dans Gitea pour voir ce qu’il s’est passé.
+- **Verify Blog** : Lien vers le blog pour vérifier qu’il est toujours en ligne.
 ```yaml
   Notify:
     needs: [Check-Rebuild, Build, Deploy-Staging, Test-Staging, Merge, Deploy-Production, Test-Production, Clean]
@@ -367,13 +368,13 @@ If anything fails, I want to be notified on my mobile with higher priority. Ntfy
           fi
 ```
 
-✅ Testing both cases work as expected
+✅ Test des deux cas, fonctionne comme prévu :
 ![Checking both test scenario in Ntfy WebUI](img/ntfy-testing-blog-notifications.png)
 
 ## Conclusion
 
-After testing **Gotify** and **Ntfy**, I found my next notification system. They are both good for the job but I had to pick one and I have a little preference for Ntfy.
+Après avoir testé **Gotify** et **Ntfy**, j’ai trouvé mon prochain système de notifications. Les deux sont bons pour le job, mais je devais en choisir un et j’ai une petite préférence pour Ntfy.
 
-The application would be perfect if I could manage the users and access from the WebUI, also I would prefer to manage the topic's icon globally and not having to upload it from my mobile.
+L’application serait parfaite si je pouvais gérer les utilisateurs et les accès depuis l’interface Web. Aussi, je préférerais pouvoir gérer l’icône des topics globalement plutôt que depuis mon mobile.
 
-Anyway I'm very satisfied with the results on my first implementation and I look forward to add notification elsewhere!
+Quoi qu’il en soit, je suis très satisfait du résultat de cette première implémentation et j’ai hâte d’ajouter des notifications ailleurs !
