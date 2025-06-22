@@ -134,6 +134,19 @@ jobs:
     needs: Test-Staging
     runs-on: ubuntu
     steps:
+      - name: Checkout preview branch
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: preview
+
+      - name: Check for merge lock
+        run: |
+          if [ -f .dev-lock ]; then
+            echo "🔒 Merge is locked via .dev-lock file. Skipping merge to main."
+            exit 0
+          fi
+          
       - name: Checkout Repository
         uses: actions/checkout@v4
         with:
