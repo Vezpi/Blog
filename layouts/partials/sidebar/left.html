@@ -54,7 +54,7 @@
                     </a>
                 </li>
             {{ end }}
-            {{- $currentLang := .Language.Lang -}}
+            {{- $currentLang := .Site.Language.Lang -}}
             {{- range .AllTranslations }}
                 {{- if ne .Language.Lang $currentLang }}
                     <li>
