@@ -1,0 +1,26 @@
+{{ define "main" }}
+    <header class="homepage-header">
+        {{ with .Title }}
+            <h1 class="homepage-title">{{ . }}</h1>
+        {{ end }}
+        {{ with .Content }}
+            <div class="homepage-description">
+                {{ . }}
+            </div>
+        {{ end }}
+    </header>
+
+    {{ $pages := where .Site.RegularPages "Type" "in" .Site.Params.mainSections }}
+    {{ $notHidden := where .Site.RegularPages "Params.hidden" "!=" true }}
+    {{ $filtered := ($pages | intersect $notHidden) }}
+    {{ $pag := .Paginate ($filtered) }}
+
+    <section class="article-list">
+        {{ range $index, $element := $pag.Pages }}
+            {{ partial "article-list/default" . }}
+        {{ end }}
+    </section>
+
+    {{- partial "pagination.html" . -}}
+    {{- partial "footer/footer" . -}}
+{{ end }}
