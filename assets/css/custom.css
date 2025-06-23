@@ -1,0 +1,12 @@
+.homepage-header {
+  padding: 1rem 0;
+  text-align: center;
+}
+.homepage-title {
+  font-size: 2.5rem;
+  margin-bottom: 0.5rem;
+}
+.homepage-description {
+  font-size: 1.2rem;
+  color: #666;
+}
