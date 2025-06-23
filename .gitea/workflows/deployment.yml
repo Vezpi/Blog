@@ -22,6 +22,7 @@ jobs:
       newer_version_available: ${{ steps.compare.outputs.version }}
       current_docker_image: ${{ steps.current_docker.outputs.image }}
       docker_folder_changed: ${{ steps.docker_folder.outputs.changed }}
+      dev_lock_present: ${{ steps.check_dev_lock.outputs.locked }}
     steps:
       - name: Checkout Repository
         run: git clone --branch preview https://${{ secrets.REPO_TOKEN }}@git.vezpi.me/Vezpi/blog.git .
@@ -69,6 +70,15 @@ jobs:
             echo "No change in the /docker folder"
           fi
           echo "changed=$docker_folder_changed" | tee -a $GITEA_OUTPUT
+      
+      - name: Check for .dev-lock file
+        id: check_dev_lock
+        run: |
+          if [ -f .dev-lock ]; then
+            echo "locked=true" | tee -a $GITEA_OUTPUT
+          else
+            echo "locked=false" | tee -a $GITEA_OUTPUT
+          fi
 
   Build:
     needs: Check-Rebuild
@@ -132,21 +142,9 @@ jobs:
 
   Merge:
     needs: Test-Staging
+    if: needs.Test-Staging.result == 'success' && needs.Check-Rebuild.outputs.dev_lock_present == 'false'
     runs-on: ubuntu
     steps:
-      - name: Checkout preview branch
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-          ref: preview
-
-      - name: Check for merge lock
-        run: |
-          if [ -f .dev-lock ]; then
-            echo "🔒 Merge is locked via .dev-lock file. Skipping merge to main."
-            exit 0
-          fi
-          
       - name: Checkout Repository
         uses: actions/checkout@v4
         with:
