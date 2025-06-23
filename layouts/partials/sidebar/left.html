@@ -54,6 +54,16 @@
                     </a>
                 </li>
             {{ end }}
+            {{- $currentLang := .Language.Lang -}}
+            {{- range .AllTranslations }}
+                {{- if ne .Language.Lang $currentLang }}
+                    <li>
+                        <a href="{{ .Permalink }}" title="{{ .Language.LanguageName }}">
+                            <img src="/flags/{{ .Language.Lang }}.svg" alt="{{ .Language.LanguageName }}" width="24" height="16" style="vertical-align: middle;">
+                        </a>
+                    </li>
+                {{- end }}
+            {{- end }}
         </ol>
     {{- end -}}
 
@@ -76,18 +86,6 @@
         {{ end }}
         <li class="menu-bottom-section">
             <ol class="menu">
-                {{- $currentLang := .Language.Lang -}}
-                {{- range .AllTranslations }}
-                  {{- if ne .Language.Lang $currentLang }}
-                    <li id="i18n-switch">
-                      <a href="{{ .Permalink }}" title="{{ .Language.LanguageName }}">
-                        <img src="/flags/{{ .Language.Lang }}.png" alt="{{ .Language.LanguageName }} flag" style="width: 20px; height: auto; vertical-align: middle; margin-right: 5px;" />
-                        {{ .Language.LanguageName }}
-                      </a>
-                    </li>
-                  {{- end }}
-                {{- end }}
-
                 {{ if (default false .Site.Params.colorScheme.toggle) }}
                     <li id="dark-mode-toggle">
                         {{ partial "helper/icon" "moon" }}
