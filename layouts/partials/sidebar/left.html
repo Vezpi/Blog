@@ -77,7 +77,7 @@
         <li class="menu-bottom-section">
             <ol class="menu">
                 {{- $currentLang := .Language.Lang -}}
-                {{- range .Site.Home.AllTranslations }}
+                {{- range .AllTranslations }}
                   {{- if ne .Language.Lang $currentLang }}
                     <li id="i18n-switch">
                       <a href="{{ .Permalink }}" title="{{ .Language.LanguageName }}">
