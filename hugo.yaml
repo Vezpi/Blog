@@ -115,7 +115,7 @@ frontmatter:
   format: "yaml"
 
 params:
-  mainSections: ["about"]
+  mainSections: ["page/about"]
   description: "A blog documenting my homelab journey, covering automation, self-hosted services, and hands-on experiments with open source technologies."
   favicon: "/favicon-32x32.png"
   sitemapFilter: ["/tags/", "/categories/", "/search/"]
