@@ -55,7 +55,7 @@
                 </li>
             {{ end }}
             {{- $currentLang := .Site.Language.Lang -}}
-            {{- range .Site.Home.AllTranslations - }}
+            {{- range .Site.Home.AllTranslations -}}
                 {{- if ne .Language.Lang $currentLang }}
                     <li>
                         <a href="{{ .Permalink }}" title="{{ .Language.LanguageName }}">
