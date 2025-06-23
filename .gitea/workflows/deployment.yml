@@ -241,9 +241,9 @@ jobs:
                   -d "Blog workflow failed!" \
                   -u ${NTFY_TOKEN} \
                   ${NTFY_URL}/${NTFY_TOPIC}
-            else
-              echo "🔒 Merge is locked via .dev-lock file, no notification" 
             fi
+          else
+            echo "🔒 Merge is locked via .dev-lock file, no notification" 
           fi
 
           
