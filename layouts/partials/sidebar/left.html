@@ -81,7 +81,7 @@
                   {{- if ne .Language.Lang $currentLang }}
                     <li id="i18n-switch">
                       <a href="{{ .Permalink }}" title="{{ .Language.LanguageName }}">
-                        {{ partial "helper/icon" "message-language" }}
+                        <img src="/flags/{{ .Language.Lang }}.png" alt="{{ .Language.LanguageName }} flag" style="width: 20px; height: auto; vertical-align: middle; margin-right: 5px;" />
                         {{ .Language.LanguageName }}
                       </a>
                     </li>
