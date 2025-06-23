@@ -1,5 +1,6 @@
 ---
-title: Home
-description: Home Sweet Home
+title: Welcome to Vezpi Lab
+description: Here the latest articles
 ---
-Hi! I'm Etienne, an **automation** lover and **homelab** projects enthusiast. I am a Linux SME and work as a **Senior Cloud DevOps Engineer** at Capgemini.
+This blog shares thoughts and experiments from my homelab. 
+Below you'll find the latest articles on self-hosting, automation, and more.
