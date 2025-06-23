@@ -209,7 +209,7 @@ jobs:
   Notify:
     needs: [Check-Rebuild, Build, Deploy-Staging, Test-Staging, Merge, Deploy-Production, Test-Production, Clean]
     runs-on: ubuntu
-    if: always()
+    if: always() && needs.Check-Rebuild.outputs.dev_lock_present == 'false'
     env:
       NTFY_URL: https://ntfy.vezpi.me
       NTFY_TOPIC: blog
@@ -217,33 +217,29 @@ jobs:
     steps:
       - name: Notify Workflow Result
         run: |
-          if [[ ${{ needs.Check-Rebuild.outputs.dev_lock_present}}" == 'false' ]]; then
-            if [[
-              "${{ needs.Check-Rebuild.result }}" == "success" &&
-            ("${{ needs.Build.result }}" == "success" || "${{ needs.Build.result }}" == "skipped") &&
-              "${{ needs.Deploy-Staging.result }}" == "success" &&
-              "${{ needs.Test-Staging.result }}" == "success" && 
-              "${{ needs.Merge.result }}" == "success" &&
-              "${{ needs.Deploy-Production.result }}" == "success" &&
-              "${{ needs.Test-Production.result }}" == "success" &&
-            ("${{ needs.Clean.result }}" == "success" || "${{ needs.Clean.result }}" == "skipped")
-            ]]; then
-              curl -H "Priority: min" \
-                  -H "Tags: white_check_mark" \
-                  -d "Blog workflow completed successfully." \
-                  -u ${NTFY_TOKEN} \
-                  ${NTFY_URL}/${NTFY_TOPIC}
-            else
-              curl -H "Priority: high" \
-                  -H "Tags: x" \
-                  -H "Actions: view, View Run, ${{ gitea.server_url }}/${{ gitea.repository }}/actions/runs/${{ gitea.run_number }}, clear=true; \
-                                view, Verify Blog, https://blog.vezpi.com, clear=true" \
-                  -d "Blog workflow failed!" \
-                  -u ${NTFY_TOKEN} \
-                  ${NTFY_URL}/${NTFY_TOPIC}
-            fi
+          if [[
+            "${{ needs.Check-Rebuild.result }}" == "success" &&
+           ("${{ needs.Build.result }}" == "success" || "${{ needs.Build.result }}" == "skipped") &&
+            "${{ needs.Deploy-Staging.result }}" == "success" &&
+            "${{ needs.Test-Staging.result }}" == "success" && 
+            "${{ needs.Merge.result }}" == "success" &&
+            "${{ needs.Deploy-Production.result }}" == "success" &&
+            "${{ needs.Test-Production.result }}" == "success" &&
+           ("${{ needs.Clean.result }}" == "success" || "${{ needs.Clean.result }}" == "skipped")
+          ]]; then
+            curl -H "Priority: min" \
+                 -H "Tags: white_check_mark" \
+                 -d "Blog workflow completed successfully." \
+                 -u ${NTFY_TOKEN} \
+                 ${NTFY_URL}/${NTFY_TOPIC}
           else
-            echo "🔒 Merge is locked via .dev-lock file, no notification" 
+            curl -H "Priority: high" \
+                 -H "Tags: x" \
+                 -H "Actions: view, View Run, ${{ gitea.server_url }}/${{ gitea.repository }}/actions/runs/${{ gitea.run_number }}, clear=true; \
+                              view, Verify Blog, https://blog.vezpi.com, clear=true" \
+                 -d "Blog workflow failed!" \
+                 -u ${NTFY_TOKEN} \
+                 ${NTFY_URL}/${NTFY_TOPIC}
           fi
 
           
