@@ -37,6 +37,7 @@
         </div>
     </header>
 
+    {{- $global := . -}}
     {{- with .Site.Menus.social -}}
         <ol class="menu-social">
             {{ range . }}
@@ -54,8 +55,8 @@
                     </a>
                 </li>
             {{ end }}
-            {{- $currentLang := .Site.Language.Lang -}}
-            {{- range .Site.Home.AllTranslations -}}
+            {{- $currentLang := $global.Site.Language.Lang -}}
+            {{- range $global.Site.Home.AllTranslations }}
                 {{- if ne .Language.Lang $currentLang }}
                     <li>
                         <a href="{{ .Permalink }}" title="{{ .Language.LanguageName }}">
