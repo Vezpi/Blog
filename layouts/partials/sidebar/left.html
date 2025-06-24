@@ -60,9 +60,7 @@
                 {{- if ne .Language.Lang $currentLang }}
                     <li>
                         <a href="{{ .Permalink }}" title="{{ .Language.LanguageName }}">
-                            <div style="width: 64px; height: 24px;">
-                                {{ partial "helper/icon" (printf "toggle_to_%s" .Language.Lang) }}
-                            </div>
+                            <object data="/icons/toggle_to_{{ .Language.Lang }}.svg" type="image/svg+xml" class="language-toggle"></object>
                         </a>
                     </li>
                 {{- end }}
