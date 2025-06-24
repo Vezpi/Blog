@@ -60,7 +60,7 @@
                 {{- if ne .Language.Lang $currentLang }}
                     <li>
                         <a href="{{ .Permalink }}" title="{{ .Language.LanguageName }}">
-                            {{ partial "helper/icon" "toggle_to_{{ .Language.Lang }}" }}
+                            {{ partial "helper/icon" (printf "toggle_to_%s" .Language.Lang) }}
                         </a>
                     </li>
                 {{- end }}
