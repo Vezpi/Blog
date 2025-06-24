@@ -60,7 +60,7 @@
                 {{- if ne .Language.Lang $currentLang }}
                     <li>
                         <a href="{{ .Permalink }}" title="{{ .Language.LanguageName }}">
-                            <img src="/flags/{{ .Language.Lang }}.png" alt="{{ .Language.LanguageName }} flag" style="width: 20px; height: auto; vertical-align: middle;">
+                            <img src="/icons/{{ .Language.Lang }}_toggle.svg" alt="{{ .Language.LanguageName }} toggle" style="width: 30px; height: auto; vertical-align: middle;">
                         </a>
                     </li>
                 {{- end }}
