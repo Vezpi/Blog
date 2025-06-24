@@ -58,8 +58,8 @@
             {{- $currentLang := $page.Language.Lang -}}
             {{- range $page.AllTranslations }}
                 {{- if ne .Language.Lang $currentLang }}
-                    <li>
-                        <a href="{{ .Permalink }}" title="{{ .Language.LanguageName }}" style="width: auto; height: 24px;">
+                    <li style="width: auto; height: 24px;">
+                        <a href="{{ .Permalink }}" title="{{ .Language.LanguageName }}">
                             {{ partial "helper/icon" (printf "toggle_to_%s" .Language.Lang) }}
                         </a>
                     </li>
