@@ -141,7 +141,7 @@ jobs:
           fi
 
   Merge:
-    needs: Test-Staging
+    needs: [Check-Rebuild, Test-Staging]
     if: needs.Test-Staging.result == 'success' && needs.Check-Rebuild.outputs.dev_lock_present == 'false'
     runs-on: ubuntu
     steps:
