@@ -3,7 +3,10 @@
   text-align: center;
 }
 
-.lang-toggle-icon svg {
+.lang-toggle-icon {
+  margin-left: auto;
+  svg {
     width: 64px;
     height: 24px;
+  }
 }
