@@ -90,16 +90,10 @@ languages:
           weight: 20
           params:
             icon: "brand-github"
-        - identifier: "gitea"
-          name: "Gitea"
-          url: "https://git.vezpi.me/Vezpi/blog"
-          weight: 30
-          params:
-            icon: "brand-git"
         - identifier: "linkedin"
           name: "LinkedIn"
           url: "https://www.linkedin.com/in/etiennegirault/"
-          weight: 40
+          weight: 30
           params:
             icon: "brand-linkedin"
 
