@@ -305,21 +305,93 @@ It is connected to a `change node` which will attach the configuration to the `r
 }
 ```
 
-#### 9. TBD
+#### 9. Computation
 
 Now that the message has the room configuration attached, we are entering in the computation pipeline. We have the AC unit name, the sensor names, the desired base temperature and the offset to apply. From these values, we will fetch the current state and do the maths.
 
 The first node is another `delay node` which regulate the rate of incoming messages, because the previous block could have created 3 messages in all rooms are targeted.
 
 The second is the most important node of the workflow, a `function node` that has multiple tasks:
-- 
+- Fetch sensor state for Home Assistant
+- Calculate mode thresholds with given offset
+- Disable modes if conditions are met
+- Inject these values in the payload
+```js
+INSERT CODE
+```
 
+The third node is a `TBD node`, which drops subsequent messages with similar payload:
+ADD IMAGE
 
-#### 10. 
-#### 11. 
-#### 12. 
-#### 13. 
-#### 14. 
-#### 15. 
+The fourth node checks if any lock is set, with a `current state node`, we verify if the timer associated to the unit is idle. If not, the message is discarded:
+ADD IMAGE
+
+The last node is another `current state node` which will fetch the unit state and properties:
+ADD IMAGE
+
+#### 10. Target State
+
+After the computation, we want to determine what should be the target mode, what action to do to converge from the current mode and, if apply, what should be the fan's speed for that mode.
+
+All three nodes are `function nodes`, the first one decides what should be the target mode, between: `off`, `cool`, `dry`, `fan_only` and `heat`:
+```js
+INSERT CODE
+```
+
+The second compares the current and target node and pick which action to take:
+- **check**: current and target are the same.
+- **start**: the AC unit is currently off, but the target is different.
+- **change**: the AC unit is on, the target mode is different, but not `off`.
+- **stop**: the AC unit is on and it is required to stop it.
+```js
+INSERT CODE
+```
+
+The last node determines the fan's speed of the target mode based on thresholds:
+```js
+INSERT CODE
+```
+
+#### 11. Action Switch
+
+Based on the action to take, the `switch node` will route the message accordingly:
+ADD IMAGE
+
+#### 12. Start
+
+When the action is `start`, we first need to turn the unit online, while this takes between 20 to 40 seconds depending on the unit model, it is also locking the unit for a short period for future messages.
+
+The first node is a `call service node` using the `turn_on` service on the AC unit:
+ADD IMAGE
+
+The second node is another `call service node` which will start the lock timer of this unit for 45 seconds:
+ADD IMAGE
+
+The last one is a `delay node` of 5 seconds, to give the time to the Home Assistant Daikin integration to resolve the new state.
+
+#### 13. Change
+
+The `change` action is used to change from one mode to another, but also used right after the start action.
+
+The first node is a `call service node` using `the set_hvac_mode` service on the AC unit:
+ADD IMAGE
+
+The following node is another delay of 5 seconds.
+
+The last one verify with a `switch node` if the target temperature needs to be set, this is only required for the modes `cool` and `heat`
+ADD IMAGE
+
+#### 14. Set Target Temperature
+
+The target temperature is only relevant for `cool` and `heat` mode, when you use a normal AC unit, you define a temperature to reach. This is exactly what is defined here. But because each unit is using its own internal sensor to verify, I don't trust it. If the value is already reached, the unit won't blow anything.
+
+The first node is another `call service node` using the `set_temperature` service:
+ADD IMAGE
+
+Again, this node is followed by a `delay node` of 5 seconds
+
+#### 15. Check
+
+The `check` action is almost used everytime
 #### 16. 
 #### 17. 
