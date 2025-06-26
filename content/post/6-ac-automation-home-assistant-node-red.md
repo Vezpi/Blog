@@ -305,7 +305,16 @@ It is connected to a `change node` which will attach the configuration to the `r
 }
 ```
 
-#### 9. 
+#### 9. TBD
+
+Now that the message has the room configuration attached, we are entering in the computation pipeline. We have the AC unit name, the sensor names, the desired base temperature and the offset to apply. From these values, we will fetch the current state and do the maths.
+
+The first node is another `delay node` which regulate the rate of incoming messages, because the previous block could have created 3 messages in all rooms are targeted.
+
+The second is the most important node of the workflow, a `function node` that has multiple tasks:
+- 
+
+
 #### 10. 
 #### 11. 
 #### 12. 
