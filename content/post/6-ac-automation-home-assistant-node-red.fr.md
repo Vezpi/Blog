@@ -36,7 +36,7 @@ Node-RED ne remplace pas Home Assistant, il le renforce. Je ne détaillerai pas 
 
 ## Ancien Workflow
 
-J’avais déjà une solution plutôt efficace pour contrôler ma climatisation via Home Assistant et Node-RED, mais je voulais l’améliorer pour qu’elle prenne aussi en compte le taux d’humidité dans l’appartement. Mon workflow actuel, bien qu’il fonctionne, n’était pas vraiment évolutif et assez difficile à maintenir.  
+J’avais déjà une solution plutôt efficace pour contrôler ma climatisation via Home Assistant et Node-RED, mais je voulais l’améliorer pour qu’elle prenne aussi en compte le taux d’humidité dans l’appartement. Mon workflow actuel, bien qu’il fonctionne, n’était pas vraiment évolutif et assez difficile à maintenir :  
 ![Ancien workflow Node-RED pour contrôler la climatisation](img/node-red-ha-ac-automation-before.png)
 
 ## Nouveau Workflow
@@ -53,7 +53,7 @@ Pour m’aider à faire tout ça, j’utilise 4 [capteurs de température et d�
 
 ### Workflow
 
-Laissez-moi vous présenter mon nouveau workflow de climatisation dans Node-RED, et vous expliquer en détail comment il fonctionne :
+Laissez-moi vous présenter mon nouveau workflow de climatisation dans Node-RED, et vous expliquer en détail comment il fonctionne :  
 ![New Node-RED air conditioning workflow](img/node-red-new-ac-workflow-with-legend.png)
 
 #### #### 1. Capteurs de Température
