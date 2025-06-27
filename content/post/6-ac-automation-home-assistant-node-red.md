@@ -3,7 +3,7 @@ slug: ac-automation-home-assistant-node-red
 title: Full AC Automation with Home Assistant and Node-RED
 description: How I automate my AC with Home Assistant and Node-RED to react to temperature, humidity and all daily events.
 date: 2025-06-27
-draft: true
+draft: false
 tags:
   - home-automation
   - home-assistant
