@@ -1,11 +1,15 @@
 ---
 slug: ac-automation-home-assistant-node-red
-title: home-assistant-node-red-ac-automation
-description: 
-date: 
+title: Full AC Automation with Home Assistant and Node-RED
+description: How I automate my AC with Home Assistant and Node-RED to react to temperature, humidity and all daily events.
+date: 2025-06-27
 draft: true
-tags: 
+tags:
+  - home-automation
+  - home-assistant
+  - node-red
 categories:
+  - automation
 ---
 ## Intro
 
@@ -662,8 +666,36 @@ The second node is another `call service node` which will start the lock timer o
 
 #### 17. Manual Intervention
 
-Sometime, for some reason, we want to use the AC manually. When we do, we don't want the workflow to change our manual setting, at least for some time.
+Sometime, for some reason, we want to use the AC manually. When we do, we don't want the workflow to change our manual setting, at least for some time. Node-RED is using its own user in Home Assistant, so when an AC unit change state without this user, this was manually done.
 
 The first node is a `trigger state node`, which will send a message when any AC unit is changing state:
 ![Pasted_image_20250626221149.png](img/Pasted_image_20250626221149.png)
 
+The second is a `function node` which willassociate the unit with its timer:
+```js
+const association = {
+    "climate.clim_salon": "timer.minuteur_clim_salon",
+    "climate.clim_chambre": "timer.minuteur_clim_chambre",
+    "climate.clim_couloir": "timer.minuteur_clim_couloir"
+};
+
+msg.payload = association[msg.topic]; 
+return msg;
+```
+
+The third is a `switch node` that will let through the message when the user_id is not the Node-RED user's one:
+![Node-RED switch node not specific user_id](img/node-red-switch-node-user-id.png)
+
+The fourth is another `switch node` which checks if there are any `user_id`:
+![Node-RED switch node check user_id not null](img/node-red-switch-node-check-user-id.png)
+
+Lastly, the final node is a `call service node` using `start` service on the unit's timer with its default duration (60 minutes):
+![Node-RED call service node start timer with default duration](img/node-red-call-service-node-start-unit-timer.png)
+
+## TL;DR
+
+With this setup, my AC system is fully automated, from  cooling in summer to warming in winter, while keeping in check the humidity level.
+
+This required quite a lot of thinking, tweaking and testing, but finally I'm now very happy with the results, that's why I'm sharing it with you, to give you some ideas about what you can do in home automation.
+
+If you think I could have done things differently, please reach out to me to discuss about it, do not hesitate to share your ideas as well!

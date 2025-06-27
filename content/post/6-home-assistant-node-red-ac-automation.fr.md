@@ -1,11 +1,15 @@
 ---
 slug: ac-automation-home-assistant-node-red
-title: home-assistant-node-red-ac-automation
-description: 
-date: 
+title: " Automatisation complète de la clim avec Home Assistant et Node-RED"
+description: Comment j’automatise ma clim avec Home Assistant et Node-RED pour réagir à la température, l’humidité et à tous les évènements quotidiens.
+date: 2025-06-27
 draft: true
-tags: 
+tags:
+  - home-automation
+  - home-assistant
+  - node-red
 categories:
+  - automation
 ---
 ## Intro
 
@@ -644,7 +648,62 @@ Le premier nœud est un autre `call service node` utilisant le service `set_temp
 
 Encore une fois, ce nœud est suivi d’un `delay node` de 5 secondes.
 
-#### 15. 
-#### 16. 
-#### 17. 
+#### 15. Vérification
+
+L’action `check` est utilisée presque tout le temps. Elle consiste uniquement à vérifier et comparer la vitesse de ventilation souhaitée, et à la modifier si nécessaire.
+
+Le premier nœud est un `switch node` qui vérifie si la valeur `speed` est définie :  
+![Node-RED switch node to test if speed is defined](img/node-red-switch-node-fan-speed.png)
+
+Le deuxième est un autre `switch node` qui compare la valeur `speed` avec la vitesse actuelle :  
+![Node-Red switch node to compare speed](img/node-red-switch-node-compare-speed.png)
+
+Enfin, le dernier nœud est un `call service node` utilisant le service `set_fan_mode` pour définir la vitesse du ventilateur :  
+![Node-RED call service node with set_fan_mode](img/node-red-call-service-node-set-fan-mode.png)
+
+#### 16. Arrêt
+
+Lorsque l’action est `stop`, l’unité de climatisation est simplement arrêtée.
+
+Le premier nœud est un `call service node` utilisant le service `turn_off` :  
+![Node-RED call service node with turn_off service](img/node-red-call-service-node-turn-off.png)
+
+Le deuxième nœud est un autre `call service node` qui va démarrer le minuteur de verrouillage de cette unité pour 45 secondes.
+
+#### 17. Intervention Manuelle
+
+Parfois, pour une raison ou une autre, on souhaite utiliser la climatisation manuellement. Dans ce cas, on ne veut pas que le flux Node-RED vienne écraser notre réglage manuel, du moins pendant un certain temps.  
+Node-RED utilise son propre utilisateur dans Home Assistant, donc si une unité change d’état sans cet utilisateur, c’est qu’une intervention manuelle a eu lieu.
+
+Le premier nœud est un `trigger state node`, qui envoie un message dès qu’une unité AC change d’état :  
+![Pasted_image_20250626221149.png](img/Pasted_image_20250626221149.png)
+
+Le deuxième est un `function node` qui associe l’unité avec son minuteur :
+```js
+const association = {
+    "climate.clim_salon": "timer.minuteur_clim_salon",
+    "climate.clim_chambre": "timer.minuteur_clim_chambre",
+    "climate.clim_couloir": "timer.minuteur_clim_couloir"
+};
+
+msg.payload = association[msg.topic]; 
+return msg;
+```
+
+Le troisième est un `switch node` qui laisse passer le message uniquement si le `user_id` **n’est pas** celui de Node-RED :  
+![Node-RED switch node not specific user_id](img/node-red-switch-node-user-id.png)
+
+Le quatrième est un autre `switch node` qui vérifie que le champ `user_id` **est bien défini** :  
+![Node-RED switch node check user_id not null](img/node-red-switch-node-check-user-id.png)
+
+Enfin, le dernier nœud est un `call service node` utilisant le service `start` sur le minuteur de l’unité, avec sa durée par défaut (60 minutes) :  
+![Node-RED call service node start timer with default duration](img/node-red-call-service-node-start-unit-timer.png)
+
+## TL;DR
+
+Avec cette configuration, mon système de climatisation est entièrement automatisé, du refroidissement en été au chauffage en hiver, tout en gardant un œil sur le taux d’humidité.
+
+Cela m’a demandé pas mal de réflexion, d’ajustements et de tests, mais au final je suis vraiment satisfait du résultat. C’est pourquoi je le partage ici, pour vous donner des idées sur ce qu’on peut faire en domotique.
+
+Si vous pensez que certaines choses pourraient être faites autrement, n’hésitez pas à me contacter pour en discuter ou me proposer de nouvelles idées !
 
