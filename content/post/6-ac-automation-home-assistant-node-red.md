@@ -317,17 +317,136 @@ The second is the most important node of the workflow, a `function node` that ha
 - Disable modes if conditions are met
 - Inject these values in the payload
 ```js
-INSERT CODE
+// --- Helper: Get Home Assistant state by entity ID ---
+function getState(entityId) {
+    return global.get("homeassistant.homeAssistant.states")[entityId]?.state;
+}
+
+// --- Determine current time period based on sensors ---
+const periods = ["jour", "soir", "nuit", "matin"];
+msg.payload.period = periods.find(p => getState(`binary_sensor.${p}`) === 'on') || 'unknown';
+
+// --- Determine presence status (absent = inverse of presence) ---
+const vacances = getState("input_boolean.absent");
+const absent = getState("input_boolean.presence") === 'on' ? 'off' : 'on';
+
+/**
+ * Recursively adds the base temperature and offset to all numeric start values in a threshold config
+ */
+function applyOffsetToThresholds(threshold, baseTemp, globalOffset) {
+    for (const [key, value] of Object.entries(threshold)) {
+        if (key === "offset") continue;
+
+        if (typeof value === 'object') {
+            applyOffsetToThresholds(value, baseTemp, globalOffset);
+        } else {
+            threshold[key] += baseTemp + globalOffset;
+        }
+    }
+}
+
+/**
+ * Calculates the global offset for a mode, based on presence, vacation, window, and time of day
+ */
+function calculateGlobalOffset(offsets, modeName, windowState, disabledMap) {
+    let globalOffset = 0;
+
+    for (const [key, offsetValue] of Object.entries(offsets)) {
+        let conditionMet = false;
+
+        if (key === msg.payload.period) conditionMet = true;
+        else if (key === "absent" && absent === 'on') conditionMet = true;
+        else if (key === "vacances" && vacances === 'on') conditionMet = true;
+        else if ((key === "fenetre" || key === "window") && windowState === 'on') conditionMet = true;
+
+        if (conditionMet) {
+            if (offsetValue === 'disabled') {
+                disabledMap[modeName] = true;
+                return 0; // Mode disabled immediately
+            }
+
+            globalOffset += parseFloat(offsetValue);
+        }
+    }
+
+    return globalOffset;
+}
+
+/**
+ * Main logic: compute thresholds for the specified room using the provided config
+ */
+const cfg = msg.payload.room_config;
+const room = msg.payload.room;
+
+// Normalize window sensor state
+const rawWindow = getState(cfg.window);
+const window = rawWindow === 'open' ? 'on' : rawWindow === 'closed' ? 'off' : rawWindow;
+
+// Gather temperatures
+const temps = cfg.thermometre.split(',')
+    .map(id => parseFloat(getState(id)))
+    .filter(v => !isNaN(v));
+
+const temp_avg = temps.reduce((a, b) => a + b, 0) / temps.length;
+const temp_min = Math.min(...temps);
+const temp_max = Math.max(...temps);
+
+// Gather humidity
+const humidities = cfg.humidity.split(',')
+    .map(id => parseFloat(getState(id)))
+    .filter(v => !isNaN(v));
+
+const humidity_avg = humidities.reduce((a, b) => a + b, 0) / humidities.length;
+const humidity_min = Math.min(...humidities);
+const humidity_max = Math.max(...humidities);
+
+// Get base temps
+const temp_ete = parseFloat(getState(cfg.temp_ete));
+const temp_hiver = parseFloat(getState(cfg.temp_hiver));
+
+// Process modes
+const { threshold } = cfg;
+const modes = ["cool", "dry", "fan_only", "heat"];
+const disabled = {};
+
+for (const mode of modes) {
+    const baseTemp = (mode === "heat") ? temp_hiver : temp_ete;
+    const globalOffset = calculateGlobalOffset(threshold[mode].offset, mode, window, disabled);
+
+    applyOffsetToThresholds(threshold[mode], baseTemp, globalOffset);
+}
+
+// Final message
+msg.payload = {
+    ...msg.payload,
+    unit: cfg.unit,
+    timer: cfg.timer,
+    threshold,
+    window,
+    temp: {
+        min: temp_min,
+        max: temp_max,
+        avg: Math.round(temp_avg * 100) / 100
+    },
+    humidity: {
+        min: humidity_min,
+        max: humidity_max,
+        avg: Math.round(humidity_avg * 100) / 100
+    },
+    disabled
+};
+
+return msg;
 ```
 
-The third node is a `TBD node`, which drops subsequent messages with similar payload:
-ADD IMAGE
+The third node is a `filter node`, which drops subsequent messages with similar payload:
+![Node-RED filter node to block similar message](img/node-red-filter-node-blocker.png)
 
 The fourth node checks if any lock is set, with a `current state node`, we verify if the timer associated to the unit is idle. If not, the message is discarded:
-ADD IMAGE
+![Node-RED current state node for timer lock](img/node-red-current-state-node-lock-timer.png)
 
 The last node is another `current state node` which will fetch the unit state and properties:
-ADD IMAGE
+![Node-RED current state node to get current unit state](img/node-red-current-state-node-get-unit-state.png)
 
 #### 10. Target State
 
@@ -335,7 +454,85 @@ After the computation, we want to determine what should be the target mode, what
 
 All three nodes are `function nodes`, the first one decides what should be the target mode, between: `off`, `cool`, `dry`, `fan_only` and `heat`:
 ```js
-INSERT CODE
+const minHumidityThreshold = 52;
+const maxHumidityThreshold = 57;
+
+// Helper: check if mode can be activated or stopped
+function isModeEligible(mode, temps, humidity, thresholds, currentMode) {
+    const isCurrent = (mode === currentMode);
+    const threshold = thresholds[mode];
+
+    if (msg.payload.disabled?.[mode]) return false;
+
+    // Determine which temperature to use for start/stop:
+    // start: temp.max (except heat uses temp.min)
+    // stop: temp.avg
+    let tempForCheckStart;
+    if (mode === "heat") {
+        tempForCheckStart = temps.min;  // heat start uses min temp
+    } else {
+        tempForCheckStart = temps.max;  // others start use max temp
+    }
+    const tempForCheckStop = temps.avg;
+
+    // Dry mode also depends on humidity thresholds
+    // humidity max for start, humidity avg for stop
+    let humidityForCheckStart = humidity.max;
+    let humidityForCheckStop = humidity.avg;
+
+    // For heat mode (inverted logic)
+    if (mode === "heat") {
+        if (!isCurrent) {
+            const minStart = Math.min(...Object.values(threshold.start));
+            return tempForCheckStart < minStart;
+        } else {
+            return tempForCheckStop < threshold.stop;
+        }
+    }
+
+    // For dry mode (humidity-dependent)
+    if (mode === "dry") {
+        // Skip if humidity too low
+        if (humidityForCheckStart <= (isCurrent ? minHumidityThreshold : maxHumidityThreshold)) return false;
+
+        const minStart = Math.min(...Object.values(threshold.start));
+        if (!isCurrent) {
+            return tempForCheckStart >= minStart;
+        } else {
+            return tempForCheckStop >= threshold.stop;
+        }
+    }
+
+    // For cool and fan_only
+    if (!isCurrent) {
+        const minStart = Math.min(...Object.values(threshold.start));
+        return tempForCheckStart >= minStart;
+    } else {
+        return tempForCheckStop >= threshold.stop;
+    }
+}
+
+// --- Main logic ---
+const { threshold, temp, humidity, current_mode, disabled } = msg.payload;
+
+const priority = ["cool", "dry", "fan_only", "heat"];
+let target_mode = "off";
+
+// Loop through priority list and stop at the first eligible mode
+for (const mode of priority) {
+    if (isModeEligible(mode, temp, humidity, threshold, current_mode)) {
+        target_mode = mode;
+        break;
+    }
+}
+
+msg.payload.target_mode = target_mode;
+
+if (target_mode === "cool" || target_mode === "heat") {
+  msg.payload.set_temp = true;
+}
+
+return msg;
 ```
 
 The second compares the current and target node and pick which action to take:
@@ -344,28 +541,79 @@ The second compares the current and target node and pick which action to take:
 - **change**: the AC unit is on, the target mode is different, but not `off`.
 - **stop**: the AC unit is on and it is required to stop it.
 ```js
-INSERT CODE
+let action = "check"; // default if both are same
+
+if (msg.payload.current_mode === "off" && msg.payload.target_mode !== "off") {
+    action = "start";
+} else if (msg.payload.current_mode !== "off" && msg.payload.target_mode !== "off" && msg.payload.current_mode !== msg.payload.target_mode) {
+    action = "change";
+} else if (msg.payload.current_mode !== "off" && msg.payload.target_mode === "off") {
+    action = "stop";
+}
+
+msg.payload.action = action;
+return msg;
 ```
 
 The last node determines the fan's speed of the target mode based on thresholds:
 ```js
-INSERT CODE
+// Function to find the appropriate speed key based on temperature and mode
+function findSpeed(thresholdStart, temperature, mode) {
+  let closestSpeed = 'quiet';
+  let closestTemp = mode === 'heat' ? Infinity : -Infinity;
+
+  for (const speedKey in thresholdStart) {
+    if (speedKey !== 'quiet') {
+      const tempValue = thresholdStart[speedKey];
+      if (mode === 'heat') {
+        if (tempValue >= temperature && tempValue <= closestTemp) {
+          closestSpeed = speedKey;
+          closestTemp = tempValue;
+        }
+      } else { // cool, fan_only
+        if (tempValue <= temperature && tempValue >= closestTemp) {
+          closestSpeed = speedKey;
+          closestTemp = tempValue;
+        }
+      }
+    }
+  }
+  return closestSpeed;
+}
+
+if (msg.payload.target_mode && msg.payload.target_mode !== "off" && msg.payload.target_mode !== "dry") {
+  const modeData = msg.payload.threshold[msg.payload.target_mode];
+  if (modeData && modeData.start) {
+    if (msg.payload.target_mode === "heat") {
+      msg.payload.speed = findSpeed(modeData.start, msg.payload.temp.min, 'heat');
+    } else {
+      msg.payload.speed = findSpeed(modeData.start, msg.payload.temp.max, 'cool');
+    }
+  } else {
+    node.error("Invalid mode data or missing 'start' thresholds", msg);
+  }
+} else {
+  // No need for speed in 'off' or 'dry' modes
+  msg.payload.speed = null;
+}
+
+return msg;
 ```
 
 #### 11. Action Switch
 
 Based on the action to take, the `switch node` will route the message accordingly:
-ADD IMAGE
+![Node-RED `switch node` pour sélectionner l’action](img/node-red-switch-node-select-action.png)
 
 #### 12. Start
 
 When the action is `start`, we first need to turn the unit online, while this takes between 20 to 40 seconds depending on the unit model, it is also locking the unit for a short period for future messages.
 
 The first node is a `call service node` using the `turn_on` service on the AC unit:
-ADD IMAGE
+![Node-RED call service node with turn_on service](img/node-red-call-service-node-turn-on.png)
 
 The second node is another `call service node` which will start the lock timer of this unit for 45 seconds:
-ADD IMAGE
+![Node-RED call service node to start the unit timer](img/node-red-call-service-node-start-timer.png)
 
 The last one is a `delay node` of 5 seconds, to give the time to the Home Assistant Daikin integration to resolve the new state.
 
@@ -374,24 +622,48 @@ The last one is a `delay node` of 5 seconds, to give the time to the Home Assist
 The `change` action is used to change from one mode to another, but also used right after the start action.
 
 The first node is a `call service node` using `the set_hvac_mode` service on the AC unit:
-ADD IMAGE
+![Node-RED call service node with set_hvac_mode service](img/node-red-call-service-node-set-hvac-mode.png)
 
 The following node is another delay of 5 seconds.
 
-The last one verify with a `switch node` if the target temperature needs to be set, this is only required for the modes `cool` and `heat`
-ADD IMAGE
+The last one verify with a `switch node` if the target temperature needs to be set, this is only required for the modes `cool` and `heat`:
+![Node-RED switch node for set_temp](img/node-red-switch-node-set-temp.png)
 
 #### 14. Set Target Temperature
 
 The target temperature is only relevant for `cool` and `heat` mode, when you use a normal AC unit, you define a temperature to reach. This is exactly what is defined here. But because each unit is using its own internal sensor to verify, I don't trust it. If the value is already reached, the unit won't blow anything.
 
 The first node is another `call service node` using the `set_temperature` service:
-ADD IMAGE
+![Node-RED call service node with set_temperature service](img/node-red-call-service-node-set-temperature-service.png)
 
 Again, this node is followed by a `delay node` of 5 seconds
 
 #### 15. Check
 
-The `check` action is almost used everytime
-#### 16. 
-#### 17. 
+The `check` action is almost used everytime, it is actually only checks and compare the desired fan speed, it changes the fan speed if needed.
+
+The first node is a `switch node` which verify if the `speed` is defined:
+![Node-RED switch node to test if speed is defined](img/node-red-switch-node-fan-speed.png)
+
+The second is another `switch node` to compare the `speed` value with the current speed:
+![Node-Red switch node to compare speed](img/node-red-switch-node-compare-speed.png)
+
+Finally the last node is a `call service node` using the `set_fan_mode` to set the fan speed:
+![Node-RED call service node with set_fan_mode](img/node-red-call-service-node-set-fan-mode.png)
+
+#### 16. Stop
+
+When the `action` is stop, the AC unit is simply turned off
+
+The first node is a `call service noded` using the service `turn_off`:
+![Node-RED call service node with turn_off service](img/node-red-call-service-node-turn-off.png)
+
+The second node is another `call service node` which will start the lock timer of this unit for 45 seconds
+
+#### 17. Manual Intervention
+
+Sometime, for some reason, we want to use the AC manually. When we do, we don't want the workflow to change our manual setting, at least for some time.
+
+The first node is a `trigger state node`, which will send a message when any AC unit is changing state:
+![Pasted_image_20250626221149.png](img/Pasted_image_20250626221149.png)
+
