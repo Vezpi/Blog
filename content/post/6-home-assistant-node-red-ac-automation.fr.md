@@ -24,7 +24,7 @@ Et si je pouvais automatiser tout ça ? Après tout, j’utilise déjà Home As
 
 ### Home Assistant
 
-Home Assistant, c’est le cerveau de ma maison connectée. Il relie tous mes appareils (lumières, capteurs, volets, etc.) dans une interface unique. Sa vraie force, c’est la possibilité de créer des automatisations : _si quelque chose se passe, alors fais ça_. Des actions simples comme “allumer la lumière de la cuisine quand un mouvement est détecté” se mettent en place en quelques clics. Et pour des scénarios plus avancés, Home Assistant propose un système de scripts en YAML avec des conditions, des minuteries, des déclencheurs, et même du templating.
+Home Assistant, c’est le cerveau de ma maison connectée. Il relie tous mes appareils (lumières, capteurs, volets, etc.) dans une interface unique. Sa vraie force, c’est la possibilité de créer des automatisations : si quelque chose se passe, alors fait ça. Des actions simples comme “allumer la lumière de la cuisine quand un mouvement est détecté” se mettent en place en quelques clics. Et pour des scénarios plus avancés, Home Assistant propose un système de scripts en YAML avec des conditions, des minuteries, des déclencheurs, et même du templating.
 
 Mais dès qu’on commence à faire des automatisations un peu complexes, qui dépendent de plusieurs capteurs, d’horaires spécifiques ou de la présence de quelqu’un, ça devient vite difficile à lire. Les blocs de code YAML s’allongent, et on ne sait plus trop ce qui fait quoi, surtout quand on veut corriger un petit détail plusieurs semaines plus tard.
 
@@ -36,7 +36,7 @@ Node-RED ne remplace pas Home Assistant, il le renforce. Je ne détaillerai pas 
 
 ## Ancien Workflow
 
-J’avais déjà une solution plutôt efficace pour contrôler ma climatisation via Home Assistant et Node-RED, mais je voulais l’améliorer pour qu’elle prenne aussi en compte le taux d’humidité dans l’appartement. Mon automatisation actuelle, bien qu’elle fonctionne, n’était pas vraiment évolutive et assez difficile à maintenir.  
+J’avais déjà une solution plutôt efficace pour contrôler ma climatisation via Home Assistant et Node-RED, mais je voulais l’améliorer pour qu’elle prenne aussi en compte le taux d’humidité dans l’appartement. Mon workflow actuel, bien qu’il fonctionne, n’était pas vraiment évolutif et assez difficile à maintenir.  
 ![Ancien workflow Node-RED pour contrôler la climatisation](img/node-red-ha-ac-automation-before.png)
 
 ## Nouveau Workflow
@@ -53,13 +53,12 @@ Pour m’aider à faire tout ça, j’utilise 4 [capteurs de température et d�
 
 ### Workflow
 
-Laissez-moi vous présenter mon nouveau workflow de climatisation dans Node-RED, et vous expliquer en détail comment il fonctionne.
-
+Laissez-moi vous présenter mon nouveau workflow de climatisation dans Node-RED, et vous expliquer en détail comment il fonctionne :
 ![New Node-RED air conditioning workflow](img/node-red-new-ac-workflow-with-legend.png)
 
 #### #### 1. Capteurs de Température
 
-Dans le premier nœud, j’ai regroupé tous les capteurs thermiques dans un seul `trigger state node`, en ajoutant non seulement la température mais aussi le taux d’humidité géré par chaque capteur. Ce nœud contient donc une liste de 8 entités (2 pour chaque capteur). À chaque fois qu’une de ces 8 valeurs change, le nœud est déclenché:
+Dans le premier nœud, j’ai regroupé tous les capteurs thermiques dans un seul `trigger state node`, en ajoutant non seulement la température mais aussi le taux d’humidité géré par chaque capteur. Ce nœud contient donc une liste de 8 entités (2 pour chaque capteur). À chaque fois qu’une de ces 8 valeurs change, le nœud est déclenché :  
 ![Nœud trigger state dans Node-RED avec les 8 entités](img/node-red-temperature-sensors-trigger-node.png)
 
 Chacun de mes capteurs thermiques porte un nom de couleur en français, car ils ont tous un autocollant coloré pour les distinguer :
@@ -93,7 +92,7 @@ msg.payload = {
 return msg;
 ```
 
-Pour le dernier nœud, dans la majorité des cas, les capteurs envoient deux messages simultanés : l’un pour la température, l’autre pour l’humidité. J’ai donc ajouté un `join node` pour fusionner ces deux messages s’ils sont envoyés dans la même seconde.  
+Pour le dernier nœud, dans la majorité des cas, les capteurs envoient deux messages simultanés : l’un pour la température, l’autre pour l’humidité. J’ai donc ajouté un `join node` pour fusionner ces deux messages s’ils sont envoyés dans la même seconde :  
 ![Join node in Node-RED to merge temperature and humidity](img/node-red-temperature-sensor-join-node.png)
 
 #### 2. Notification
@@ -135,9 +134,9 @@ return null; // Don't send anything now
 Le second nœud est un `call service node` qui envoie une notification sur mon téléphone Android avec les informations fournies :  
 ![Node-RED call service node for notification](img/node-red-call-service-node-notification.png)
 
-#### 3. Curseurs de température
+#### 3. Curseurs de Température
 
-Pour pouvoir ajuster la température sans avoir à modifier tout le workflow, j’ai créé deux entrées (ou helper) Home Assistant, de type _number_, pour chaque unité de climatisation, ce qui me fait un total de 6 entrées :  
+Pour pouvoir ajuster la température sans avoir à modifier tout le workflow, j’ai créé deux entrées (ou helper) Home Assistant, de type number, pour chaque unité de climatisation, ce qui me fait un total de 6 entrées :  
 ![Curseur de température dans Home Assistant pour chaque unité](img/home-assistant-temperature-room-sliders.png)
 
 Ces valeurs représentent la température de base utilisée pour le calcul des seuils, en fonction des offsets que je détaillerai plus loin.

@@ -30,7 +30,7 @@ That said, once automations start getting more complex, like reacting to multipl
 
 ### Node-RED
 
-That’s exactly why I turned to Node-RED. It’s a visual tool that lets you build logic using blocks called “nodes,” which you connect with wires to create flows. Each node performs a small task: trigger at a certain time, check a condition, send a command to a device, etc. Instead of writing YAML, you just drag, drop, and connect.
+That’s exactly why I turned to Node-RED. It’s a visual tool that lets you build logic using blocks called “nodes”, which you connect with wires to create flows. Each node performs a small task: trigger at a certain time, check a condition, send a command to a device, etc. Instead of writing YAML, you just drag, drop, and connect.
 
 Node-RED does not replace Home Assistant, it empowers it. I won't cover the installation of Node-RED neither the integration in HA, I've done that 2 years ago, but for that I remember, this is quite straightforward.
 
@@ -53,13 +53,12 @@ To help me achieve that, I'm using 4 [Aqara temperature and humidity sensors](ht
 
 ### Workflow
 
-Let me introduce my new AC workflow within Node-RED and explain what it does in detail 
-
+Let me introduce my new AC workflow within Node-RED and explain what it does in detail:  
 ![New Node-RED air conditioning workflow](img/node-red-new-ac-workflow-with-legend.png)
 
 #### 1. Temperature Sensors
 
-In the first node, I combined all the temperature sensors together in one `trigger state node`, but I also added humidity levels in addition to the temperature, managed by the sensor. The node then contains 8 entities in a list (2 for each of my sensor). Each time one value change out of these 8 entities, the node is triggered:
+In the first node, I combined all the temperature sensors together in one `trigger state node`, but I also added humidity levels in addition to the temperature, managed by the sensor. The node then contains 8 entities in a list (2 for each of my sensor). Each time one value change out of these 8 entities, the node is triggered:  
 ![Nœud trigger state dans Node-RED avec les 8 entités](img/node-red-temperature-sensors-trigger-node.png)
 
 Each of my temperature sensors are named with a color in French, because each has its own color sticker to distinguish them:
