@@ -155,6 +155,17 @@ terraform {
     }
   }
 }
+
+provider "proxmox" {
+  endpoint  = var.proxmox_endpoint
+  api_token = var.proxmox_api_token
+  insecure  = false
+  ssh {
+    agent       = false
+    private_key = file("~/.ssh/id_ed25519")
+    username    = "root"
+  }
+}
 ```
 
 #### `variables.tf`
@@ -162,6 +173,17 @@ terraform {
 > ⚠️ The defaults are based on my environment, adapt them to yours.
 
 ```hcl
+variable "proxmox_endpoint" {
+  description = "Proxmox URL endpoint"
+  type        = string
+}
+
+variable "proxmox_api_token" {
+  description = "Proxmox API token"
+  type        = string
+  sensitive   = true
+}
+
 variable "node_name" {
   description = "Proxmox host for the VM"
   type        = string
@@ -240,7 +262,7 @@ Now that we've moved all the resources required to deploy our VM into the `pve_v
 
 ### Code Structure
 
-For clarity, I've separated the modules and the projects:
+Here what is look like:
 ```plaintext
 terraform
 |-- modules
@@ -251,8 +273,7 @@ terraform
 `-- projects
     `-- simple-vm-with-module
         |-- credentials.auto.tfvars
-        |-- main.tf
-        |-- provider.tf
+        |-- main.
         `-- variables.tf
 ```
 
@@ -269,33 +290,12 @@ module "pve_vm" {
   vm_cpu            = 2
   vm_ram            = 2048
   vm_vlan           = 66
+  proxmox_endpoint  = var.proxmox_endpoint
+  proxmox_api_token = var.proxmox_api_token
 }
 
 output "vm_ip" {
   value = module.pve_vm.vm_ip
-}
-```
-
-#### `provider.tf`
-
-```hcl
-terraform {
-  required_providers {
-    proxmox = {
-      source = "bpg/proxmox"
-    }
-  }
-}
-
-provider "proxmox" {
-  endpoint  = var.proxmox_endpoint
-  api_token = var.proxmox_api_token
-  insecure  = false
-  ssh {
-    agent       = false
-    private_key = file("~/.ssh/id_ed25519")
-    username    = "root"
-  }
 }
 ```
 
