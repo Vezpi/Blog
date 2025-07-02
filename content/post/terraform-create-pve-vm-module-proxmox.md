@@ -41,7 +41,7 @@ terraform
 
 ### Module's Code
 
-Basically, the module files are those from the project we are transforming. I just kept out the parts related to the proxmox cluster, which will stay at the project level.
+📝 Basically, the module files are the same as the project files we are transforming.
 
 The module `pve_vm` will be decomposed in 3 files:
 - **main**: The core logic
@@ -256,7 +256,7 @@ variable "vm_tags" {
 ```
 
 
-##  Deploy a VM Using our Module
+## Deploy a VM Using our Module
 
 Now that we've moved all the resources required to deploy our VM into the `pve_vm` module, our project folder only needs to call that module and provide the necessary variables.
 
@@ -279,7 +279,7 @@ terraform
 
 ### Project's Code
 
-In this example, I manually provide the values when calling my module, the others are related to the cluster 
+In this example, I manually provide the values when calling my module. I kept the proxmox secret variables because they are automatically sourced from the project, but I need to define them here.
 #### `main.tf`
 
 ```hcl
@@ -313,3 +313,261 @@ variable "proxmox_api_token" {
   sensitive   = true
 }
 ```
+#### `credentials.auto.tfvars`
+
+```hcl
+proxmox_endpoint  = <your Proxox endpoint>
+proxmox_api_token = <your Proxmox API token for the user terraformer>
+```
+
+### Initialize the Terraform Workspace
+
+In our new project, we first need to initialize the Terraform workspace with `terraform init`:
+```bash
+$ terraform init
+Initializing the backend...
+Initializing modules...
+- pve_vm in ../../modules/pve_vm
+Initializing provider plugins...
+- Finding latest version of bpg/proxmox...
+- Installing bpg/proxmox v0.78.2...
+- Installed bpg/proxmox v0.78.2 (self-signed, key ID F0582AD6AE97C188)
+Partner and community providers are signed by their developers.
+If you'd like to know more about provider signing, you can read about it here:
+https://www.terraform.io/docs/cli/plugins/signing.html
+Terraform has created a lock file .terraform.lock.hcl to record the provider
+selections it made above. Include this file in your version control repository
+so that Terraform can guarantee to make the same selections by default when
+you run "terraform init" in the future.
+
+Terraform has been successfully initialized!
+
+You may now begin working with Terraform. Try running "terraform plan" to see
+any changes that are required for your infrastructure. All Terraform commands
+should now work.
+
+If you ever set or change modules or backend configuration for Terraform,
+rerun this command to reinitialize your working directory. If you forget, other
+commands will detect it and remind you to do so if necessary.
+```
+
+### Deploy the VM
+
+Before deploying it, make sure that everything is ok with a `terraform plan`.
+
+Once ready, you can deploy it with `terraform apply`:
+```bash
+$ terraform apply
+module.pve_vm.data.proxmox_virtual_environment_vms.template: Reading...
+module.pve_vm.data.proxmox_virtual_environment_vms.template: Read complete after 0s [id=89b444be-7501-4538-9436-08609b380d39]
+
+Terraform used the selected providers to generate the following execution plan. Resource actions are indicated with the following symbols:
+  + create
+
+Terraform will perform the following actions:
+
+  # module.pve_vm.proxmox_virtual_environment_file.cloud_config will be created
+  + resource "proxmox_virtual_environment_file" "cloud_config" {
+      + content_type           = "snippets"
+      + datastore_id           = "local"
+      + file_modification_date = (known after apply)
+      + file_name              = (known after apply)
+      + file_size              = (known after apply)
+      + file_tag               = (known after apply)
+      + id                     = (known after apply)
+      + node_name              = "zenith"
+      + overwrite              = true
+      + timeout_upload         = 1800
+
+      + source_raw {
+          + data      = <<-EOT
+                #cloud-config
+                hostname: zenith-vm
+                package_update: true
+                package_upgrade: true
+                packages:
+                  - qemu-guest-agent
+                users:
+                  - default
+                  - name: vez
+                    groups: sudo
+                    shell: /bin/bash
+                    ssh-authorized-keys:
+                      - "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAID62LmYRu1rDUha3timAIcA39LtcIOny1iAgFLnxoBxm vez@bastion"
+                    sudo: ALL=(ALL) NOPASSWD:ALL
+                runcmd:
+                  - systemctl enable qemu-guest-agent
+                  - reboot
+            EOT
+          + file_name = "zenith-vm.cloud-config.yaml"
+          + resize    = 0
+        }
+    }
+
+  # module.pve_vm.proxmox_virtual_environment_vm.vm will be created
+  + resource "proxmox_virtual_environment_vm" "vm" {
+      + acpi                    = true
+      + bios                    = "ovmf"
+      + id                      = (known after apply)
+      + ipv4_addresses          = (known after apply)
+      + ipv6_addresses          = (known after apply)
+      + keyboard_layout         = "en-us"
+      + mac_addresses           = (known after apply)
+      + machine                 = "q35"
+      + migrate                 = false
+      + name                    = "zenith-vm"
+      + network_interface_names = (known after apply)
+      + node_name               = "zenith"
+      + on_boot                 = true
+      + protection              = false
+      + reboot                  = false
+      + reboot_after_update     = true
+      + scsi_hardware           = "virtio-scsi-pci"
+      + started                 = true
+      + stop_on_destroy         = true
+      + tablet_device           = true
+      + tags                    = [
+          + "test",
+        ]
+      + template                = false
+      + timeout_clone           = 1800
+      + timeout_create          = 1800
+      + timeout_migrate         = 1800
+      + timeout_move_disk       = 1800
+      + timeout_reboot          = 1800
+      + timeout_shutdown_vm     = 1800
+      + timeout_start_vm        = 1800
+      + timeout_stop_vm         = 300
+      + vm_id                   = (known after apply)
+
+      + agent {
+          + enabled = true
+          + timeout = "15m"
+          + trim    = false
+          + type    = "virtio"
+        }
+
+      + clone {
+          + full      = true
+          + node_name = "apex"
+          + retries   = 1
+          + vm_id     = 900
+        }
+
+      + cpu {
+          + cores      = 2
+          + hotplugged = 0
+          + limit      = 0
+          + numa       = false
+          + sockets    = 1
+          + type       = "host"
+          + units      = 1024
+        }
+
+      + disk {
+          + aio               = "io_uring"
+          + backup            = true
+          + cache             = "none"
+          + datastore_id      = "ceph-workload"
+          + discard           = "ignore"
+          + file_format       = (known after apply)
+          + interface         = "scsi0"
+          + iothread          = false
+          + path_in_datastore = (known after apply)
+          + replicate         = true
+          + size              = 4
+          + ssd               = false
+        }
+
+      + initialization {
+          + datastore_id         = "ceph-workload"
+          + interface            = "scsi1"
+          + meta_data_file_id    = (known after apply)
+          + network_data_file_id = (known after apply)
+          + type                 = (known after apply)
+          + user_data_file_id    = (known after apply)
+          + vendor_data_file_id  = (known after apply)
+
+          + ip_config {
+              + ipv4 {
+                  + address = "dhcp"
+                }
+            }
+        }
+
+      + memory {
+          + dedicated      = 2048
+          + floating       = 0
+          + keep_hugepages = false
+          + shared         = 0
+        }
+
+      + network_device {
+          + bridge      = "vmbr0"
+          + enabled     = true
+          + firewall    = false
+          + mac_address = (known after apply)
+          + model       = "virtio"
+          + mtu         = 0
+          + queues      = 0
+          + rate_limit  = 0
+          + vlan_id     = 66
+        }
+
+      + operating_system {
+          + type = "l26"
+        }
+
+      + vga {
+          + memory = 16
+          + type   = "std"
+        }
+    }
+
+Plan: 2 to add, 0 to change, 0 to destroy.
+
+Changes to Outputs:
+  + vm_ip = (known after apply)
+
+Do you want to perform these actions?
+  Terraform will perform the actions described above.
+  Only 'yes' will be accepted to approve.
+
+  Enter a value: yes
+
+module.pve_vm.proxmox_virtual_environment_file.cloud_config: Creating...
+module.pve_vm.proxmox_virtual_environment_file.cloud_config: Creation complete after 1s [id=local:snippets/zenith-vm.cloud-config.yaml]
+module.pve_vm.proxmox_virtual_environment_vm.vm: Creating...
+module.pve_vm.proxmox_virtual_environment_vm.vm: Still creating... [10s elapsed]
+module.pve_vm.proxmox_virtual_environment_vm.vm: Still creating... [20s elapsed]
+module.pve_vm.proxmox_virtual_environment_vm.vm: Still creating... [30s elapsed]
+module.pve_vm.proxmox_virtual_environment_vm.vm: Still creating... [40s elapsed]
+module.pve_vm.proxmox_virtual_environment_vm.vm: Still creating... [50s elapsed]
+module.pve_vm.proxmox_virtual_environment_vm.vm: Still creating... [1m0s elapsed]
+module.pve_vm.proxmox_virtual_environment_vm.vm: Still creating... [1m10s elapsed]
+module.pve_vm.proxmox_virtual_environment_vm.vm: Still creating... [1m20s elapsed]
+module.pve_vm.proxmox_virtual_environment_vm.vm: Still creating... [1m30s elapsed]
+module.pve_vm.proxmox_virtual_environment_vm.vm: Still creating... [1m40s elapsed]
+module.pve_vm.proxmox_virtual_environment_vm.vm: Still creating... [1m50s elapsed]
+module.pve_vm.proxmox_virtual_environment_vm.vm: Still creating... [2m0s elapsed]
+module.pve_vm.proxmox_virtual_environment_vm.vm: Still creating... [2m10s elapsed]
+module.pve_vm.proxmox_virtual_environment_vm.vm: Still creating... [2m20s elapsed]
+module.pve_vm.proxmox_virtual_environment_vm.vm: Still creating... [2m30s elapsed]
+module.pve_vm.proxmox_virtual_environment_vm.vm: Still creating... [2m40s elapsed]
+module.pve_vm.proxmox_virtual_environment_vm.vm: Still creating... [2m50s elapsed]
+module.pve_vm.proxmox_virtual_environment_vm.vm: Still creating... [3m0s elapsed]
+module.pve_vm.proxmox_virtual_environment_vm.vm: Still creating... [3m10s elapsed]
+module.pve_vm.proxmox_virtual_environment_vm.vm: Creation complete after 3m13s [id=103]
+
+Apply complete! Resources: 2 added, 0 changed, 0 destroyed.
+
+Outputs:
+
+vm_ip = "192.168.66.159"
+```
+
+✅ The VM is now ready!
+
+![VM on Proxmox WebUI deployed using a Terraform module](img/proxmox-vm-deployed-using-terraform-module.png)
+🕗 *Don't pay attention to the uptime, I took the screenshot the next day*
+
