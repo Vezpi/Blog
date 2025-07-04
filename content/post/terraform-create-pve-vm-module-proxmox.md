@@ -9,9 +9,9 @@ categories:
 ---
 ## Intro
 
-In one of my [previous article]({{< ref "post/3-terraform-create-vm-proxmox" >}}), I explained how to deploy Virtual Machines on Proxmox using Terraform from scratch.
+In one of my [previous article]({{< ref "post/3-terraform-create-vm-proxmox" >}}), I explained how to deploy **Virtual Machines** on **Proxmox** using **Terraform** from scratch, after have created a **cloud-init** template in [that one]({{< ref "post/1-proxmox-cloud-init-vm-template" >}})
 
-Here I want to detail how to transform this piece of code in a reusable Terraform module. I will then show you how to modify your code to make use of it in other projects.
+Here I want to detail how to transform this piece of code in a reusable Terraform **module**. I will then show you how to modify your code to make use of it in other projects.
 
 ---
 ## What is a Terraform Module?
@@ -41,106 +41,123 @@ terraform
 
 ### Module's Code
 
-📝 Basically, the module files are the same as the project files we are transforming.
+📝 Basically, the module files are the same as the project files we are transforming. We don't want to configure the providers at module level, but we still declaring them.
 
 The module `pve_vm` will be decomposed in 3 files:
-- **main**: The core logic
-- **provider**: The providers needed to function
-- **variables**: The variables of the module
+- **main**: The core logic, same code as before.
+- **provider**: The providers needed to function without their configuration.
+- **variables**: The variables of the module, without provider's variables.
 
 #### `main.tf`
 
 ```hcl
+# Retrieve VM templates available in Proxmox that match the specified name
 data "proxmox_virtual_environment_vms" "template" {
   filter {
     name   = "name"
-    values = ["${var.vm_template}"]
+    values = ["${var.vm_template}"] # The name of the template to clone from
   }
 }
 
+# Create a cloud-init configuration file as a Proxmox snippet
 resource "proxmox_virtual_environment_file" "cloud_config" {
-  content_type = "snippets"
-  datastore_id = "local"
-  node_name    = var.node_name
+  content_type = "snippets"        # Cloud-init files are stored as snippets in Proxmox
+  datastore_id = "local"           # Local datastore used to store the snippet
+  node_name    = var.node_name     # The Proxmox node where the file will be uploaded
+
   source_raw {
-    file_name = "${var.vm_name}.cloud-config.yaml"
+    file_name = "vm.cloud-config.yaml" # The name of the snippet file
     data      = <<-EOF
     #cloud-config
     hostname: ${var.vm_name}
     package_update: true
     package_upgrade: true
     packages:
-      - qemu-guest-agent
+      - qemu-guest-agent           # Ensures the guest agent is installed
     users:
       - default
       - name: ${var.vm_user}
         groups: sudo
         shell: /bin/bash
         ssh-authorized-keys:
-          - "${var.vm_user_sshkey}"
+          - "${var.vm_user_sshkey}" # Inject user's SSH key
         sudo: ALL=(ALL) NOPASSWD:ALL
     runcmd:
       - systemctl enable qemu-guest-agent 
-      - reboot
+      - reboot                     # Reboot the VM after provisioning
     EOF
   }
 }
 
+# Define and provision a new VM by cloning the template and applying initialization
 resource "proxmox_virtual_environment_vm" "vm" {
-  name      = var.vm_name
-  node_name = var.node_name
-  tags      = var.vm_tags
+  name      = var.vm_name           # VM name
+  node_name = var.node_name         # Proxmox node to deploy the VM
+  tags      = var.vm_tags           # Optional VM tags for categorization
+
   agent {
-    enabled = true
+    enabled = true                  # Enable the QEMU guest agent
   }
-  stop_on_destroy = true
+
+  stop_on_destroy = true            # Ensure VM is stopped gracefully when destroyed
+
   clone {
-    vm_id     = data.proxmox_virtual_environment_vms.template.vms[0].vm_id
-    node_name = data.proxmox_virtual_environment_vms.template.vms[0].node_name
+    vm_id     = data.proxmox_virtual_environment_vms.template.vms[0].vm_id     # ID of the source template
+    node_name = data.proxmox_virtual_environment_vms.template.vms[0].node_name # Node of the source template
   }
-  bios    = var.vm_bios
-  machine = var.vm_machine
+
+  bios    = var.vm_bios             # BIOS type (e.g., seabios or ovmf)
+  machine = var.vm_machine          # Machine type (e.g., q35)
+
   cpu {
-    cores = var.vm_cpu
-    type  = "host"
+    cores = var.vm_cpu              # Number of CPU cores
+    type  = "host"                  # Use host CPU type for best compatibility/performance
   }
+
   memory {
-    dedicated = var.vm_ram
+    dedicated = var.vm_ram          # RAM in MB
   }
+
   disk {
-    datastore_id = var.node_datastore
-    interface    = "scsi0"
-    size         = 4
+    datastore_id = var.node_datastore # Datastore to hold the disk
+    interface    = "scsi0"             # Primary disk interface
+    size         = 4                   # Disk size in GB
   }
+
   initialization {
-    user_data_file_id = proxmox_virtual_environment_file.cloud_config.id
+    user_data_file_id = proxmox_virtual_environment_file.cloud_config.id # Link the cloud-init file
     datastore_id      = var.node_datastore
-    interface         = "scsi1"
+    interface         = "scsi1"             # Separate interface for cloud-init
     ip_config {
       ipv4 {
-        address = "dhcp"
+        address = "dhcp"            # Get IP via DHCP
       }
     }
   }
+
   network_device {
-    bridge  = "vmbr0"
-    vlan_id = var.vm_vlan
+    bridge  = "vmbr0"               # Use the default bridge
+    vlan_id = var.vm_vlan           # VLAN tagging if used
   }
+
   operating_system {
-    type = "l26"
+    type = "l26"                    # Linux 2.6+ kernel
   }
+
   vga {
-    type = "std"
+    type = "std"                    # Standard VGA type
   }
+
   lifecycle {
-    ignore_changes = [
+    ignore_changes = [              # Ignore initialization section after first depoloyment for idempotency
       initialization
     ]
   }
 }
 
+# Output the assigned IP address of the VM after provisioning
 output "vm_ip" {
-  value       = proxmox_virtual_environment_vm.vm.ipv4_addresses[1][0]
+  value       = proxmox_virtual_environment_vm.vm.ipv4_addresses[1][0] # Second network interface's first IP
   description = "VM IP"
 }
 ```
@@ -155,17 +172,6 @@ terraform {
     }
   }
 }
-
-provider "proxmox" {
-  endpoint  = var.proxmox_endpoint
-  api_token = var.proxmox_api_token
-  insecure  = false
-  ssh {
-    agent       = false
-    private_key = file("~/.ssh/id_ed25519")
-    username    = "root"
-  }
-}
 ```
 
 #### `variables.tf`
@@ -173,17 +179,6 @@ provider "proxmox" {
 > ⚠️ The defaults are based on my environment, adapt them to yours.
 
 ```hcl
-variable "proxmox_endpoint" {
-  description = "Proxmox URL endpoint"
-  type        = string
-}
-
-variable "proxmox_api_token" {
-  description = "Proxmox API token"
-  type        = string
-  sensitive   = true
-}
-
 variable "node_name" {
   description = "Proxmox host for the VM"
   type        = string
@@ -273,13 +268,14 @@ terraform
 `-- projects
     `-- simple-vm-with-module
         |-- credentials.auto.tfvars
-        |-- main.
+        |-- main.tf
+|       |-- provider.tf
         `-- variables.tf
 ```
 
 ### Project's Code
 
-In this example, I manually provide the values when calling my module. I kept the proxmox secret variables because they are automatically sourced from the project, but I need to define them here.
+In this example, I manually provide the values when calling my module. The provider is configured at project level.
 #### `main.tf`
 
 ```hcl
@@ -290,12 +286,33 @@ module "pve_vm" {
   vm_cpu            = 2
   vm_ram            = 2048
   vm_vlan           = 66
-  proxmox_endpoint  = var.proxmox_endpoint
-  proxmox_api_token = var.proxmox_api_token
 }
 
 output "vm_ip" {
   value = module.pve_vm.vm_ip
+}
+```
+
+#### `provider.tf`
+
+```hcl
+terraform {
+  required_providers {
+    proxmox = {
+      source = "bpg/proxmox"
+    }
+  }
+}
+
+provider "proxmox" {
+  endpoint  = var.proxmox_endpoint
+  api_token = var.proxmox_api_token
+  insecure  = false
+  ssh {
+    agent       = false
+    private_key = file("~/.ssh/id_ed25519")
+    username    = "root"
+  }
 }
 ```
 
@@ -570,4 +587,152 @@ vm_ip = "192.168.66.159"
 
 ![VM on Proxmox WebUI deployed using a Terraform module](img/proxmox-vm-deployed-using-terraform-module.png)
 🕗 *Don't pay attention to the uptime, I took the screenshot the next day*
+
+## Deploy Multiple VM at Once
+
+Ok, I've deployed a single VM, fine. But now, how to scale it? How to deploy multiple instances of that template, with different names, on different nodes, with different size? This is what I will show you now.
+
+### One VM per Node
+
+To deploy our single VM, I've assigned static values when calling my `pve_vm` module. What I could have done, is to create an object containing the VM spec and call the module with values from that object:
+```hcl
+module "pve_vm" {
+  source    = "../../modules/pve_vm"
+  node_name = local.vm.node_name
+  vm_name   = local.vm.vm_name
+  vm_cpu    = local.vm.vm_cpu
+  vm_ram    = local.vm.vm_ram
+  vm_vlan   = local.vm.vm_vlan
+}
+
+locals {
+  vm = {
+    node_name = "zenith"
+    vm_name   = "zenith-vm"
+    vm_cpu    = 2
+    vm_ram    = 2048
+    vm_vlan   = 66
+  }
+}
+```
+
+I could also call the module while iterating on that object:
+```hcl
+module "pve_vm" {
+  source    = "../../modules/pve_vm"
+  for_each  = local.vm_list
+  node_name = each.value.node_name
+  vm_name   = each.value.vm_name
+  vm_cpu    = each.value.vm_cpu
+  vm_ram    = each.value.vm_ram
+  vm_vlan   = each.value.vm_vlan
+}
+
+locals {
+  vm_list = {
+    zenith = {
+      node_name = "zenith"
+      vm_name   = "zenith-vm"
+      vm_cpu    = 2
+      vm_ram    = 2048
+      vm_vlan   = 66
+    }
+  }
+}
+```
+
+While this does not make sense with only one VM, I could use this module syntax, for example, to deploy one VM per node
+```hcl
+module "pve_vm" {
+  source    = "../../modules/pve_vm"
+  for_each  = local.vm_list
+  node_name = each.value.node_name
+  vm_name   = each.value.vm_name
+  vm_cpu    = each.value.vm_cpu
+  vm_ram    = each.value.vm_ram
+  vm_vlan   = each.value.vm_vlan
+}
+
+locals {
+  vm_list = {
+    for vm in flatten([
+      for node in data.proxmox_virtual_environment_nodes.pve_nodes.names : {
+        node_name = node
+        vm_name   = "${node}-vm"
+        vm_cpu    = 2
+        vm_ram    = 2048
+        vm_vlan   = 66
+      }
+    ]) : vm.vm_name => vm
+  }
+}
+
+data "proxmox_virtual_environment_nodes" "pve_nodes" {}
+
+output "vm_ip" {
+  value = { for k, v in module.pve_vm : k => v.vm_ip }
+}
+```
+
+✅ This would deploy 3 VM on my cluster, one per node:
+
+### Multiple VM per Node
+
+In the last phase, I want to be able to deploy multiple but also different VM per node. I could do it using something like this:
+```hcl
+module "pve_vm" {
+  source    = "../../modules/pve_vm"
+  for_each  = local.vm_list
+  node_name = each.value.node_name
+  vm_name   = each.value.vm_name
+  vm_cpu    = each.value.vm_cpu
+  vm_ram    = each.value.vm_ram
+  vm_vlan   = each.value.vm_vlan
+}
+
+locals {
+  vm_attr = {
+    "master" = { ram = 2048, cpu = 2, vlan = 66 }
+    "worker" = { ram = 1024, cpu = 1, vlan = 66 }
+  }
+
+  vm_list = {
+    for vm in flatten([
+      for node in data.proxmox_virtual_environment_nodes.pve_nodes.names : [
+        for role, config in local.vm_attr : {
+          node_name = node
+          vm_name   = "${node}-${role}"
+          vm_cpu    = config.cpu
+          vm_ram    = config.ram
+          vm_vlan   = config.vlan
+        }
+      ]
+    ]) : vm.vm_name => vm
+  }
+}
+
+data "proxmox_virtual_environment_nodes" "pve_nodes" {}
+
+output "vm_ip" {
+  value = { for k, v in module.pve_vm : k => v.vm_ip }
+}
+```
+
+After deploying it with a `terraform apply`, I got this:
+```bash
+Apply complete! Resources: 6 added, 0 changed, 0 destroyed.
+
+Outputs:
+
+vm_ip = {
+  "apex-master" = "192.168.66.161"
+  "apex-worker" = "192.168.66.162"
+  "vertex-master" = "192.168.66.160"
+  "vertex-worker" = "192.168.66.164"
+  "zenith-master" = "192.168.66.165"
+  "zenith-worker" = "192.168.66.163"
+}
+```
+
+## Conclusion
 
