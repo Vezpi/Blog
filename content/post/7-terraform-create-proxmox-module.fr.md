@@ -3,7 +3,7 @@ slug: terraform-create-proxmox-module
 title: Créer un Module Terraform pour Proxmox
 description: Transformez votre code VM Proxmox en module Terraform réutilisable et apprenez à déployer à l'échelle sur plusieurs nœuds.
 date: 2025-07-04
-draft: true
+draft: false
 tags:
   - terraform
   - proxmox
@@ -595,15 +595,16 @@ vm_ip = "192.168.66.159"
 ✅ La VM est maintenant prête !
 
 ![VM on Proxmox WebUI deployed using a Terraform module](img/proxmox-vm-deployed-using-terraform-module.png)
+
 🕗 _Ne faites pas attention à l’uptime, j’ai pris la capture d’écran le lendemain._
 
 ---
 
-## Déployer plusieurs VMs en une fois
+## Déployer Plusieurs VMs à la fois
 
 Très bien, on a déployé une seule VM. Mais maintenant, comment passer à l’échelle ? Comment déployer plusieurs instances de ce template, avec des noms différents, sur des nœuds différents, et avec des tailles différentes ? C’est ce que je vais vous montrer.
 
-### Une VM par nœud
+### Une VM par Nœud
 
 Dans l’exemple précédent, nous avons passé des valeurs fixes au module. À la place, nous pouvons définir un objet local contenant les caractéristiques de la VM, puis s’en servir lors de l’appel au module. Cela facilite l’évolution du code de déploiement :
 ```hcl
@@ -687,7 +688,7 @@ output "vm_ip" {
 
 ✅ Cela permet de déployer automatiquement 3 VM dans mon cluster, une par nœud.
 
-### Plusieurs VMs par nœud
+### Plusieurs VMs par Nœud
 
 Enfin, poussons l’idée plus loin : déployons plusieurs VMs avec des configurations différentes par nœud. Pour cela, on définit un ensemble de rôles et on utilise une boucle imbriquée pour générer toutes les combinaisons possibles pour chaque nœud Proxmox.
 ```hcl

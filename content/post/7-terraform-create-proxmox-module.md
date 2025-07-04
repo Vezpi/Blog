@@ -3,7 +3,7 @@ slug: terraform-create-proxmox-module
 title: Create a Terraform module for Proxmox
 description: Turn your Proxmox VM code into a reusable Terraform module and learn how to scale deployments across multiple nodes.
 date: 2025-07-04
-draft: true
+draft: false
 tags:
   - terraform
   - proxmox
@@ -590,6 +590,7 @@ vm_ip = "192.168.66.159"
 ✅ The VM is now ready!
 
 ![VM on Proxmox WebUI deployed using a Terraform module](img/proxmox-vm-deployed-using-terraform-module.png)
+
 🕗 *Don't pay attention to the uptime, I took the screenshot the next day*
 
 ---
