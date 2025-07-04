@@ -1,17 +1,22 @@
 ---
-slug: 
+slug: terraform-create-proxmox-module
 title: Create a Terraform module for Proxmox
-description: 
-date: 
+description: Turn your Proxmox VM code into a reusable Terraform module and learn how to scale deployments across multiple nodes.
+date: 2025-07-04
 draft: true
-tags: 
+tags:
+  - terraform
+  - proxmox
+  - cloud-init
 categories:
+  - homelab
 ---
 ## Intro
 
-In one of my [previous article]({{< ref "post/3-terraform-create-vm-proxmox" >}}), I explained how to deploy **Virtual Machines** on **Proxmox** using **Terraform** from scratch, after have created a **cloud-init** template in [that one]({{< ref "post/1-proxmox-cloud-init-vm-template" >}})
+In a [previous post]({{< ref "post/3-terraform-create-vm-proxmox" >}}), I explained how to deploy **Virtual Machines** on **Proxmox** using **Terraform**, building from a [cloud-init template]({{< ref "post/1-proxmox-cloud-init-vm-template" >}}).
 
-Here I want to detail how to transform this piece of code in a reusable Terraform **module**. I will then show you how to modify your code to make use of it in other projects.
+In this post, we’ll take that code and turn it into a reusable **Terraform module**. Then, I’ll show how to use that module in other projects to simplify and scale your infrastructure deployments.
+
 
 ---
 ## What is a Terraform Module?
@@ -23,9 +28,9 @@ Modules can be local (within your project) or remote (from the Terraform Registr
 ---
 ## Transform Project into Module
 
-We will now transform the Terraform code from the [previous project]({{< ref "post/3-terraform-create-vm-proxmox" >}}) by creating our own module called `pve_vm`.
+We're now going to extract the Terraform code from the [previous project]({{< ref "post/3-terraform-create-vm-proxmox" >}}) into a reusable module named `pve_vm`.
 
-> 📌 Reminder, you can find all the code I have written in my [Homelab repo](https://git.vezpi.me/Vezpi/Homelab/), the following code is located [here](https://git.vezpi.me/Vezpi/Homelab/src/commit/22f64034175a6a4642a2c7b6656688f16ece5ba1/terraform/projects/simple-vm). Don't forget to match your variables with your environment!
+> 📌 You can find the full source code in my [Homelab repo](https://git.vezpi.me/Vezpi/Homelab/). The specific code for this post lives [here](https://git.vezpi.me/Vezpi/Homelab/src/commit/22f64034175a6a4642a2c7b6656688f16ece5ba1/terraform/projects/simple-vm). Make sure to adjust the variables to match your environment.
 
 ### Code Structure
 
@@ -41,12 +46,12 @@ terraform
 
 ### Module's Code
 
-📝 Basically, the module files are the same as the project files we are transforming. We don't want to configure the providers at module level, but we still declaring them.
+📝 Basically, the module files are the same as the project files we are transforming. Providers are declared, but not configured, inside the module.
 
-The module `pve_vm` will be decomposed in 3 files:
+The module `pve_vm` will be composed of 3 files:
 - **main**: The core logic, same code as before.
-- **provider**: The providers needed to function without their configuration.
-- **variables**: The variables of the module, without provider's variables.
+- **provider**: Declares required providers without configuration.
+- **variables**: Declares module variables, excluding provider-specific ones.
 
 #### `main.tf`
 
@@ -250,14 +255,13 @@ variable "vm_tags" {
 }
 ```
 
-
+---
 ## Deploy a VM Using our Module
 
-Now that we've moved all the resources required to deploy our VM into the `pve_vm` module, our project folder only needs to call that module and provide the necessary variables.
-
+Now that we’ve extracted all the logic into the `pve_vm` module, our project code only needs to reference that module and pass the required variables. This makes our setup much cleaner and easier to maintain.
 ### Code Structure
 
-Here what is look like:
+Here what it looks like:
 ```plaintext
 terraform
 |-- modules
@@ -269,7 +273,7 @@ terraform
     `-- simple-vm-with-module
         |-- credentials.auto.tfvars
         |-- main.tf
-|       |-- provider.tf
+        |-- provider.tf
         `-- variables.tf
 ```
 
@@ -588,13 +592,14 @@ vm_ip = "192.168.66.159"
 ![VM on Proxmox WebUI deployed using a Terraform module](img/proxmox-vm-deployed-using-terraform-module.png)
 🕗 *Don't pay attention to the uptime, I took the screenshot the next day*
 
+---
 ## Deploy Multiple VM at Once
 
 Ok, I've deployed a single VM, fine. But now, how to scale it? How to deploy multiple instances of that template, with different names, on different nodes, with different size? This is what I will show you now.
 
 ### One VM per Node
 
-To deploy our single VM, I've assigned static values when calling my `pve_vm` module. What I could have done, is to create an object containing the VM spec and call the module with values from that object:
+In the earlier example, we passed fixed values to the module. Instead, we could define a local object to store the VM specs, and reference its values when calling the module. This approach makes it easier to scale the deployment logic later:
 ```hcl
 module "pve_vm" {
   source    = "../../modules/pve_vm"
@@ -641,7 +646,7 @@ locals {
 }
 ```
 
-While this does not make sense with only one VM, I could use this module syntax, for example, to deploy one VM per node
+While this does not make sense with only one VM, I could use this module syntax, for example, to deploy one VM per node:
 ```hcl
 module "pve_vm" {
   source    = "../../modules/pve_vm"
@@ -678,7 +683,7 @@ output "vm_ip" {
 
 ### Multiple VM per Node
 
-In the last phase, I want to be able to deploy multiple but also different VM per node. I could do it using something like this:
+Finally, let’s scale things up by deploying multiple VMs with different configurations per node. We’ll define a set of roles and use a nested loop to generate the desired VM configurations for each Proxmox node:
 ```hcl
 module "pve_vm" {
   source    = "../../modules/pve_vm"
@@ -718,7 +723,7 @@ output "vm_ip" {
 }
 ```
 
-After deploying it with a `terraform apply`, I got this:
+🚀 After deploying it with a `terraform apply`, I got this:
 ```bash
 Apply complete! Resources: 6 added, 0 changed, 0 destroyed.
 
@@ -734,5 +739,11 @@ vm_ip = {
 }
 ```
 
+---
 ## Conclusion
 
+We’ve transformed our Proxmox VM deployment into a reusable Terraform module and used it to easily scale our infrastructure across multiple nodes.
+
+In a next post, I would like to pair Terraform with Ansible to manage the VM deployment and even manage different Terraform workspaces to handle several environments.
+
+Stay tuned!
