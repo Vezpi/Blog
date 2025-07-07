@@ -31,7 +31,7 @@ Les modules peuvent être locaux (dans votre projet) ou distants (depuis le Terr
 
 Nous allons maintenant extraire le code Terraform du [projet précédent]({{< ref "post/3-terraform-create-vm-proxmox" >}}) pour en faire un module réutilisable nommé `pve_vm`.
 
-> 📌 Vous pouvez retrouver le code source complet dans mon [dépôt Homelab](https://git.vezpi.me/Vezpi/Homelab/). Le code spécifique à cet article se trouve [ici](https://git.vezpi.me/Vezpi/Homelab/src/commit/22f64034175a6a4642a2c7b6656688f16ece5ba1/terraform/projects/simple-vm). Pensez à adapter les variables à votre environnement.
+> 📌 Vous pouvez retrouver le code source complet dans mon [dépôt Homelab](https://github.com/Vezpi/Homelab/). Le code spécifique à cet article se trouve [ici](https://github.com/Vezpi/Homelab/tree/3a991010d5e9de30e12cbf365d1a1ca1ff1f6436/terraform). Pensez à adapter les variables à votre environnement.
 
 ### Structure du Code
 
