@@ -72,7 +72,7 @@ resource "proxmox_virtual_environment_file" "cloud_config" {
   node_name    = var.node_name     # The Proxmox node where the file will be uploaded
 
   source_raw {
-    file_name = "vm.cloud-config.yaml" # The name of the snippet file
+    file_name = "${var.vm_name}.cloud-config.yaml" # The name of the snippet file
     data      = <<-EOF
     #cloud-config
     hostname: ${var.vm_name}
@@ -737,12 +737,12 @@ Apply complete! Resources: 6 added, 0 changed, 0 destroyed.
 Outputs:
 
 vm_ip = {
-  "apex-master" = "192.168.66.161"
-  "apex-worker" = "192.168.66.162"
-  "vertex-master" = "192.168.66.160"
-  "vertex-worker" = "192.168.66.164"
-  "zenith-master" = "192.168.66.165"
-  "zenith-worker" = "192.168.66.163"
+  "apex-master" = "192.168.66.167"
+  "apex-worker" = "192.168.66.168"
+  "vertex-master" = "192.168.66.169"
+  "vertex-worker" = "192.168.66.170"
+  "zenith-master" = "192.168.66.166"
+  "zenith-worker" = "192.168.66.172"
 }
 ```
 
