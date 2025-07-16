@@ -16,7 +16,7 @@ Maintenant que l'infrastructure est prête, passons à l'étape suivante : **cr�
 
 Dans cet article, je vais détailler chaque étape de l'installation d’un cluster Kubernetes simple, depuis la préparation des nœuds jusqu'au déploiement d'une application simple.
 
-Je n'utiliserai aucun outil d'automatisation pour le moment, afin de mieux comprendre les étapes impliquées dans le bootstrap d’un cluster Kubernetes.
+Je n'utiliserai pas d'outil d'automatisation pour configurer les nœuds pour le moment, afin de mieux comprendre les étapes impliquées dans le bootstrap d’un cluster Kubernetes.
 
 ---
 ## Qu'est ce que Kubernetes
@@ -26,6 +26,8 @@ Kubernetes est une plateforme open-source qui orchestre des conteneurs sur un en
 Un cluster Kubernetes est composé de deux types de nœuds : les nœuds control plane (masters) et les workers. Le control plane assure la gestion globale du cluster, il prend les décisions de planification, surveille l’état du système et réagit aux événements. Les workers, eux, exécutent réellement vos applications, dans des conteneurs gérés par Kubernetes.
 
 Dans cet article, nous allons mettre en place manuellement un cluster Kubernetes avec 3 nœuds control plane et 3 workers. Cette architecture reflète un environnement hautement disponible et proche de la production, même si l’objectif ici est avant tout pédagogique.
+
+La documentation officielle se trouve [ici](https://kubernetes.io/docs/setup/production-environment/tools/kubeadm/), je vais utiliser la version **v1.32**.
 
 ---
 ## Prepare the Nodes
