@@ -3,7 +3,7 @@ slug: create-manual-kubernetes-cluster-kubeadm
 title: Create a Highly Available Kubernetes Cluster with kubeadm on VMs
 description: Step-by-step guide to manually build a highly available Kubernetes cluster on virtual machines using kubeadm
 date: 2025-07-18
-draft: true
+draft: false
 tags:
   - kubernetes
   - highly-available
@@ -14,13 +14,11 @@ categories:
 
 ## Intro
 
-In this [previous article]({{< ref "post/7-terraform-create-proxmox-module" >}}), I explained how to deploy 6 VMs using **Terraform** on **Proxmox**, 3 masters and 3 workers nodes, based on [cloud-init template]({{< ref "post/1-proxmox-cloud-init-vm-template" >}}).
+In this [previous article]({{< ref "post/7-terraform-create-proxmox-module" >}}), I explained how to deploy VMs using a **Terraform** module with **Proxmox** and ended up with 6 VMs, 3 masters and 3 workers nodes, based on [cloud-init template]({{< ref "post/1-proxmox-cloud-init-vm-template" >}}).
 
 Now that the infrastructure is ready, let’s move on to the next step: **manually building a Kubernetes cluster** using `kubeadm`.
 
-In this post, I’ll walk through each step of the installation process of a simple Kubernetes cluster, from preparing the nodes to deploying a basic application.
-
-I will not rely on automation tools to configure the nodes for now, to better understand what are the steps involved in a Kubernetes cluster bootstrapping. Automation will be covered in future posts.
+In this post, I’ll walk through each step of the installation process of a simple Kubernetes cluster. I will not rely on automation tools to configure the nodes for now, to better understand what are the steps involved in a Kubernetes cluster bootstrapping. Automation will be covered in future posts.
 
 ---
 ## What is Kubernetes
@@ -204,12 +202,12 @@ sudo kubeadm init \
 - `--upload-certs`: Upload the certificates that should be shared across all masters of the cluster.
 - `--pod-network-cidr`: Subnet for the CNI.
 
-ℹ️ The DNS name `k8s-lab.lab.vezpi.me` is handled in my homelab by **Unbound DNS**, this resolves on my **OPNsense** interface where a **HAProxy** service listen on the port 6443 and load balance between the 3 control plane nodes.
-
 This step will:
 - Initialize the `etcd` database and control plane components.
 - Set up RBAC and bootstrap tokens.
 - Output two important `kubeadm join` commands: one for **workers**, and one for **additional control-plane nodes**.
+
+ℹ️ The DNS name `k8s-lab.lab.vezpi.me` is handled in my homelab by **Unbound DNS**, this resolves on my **OPNsense** interface where a **HAProxy** service listen on the port 6443 and load balance between the 3 control plane nodes.
 
 You’ll also see a message instructing you to set up your `kubectl` access.
 
@@ -618,6 +616,8 @@ __ [cilium-test-1] All 73 tests (739 actions) successful, 50 tests skipped, 1 sc
 
 ---
 ## Conclusion
+
+🚀 Our highly available Kubernetes cluster is ready!
 
 In this post, we walked through the **manual creation of a Kubernetes cluster** using `kubeadm`, on top of 6 Ubuntu VMs (3 masters and 3 workers) previously provisioned with Terraform on Proxmox.
 

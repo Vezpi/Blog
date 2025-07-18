@@ -3,7 +3,7 @@ slug: create-manual-kubernetes-cluster-kubeadm
 title: Créer un Cluster Kubernetes Hautement Disponible avec kubeadm sur des VMs
 description: Guide étape par étape pour créer manuellement un cluster Kubernetes hautement disponible sur des machines virtuelles avec kubeadm.
 date: 2025-07-18
-draft: true
+draft: false
 tags:
   - kubernetes
   - highly-available
@@ -14,13 +14,11 @@ categories:
 
 ## Intro
 
-Dans cet [article précédent]({{< ref "post/7-terraform-create-proxmox-module" >}}), j'expliquais comment déployer 6 VMs avec **Terraform** sur **Proxmox**, 3 nœuds masters et 3 nœuds workers, en m'appuyant sur un [template cloud-init]({{< ref "post/1-proxmox-cloud-init-vm-template" >}}).
+Dans cet [article précédent]({{< ref "post/7-terraform-create-proxmox-module" >}}), j'expliquais comment déployer des VMs avec un module **Terraform** sur **Proxmox** et j'avais terminé avec 6 VMs, 3 nœuds masters et 3 nœuds workers, en m'appuyant sur un [template cloud-init]({{< ref "post/1-proxmox-cloud-init-vm-template" >}}).
 
 Maintenant que l'infrastructure est prête, passons à l'étape suivante : **créer manuellement un cluster Kubernetes** avec `kubeadm`.
 
-Dans cet article, je vais détailler chaque étape de l'installation d’un cluster Kubernetes simple, depuis la préparation des nœuds jusqu'au déploiement d'une application basique.
-
-Je n'utiliserai pas d'outil d'automatisation pour configurer les nœuds pour le moment, afin de mieux comprendre les étapes impliquées dans le bootstrap d’un cluster Kubernetes. L'automatisation sera couverte dans de futurs articles.
+Dans cet article, je vais détailler chaque étape de l'installation d’un cluster Kubernetes simple. Je n'utiliserai pas d'outil d'automatisation pour configurer les nœuds pour le moment, afin de mieux comprendre les étapes impliquées dans le bootstrap d’un cluster Kubernetes. L'automatisation sera couverte dans de futurs articles.
 
 ---
 ## Qu'est ce que Kubernetes
@@ -99,7 +97,7 @@ En production, vous devez autoriser la communication entre les nœuds sur les po
 | TCP       | Entrant   | 10250       | API Kubelet       | Control plane  |
 | TCP       | Entrant   | 10256       | kube-proxy        | Load balancers |
 | TCP       | Entrant   | 30000-32767 | Services NodePort | Tous           |
-### Modules noyau et paramètres sysctl
+### Modules Noyau et Paramètres sysctl
 
 Kubernetes requiert l’activation de deux modules noyau :
 - **overlay** : pour permettre l’empilement de systèmes de fichiers.
@@ -204,12 +202,12 @@ sudo kubeadm init \
 - `--upload-certs` : Télécharge les certificats qui doivent être partagés entre toutes les masters du cluster.
 - `--pod-network-cidr` : Sous-réseau à utiliser pour le CNI.
 
-ℹ️ Le nom DNS `k8s-lab.lab.vezpi.me` est géré dans mon homelab par **Unbound DNS**, cela résout sur mon interface d'**OPNsense** où un service **HAProxy** écoute sur le port 6443 et équilibre la charge entre les 3 nœuds du plan de contrôle.
-
 Cette étape va :
 - Initialiser la base `etcd` et les composants du plan de contrôle.
 - Configurer RBAC et les tokens d’amorçage.
 - Afficher deux commandes `kubeadm join` importantes : une pour les **workers**, l’autre pour les **masters supplémentaires**.
+
+ℹ️ Le nom DNS `k8s-lab.lab.vezpi.me` est géré dans mon homelab par **Unbound DNS**, cela résout sur mon interface d'**OPNsense** où un service **HAProxy** écoute sur le port 6443 et équilibre la charge entre les 3 nœuds du plan de contrôle.
 
 Vous verrez aussi un message indiquant comment configurer l’accès `kubectl`.
 
@@ -493,7 +491,7 @@ I0718 09:26:12.448472   18624 version.go:261] remote version is much newer: v1.3
 7531149107ebc3caf4990f94d19824aecf39d93b84ee1b9c86aee84c04e76656
 ```
 
-#### Générer un token
+#### Générer un Token
 
 Associé au certificat, vous aurez besoin d’un **nouveau token**, cette commande affichera directement la commande complète `join` pour un master :
 ```bash
@@ -621,6 +619,8 @@ __ [cilium-test-1] All 73 tests (739 actions) successful, 50 tests skipped, 1 sc
 
 ---
 ## Conclusion
+
+🚀 Notre cluster Kubernetes hautement disponible est prêt !
 
 Dans cet article, nous avons vu comment **créer manuellement un cluster Kubernetes** à l’aide de `kubeadm`, sur un ensemble de 6 machines Ubuntu (3 masters et 3 workers) préalablement déployées avec Terraform sur Proxmox.
 
