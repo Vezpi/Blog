@@ -312,8 +312,7 @@ sudo chown $(id -u):$(id -g) $HOME/.kube/config
 If you prefer to control the cluster from elsewhere, in my case my from my LXC bastion:
 ```bash
 mkdir -p $HOME/.kube
-scp <master node>:/etc/kubernetes/admin.conf $HOME/.kube/config
-chmod 600 ~/.kube/config
+rsync --rsync-path="sudo rsync" <master-node>:/etc/kubernetes/admin.conf $HOME/.kube/config
 ```
 
 Verify your access:
@@ -329,7 +328,7 @@ From the [Cilium documentation](https://docs.cilium.io/en/stable/gettingstarted/
 
 #### Install the Cilium CLI
 
-The Cilium CLI can be used to install Cilium, inspect the state of a Cilium installation, and enable/disable various features (e.g. `clustermesh`, `Hubble`):
+The Cilium CLI can be used to install Cilium, inspect the state of a Cilium installation, and enable/disable various features (e.g. `clustermesh`, `Hubble`). Install it on your controller where `kubectl` is installed:
 ```bash
 CILIUM_CLI_VERSION=$(curl -s https://raw.githubusercontent.com/cilium/cilium-cli/main/stable.txt)
 curl -L --fail --remote-name-all https://github.com/cilium/cilium-cli/releases/download/${CILIUM_CLI_VERSION}/cilium-linux-amd64.tar.gz{,.sha256sum}
@@ -342,22 +341,47 @@ rm cilium-linux-amd64.tar.gz{,.sha256sum}
 
 Install Cilium into the Kubernetes cluster pointed to by your current `kubectl` context:
 ```bash
-cilium install --version 1.17.6
+cilium install
 ```
-
+```plaintext
+__   Using Cilium version 1.17.5
+__ Auto-detected cluster name: kubernetes
+__ Auto-detected kube-proxy has been installed
+```
 #### Validate the Installation
 
 To validate that Cilium has been properly installed:
 ```bash
 cilium status --wait
 ```
+```plaintext
+    /__\
+ /__\__/__\    Cilium:             OK
+ \__/__\__/    Operator:           OK
+ /__\__/__\    Envoy DaemonSet:    OK
+ \__/__\__/    Hubble Relay:       disabled
+    \__/       ClusterMesh:        disabled
 
-To validate that your cluster has proper network connectivity:
-```bash
-cilium connectivity test
+DaemonSet              cilium                   Desired: 1, Ready: 1/1, Available: 1/1
+DaemonSet              cilium-envoy             Desired: 1, Ready: 1/1, Available: 1/1
+Deployment             cilium-operator          Desired: 1, Ready: 1/1, Available: 1/1
+Containers:            cilium                   Running: 1
+                       cilium-envoy             Running: 1
+                       cilium-operator          Running: 1
+                       clustermesh-apiserver    
+                       hubble-relay             
+Cluster Pods:          0/2 managed by Cilium
+Helm chart version:    1.17.5
+Image versions         cilium             quay.io/cilium/cilium:v1.17.5@sha256:baf8541723ee0b72d6c489c741c81a6fdc5228940d66cb76ef5ea2ce3c639ea6: 1
+                       cilium-envoy       quay.io/cilium/cilium-envoy:v1.32.6-1749271279-0864395884b263913eac200ee2048fd985f8e626@sha256:9f69e290a7ea3d4edf9192acd81694089af048ae0d8a67fb63bd62dc1d72203e: 1
+                       cilium-operator    quay.io/cilium/operator-generic:v1.17.5@sha256:f954c97eeb1b47ed67d08cc8fb4108fb829f869373cbb3e698a7f8ef1085b09e: 1
 ```
 
-Once installed, the master node should transition to `Ready` status.
+Once installed, the master node should transition to `Ready` status:
+```plaintext
+NAME          STATUS   ROLES           AGE   VERSION
+apex-master   Ready    control-plane   99m   v1.32.7
+```
 
 ---
 ## Join Additional Nodes
@@ -374,12 +398,93 @@ These commands were displayed at the end of the `kubeadm init` output. If you di
 
 ### Additional Masters
 
+You can now join any number of control-plane node by running the command  given by the `kubeadm init` command:
+```bash
+sudo kubeadm join <control-plane-endpoint> --token <token> --discovery-token-ca-cert-hash <discovery-token-ca-cert-hash> --control-plane --certificate-key <certificate-key>
+```
+```plaintext
+[preflight] Running pre-flight checks
+[preflight] Reading configuration from the "kubeadm-config" ConfigMap in namespace "kube-system"...
+[preflight] Use 'kubeadm init phase upload-config --config your-config.yaml' to re-upload it.
+[preflight] Running pre-flight checks before initializing the new control plane instance
+[preflight] Pulling images required for setting up a Kubernetes cluster
+[preflight] This might take a minute or two, depending on the speed of your internet connection
+[preflight] You can also perform this action beforehand using 'kubeadm config images pull'
+W0718 09:27:32.248290   12043 checks.go:846] detected that the sandbox image "registry.k8s.io/pause:3.8" of the container runtime is inconsistent with that used by kubeadm.It is recommended to use "registry.k8s.io/pause:3.10" as the CRI sandbox image.
+[download-certs] Downloading the certificates in Secret "kubeadm-certs" in the "kube-system" Namespace
+[download-certs] Saving the certificates to the folder: "/etc/kubernetes/pki"
+[certs] Using certificateDir folder "/etc/kubernetes/pki"
+[certs] Generating "etcd/server" certificate and key
+[certs] etcd/server serving cert is signed for DNS names [localhost vertex-master] and IPs [192.168.66.169 127.0.0.1 ::1]
+[certs] Generating "etcd/peer" certificate and key
+[certs] etcd/peer serving cert is signed for DNS names [localhost vertex-master] and IPs [192.168.66.169 127.0.0.1 ::1]
+[certs] Generating "apiserver-etcd-client" certificate and key
+[certs] Generating "etcd/healthcheck-client" certificate and key
+[certs] Generating "apiserver" certificate and key
+[certs] apiserver serving cert is signed for DNS names [k8s-lab.lab.vezpi.me kubernetes kubernetes.default kubernetes.default.svc kubernetes.default.svc.cluster.local vertex-master] and IPs [10.96.0.1 192.168.66.169]
+[certs] Generating "apiserver-kubelet-client" certificate and key
+[certs] Generating "front-proxy-client" certificate and key
+[certs] Valid certificates and keys now exist in "/etc/kubernetes/pki"
+[certs] Using the existing "sa" key
+[kubeconfig] Generating kubeconfig files
+[kubeconfig] Using kubeconfig folder "/etc/kubernetes"
+[kubeconfig] Writing "admin.conf" kubeconfig file
+[kubeconfig] Writing "controller-manager.conf" kubeconfig file
+[kubeconfig] Writing "scheduler.conf" kubeconfig file
+[control-plane] Using manifest folder "/etc/kubernetes/manifests"
+[control-plane] Creating static Pod manifest for "kube-apiserver"
+[control-plane] Creating static Pod manifest for "kube-controller-manager"
+[control-plane] Creating static Pod manifest for "kube-scheduler"
+[check-etcd] Checking that the etcd cluster is healthy
+[kubelet-start] Writing kubelet configuration to file "/var/lib/kubelet/config.yaml"
+[kubelet-start] Writing kubelet environment file with flags to file "/var/lib/kubelet/kubeadm-flags.env"
+[kubelet-start] Starting the kubelet
+[kubelet-check] Waiting for a healthy kubelet at http://127.0.0.1:10248/healthz. This can take up to 4m0s
+[kubelet-check] The kubelet is healthy after 501.761616ms
+[kubelet-start] Waiting for the kubelet to perform the TLS Bootstrap
+[etcd] Announced new etcd member joining to the existing etcd cluster
+[etcd] Creating static Pod manifest for "etcd"
+{"level":"warn","ts":"2025-07-18T09:27:36.040077Z","logger":"etcd-client","caller":"v3@v3.5.16/retry_interceptor.go:63","msg":"retrying of unary invoker failed","target":"etcd-endpoints://0xc00037ab40/192.168.66.167:2379","attempt":0,"error":"rpc error: code = FailedPrecondition desc = etcdserver: can only promote a learner member which is in sync with leader"}
+[...]
+{"level":"warn","ts":"2025-07-18T09:27:44.976805Z","logger":"etcd-client","caller":"v3@v3.5.16/retry_interceptor.go:63","msg":"retrying of unary invoker failed","target":"etcd-endpoints://0xc00037ab40/192.168.66.167:2379","attempt":0,"error":"rpc error: code = FailedPrecondition desc = etcdserver: can only promote a learner member which is in sync with leader"}
+[etcd] Waiting for the new etcd member to join the cluster. This can take up to 40s
+[mark-control-plane] Marking the node vertex-master as control-plane by adding the labels: [node-role.kubernetes.io/control-plane node.kubernetes.io/exclude-from-external-load-balancers]
+[mark-control-plane] Marking the node vertex-master as control-plane by adding the taints [node-role.kubernetes.io/control-plane:NoSchedule]
+
+This node has joined the cluster and a new control plane instance was created:
+
+* Certificate signing request was sent to apiserver and approval was received.
+* The Kubelet was informed of the new secure connection details.
+* Control plane label and taint were applied to the new node.
+* The Kubernetes control plane instances scaled up.
+* A new etcd member was added to the local/stacked etcd cluster.
+
+To start administering your cluster from this node, you need to run the following as a regular user:
+
+        mkdir -p $HOME/.kube
+        sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
+        sudo chown $(id -u):$(id -g) $HOME/.kube/config
+
+Run 'kubectl get nodes' to see this node join the cluster.
+```
+
 #### Generate Certificates
 
-If you need to re-upload the certificates and generate a new decryption key, use the following command on a control plane node that is already joined to the cluster:
+If the certificate is expired, you would see a message like this on the `kubeadm join` command:
+```plaintext
+[download-certs] Downloading the certificates in Secret "kubeadm-certs" in the "kube-system" Namespace
+error execution phase control-plane-prepare/download-certs: error downloading certs: error downloading the secret: Secret "kubeadm-certs" was not found in the "kube-system" Namespace. This Secret might have expired. Please, run `kubeadm init phase upload-certs --upload-certs` on a control plane to generate a new one
+```
+
+If so, re-upload the certificates and generate a new decryption key, use the following command on a control plane node that is already joined to the cluster:
 ```bash
 sudo kubeadm init phase upload-certs --upload-certs
-kubeadm certs certificate-key
+```
+```plaintext
+I0718 09:26:12.448472   18624 version.go:261] remote version is much newer: v1.33.3; falling back to: stable-1.32
+[upload-certs] Storing the certificates in Secret "kubeadm-certs" in the "kube-system" Namespace
+[upload-certs] Using certificate key:
+7531149107ebc3caf4990f94d19824aecf39d93b84ee1b9c86aee84c04e76656
 ```
 #### Generate Token
 
@@ -387,28 +492,64 @@ Paired with the certificate, you'll need a new token, this will print the whole 
 ```bash
 sudo kubeadm token create --print-join-command --certificate-key <certificate-key>
 ```
-#### Join the Control Plane
 
-You can now join any number of control-plane node by running the command above or given by the `kubeadm init` command:
-```bash
-sudo kubeadm join <control-plane-endpoint> --token <token> --discovery-token-ca-cert-hash <discovery-token-ca-cert-hash> --control-plane --certificate-key <certificate-key>
-```
+Use the command given to join the Kubernetes cluster on the desired node as master.
 
 ### Join Workers
+
+You can join any number of worker nodes by running the following
+```bash
+sudo kubeadm join k8s-lab.lab.vezpi.me:6443 --token 8etamd.g8whseg60kg09nu1 \
+        --discovery-token-ca-cert-hash sha256:65c4da3121f57d2e67ea6c1c1349544c9e295d78790b199b5c3be908ffe5ed6c
+```
+```plaintext
+[preflight] Running pre-flight checks
+[preflight] Reading configuration from the "kubeadm-config" ConfigMap in namespace "kube-system"...
+[preflight] Use 'kubeadm init phase upload-config --config your-config.yaml' to re-upload it.
+[kubelet-start] Writing kubelet configuration to file "/var/lib/kubelet/config.yaml"
+[kubelet-start] Writing kubelet environment file with flags to file "/var/lib/kubelet/kubeadm-flags.env"
+[kubelet-start] Starting the kubelet
+[kubelet-check] Waiting for a healthy kubelet at http://127.0.0.1:10248/healthz. This can take up to 4m0s
+[kubelet-check] The kubelet is healthy after 506.731798ms
+[kubelet-start] Waiting for the kubelet to perform the TLS Bootstrap
+
+This node has joined the cluster:
+* Certificate signing request was sent to apiserver and a response was received.
+* The Kubelet was informed of the new secure connection details.
+
+Run 'kubectl get nodes' on the control-plane to see this node join the cluster.
+```
 
 Again here if you missed the output of the `kubeadm init`, you can generate a new token and the full `join` command:
 ```bash
 sudo kubeadm token create --print-join-command
 ```
 
-Then you can 
+Use the command given to join the Kubernetes cluster on the desired node as worker.
 
+### Verify Cluster
 
+From your controller, you can verify if all the nodes joined the cluster and are in the `Ready` status:
+```bash
+kubectl get node
+```
+```plaintext
+NAME            STATUS   ROLES           AGE     VERSION
+apex-master     Ready    control-plane   154m    v1.32.7
+apex-worker     Ready    <none>          5m14s   v1.32.7
+vertex-master   Ready    control-plane   26m     v1.32.7
+vertex-worker   Ready    <none>          3m39s   v1.32.7
+zenith-master   Ready    control-plane   23m     v1.32.7
+zenith-worker   Ready    <none>          3m26s   v1.32.7
+```
 
+To validate that your cluster has proper network connectivity, :
+```bash
+cilium connectivity test
+```
+```plaintext
 
-    Generating and running the worker kubeadm join command
-
-    Verifying node status
+```
 
 
 ## Deploying a Sample Application
