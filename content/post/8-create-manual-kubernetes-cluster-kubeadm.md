@@ -16,9 +16,9 @@ categories:
 
 In this [previous article]({{< ref "post/7-terraform-create-proxmox-module" >}}), I explained how to deploy VMs using a **Terraform** module with **Proxmox** and ended up with 6 VMs, 3 masters and 3 workers nodes, based on [cloud-init template]({{< ref "post/1-proxmox-cloud-init-vm-template" >}}).
 
-Now that the infrastructure is ready, let’s move on to the next step: **manually building a Kubernetes cluster** using `kubeadm`.
+Now that the infrastructure is ready, let’s move on to the next step: **manually building a Kubernetes cluster** using `kubeadm`, highly available using stacked `etcd`.
 
-In this post, I’ll walk through each step of the installation process of a simple Kubernetes cluster. I will not rely on automation tools to configure the nodes for now, to better understand what are the steps involved in a Kubernetes cluster bootstrapping. Automation will be covered in future posts.
+In this post, I’ll walk through each step of the installation process of a Kubernetes cluster. I will not rely on automation tools to configure the nodes for now, to better understand what are the steps involved in a Kubernetes cluster bootstrapping. Automation will be covered in future posts.
 
 ---
 ## What is Kubernetes
