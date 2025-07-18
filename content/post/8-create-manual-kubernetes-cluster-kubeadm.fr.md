@@ -187,33 +187,88 @@ Une fois tous les nœuds préparés, on peut initialiser le **plan de contrôle*
 
 ### Initialisation
 
-Exécutez la commande suivante pour lancer la création du cluster:
+Exécutez la commande suivante pour amorcer le cluster:
 ```bash
 sudo kubeadm init \
-  --control-plane-endpoint "apex-master.lab.vezpi.me:6443" \
+  --control-plane-endpoint "k8s_lab.lab.vezpi.me:6443" \
   --upload-certs \
   --pod-network-cidr=10.10.0.0/16
 ```
 
 **Explications** :
-- `--control-plane-endpoint` : un nom DNS pour votre plan de contrôle.
-- `--upload-certs` : permet d’ajouter d’autres nœuds maîtres ensuite.
-- `--pod-network-cidr` : le sous-réseau à utiliser pour le réseau des Pods (compatible avec Cilium).
+- `--control-plane-endpoint` : Nom DNS pour votre plan de contrôle.
+- `--upload-certs` : Télécharge les certificats qui doivent être partagés entre toutes les masters du cluster.
+- `--pod-network-cidr` : Sous-réseau à utiliser pour le CNI.
+
+ℹ️ Le nom DNS `k8s_lab.lab.vezpi.me` est géré dans mon homelab par **Unbound DNS**, cela résout sur mon interface d'**OPNsense** où un service **HAProxy** écoute sur le port 6443 et équilibre la charge entre les 3 nœuds du plan de contrôle.
 
 Cette étape va :
-- Initialiser etcd et les composants du plan de contrôle.
+- Initialiser la base `etcd` et les composants du plan de contrôle.
 - Configurer RBAC et les tokens d’amorçage.
-- Afficher deux commandes `kubeadm join` importantes : une pour les **workers**, l’autre pour les **maîtres supplémentaires**.
+- Afficher deux commandes `kubeadm join` importantes : une pour les **workers**, l’autre pour les **masters supplémentaires**.
 
 Vous verrez aussi un message indiquant comment configurer l’accès `kubectl`.
 
-## Create the Cluster
+### Configurer `kubectl`
 
-    Running kubeadm init
+Si vous préférez gérer votre cluster depuis le nœud master, vous pouvez simplement copier-coller depuis la sortie de la commande `kubeadm init` :
+```bash
+mkdir -p $HOME/.kube
+sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
+sudo chown $(id -u):$(id -g) $HOME/.kube/config
+```
 
-    Configuring kubectl on the bastion
+Si vous préférez contrôler le cluster depuis autre part, dans mon cas depuis mon bastion LXC :
+```bash
+mkdir -p $HOME/.kube
+scp <master node>:/etc/kubernetes/admin.conf $HOME/.kube/config
+chmod 600 ~/.kube/config
+```
 
-    Installing the CNI plugin Cilium
+Vérifiez l'accès :
+```bash
+kubectl get nodes
+```
+
+ℹ️ You devriez voir seulement le premier master listé (dans l'état `NotReady` jusqu'à ce que le CNI soit déployé).
+
+### Installer le Plugin CNI Cilium
+
+Depuis la [documentation Cilium](https://docs.cilium.io/en/stable/gettingstarted/k8s-install-default/), Il y a 2 manières principales pour installer le CNI : utiliser la CLI Cilium ou Help, pour ce lab je vais utiliser l'outil CLI.
+
+#### Installer la CLI Cilium 
+
+La CLI Cilium peut être utilisée pour installer Cilium, inspecter l'état de l'installation Cilium et activer/désactiver diverses fonctionnalités (ex : `clustermesh`, `Hubble`) :
+```bash
+CILIUM_CLI_VERSION=$(curl -s https://raw.githubusercontent.com/cilium/cilium-cli/main/stable.txt)
+curl -L --fail --remote-name-all https://github.com/cilium/cilium-cli/releases/download/${CILIUM_CLI_VERSION}/cilium-linux-amd64.tar.gz{,.sha256sum}
+sha256sum --check cilium-linux-amd64.tar.gz.sha256sum
+sudo tar xzvfC cilium-linux-amd64.tar.gz /usr/local/bin
+rm cilium-linux-amd64.tar.gz{,.sha256sum}
+```
+
+#### Installer Cilium
+
+Installer Cilium dans le cluster Kubernetes pointé par le contexte `kubectl` :
+```bash
+cilium install --version 1.17.6
+```
+
+#### Valider l'Installation
+
+Pour valider que Cilium a été installé correctement :
+```bash
+cilium status --wait
+```
+
+Pour vérifier que votre cluster dispose d'une connectivité réseau appropriée :
+```bash
+cilium connectivity test
+```
+
+Une fois installé, le nœud master doit passer au statut `Ready`.
+
+---
 
 
 ## Join Additional Nodes

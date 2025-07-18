@@ -186,18 +186,21 @@ sudo apt-mark hold kubectl
 Once all nodes are prepared, it’s time to initialize the Kubernetes control plane on the **first master node**.
 
 ### Initialization
+
 Run the following command to bootstrap the cluster:
 ```bash
 sudo kubeadm init \
-  --control-plane-endpoint "apex-master.lab.vezpi.me:6443" \
+  --control-plane-endpoint "k8s_lab.lab.vezpi.me:6443" \
   --upload-certs \
   --pod-network-cidr=10.10.0.0/16
 ```
 
 **Explanation**:
-- `--control-plane-endpoint`: a DNS name for your control plane.
-- `--upload-certs`: Upload the certificates that should be shared across all the control-plane instances to the cluster.
-- `--pod-network-cidr`: The subnet for your CNI.
+- `--control-plane-endpoint`: DNS name for your control plane.
+- `--upload-certs`: Upload the certificates that should be shared across all masters of the cluster.
+- `--pod-network-cidr`: Subnet for the CNI.
+
+ℹ️ The DNS name `k8s_lab.lab.vezpi.me` is handled in my homelab by **Unbound DNS**, this resolves on my **OPNsense** interface where a **HAProxy** service listen on the port 6443 and load balance between the 3 control plane nodes.
 
 This step will:
 - Initialize the `etcd` database and control plane components.
@@ -227,9 +230,9 @@ Verify your access:
 kubectl get nodes
 ```
 
-ℹ️ You should see only the first master listed (in "NotReady" state until the CNI is deployed).
+ℹ️ You should see only the first master listed (in `NotReady` state until the CNI is deployed).
 
-### Install the CNI plugin Cilium
+### Install the CNI Plugin Cilium
 
 From the [Cilium documentation](https://docs.cilium.io/en/stable/gettingstarted/k8s-install-default/), there are 2 common ways for installing the CNI: using the **Cilium CLI** or **Helm**, for that lab I will use the CLI tool.
 
@@ -246,35 +249,71 @@ rm cilium-linux-amd64.tar.gz{,.sha256sum}
 
 #### Install Cilium
 
-Install Cilium into the Kubernetes cluster pointed to by your current kubectl context:
+Install Cilium into the Kubernetes cluster pointed to by your current `kubectl` context:
 ```bash
 cilium install --version 1.17.6
 ```
 
-#### Validate the installation
+#### Validate the Installation
 
-To validate that Cilium has been properly installed, you can run:
+To validate that Cilium has been properly installed:
 ```bash
 cilium status --wait
 ```
 
-Run the following command to validate that your cluster has proper network connectivity:
+To validate that your cluster has proper network connectivity:
 ```bash
 cilium connectivity test
 ```
 
-Once installed, the master node should transition to **Ready** status.
+Once installed, the master node should transition to `Ready` status.
 
+---
 ## Join Additional Nodes
 
-### 	Join Masters
+After initializing the first control plane node, you can now join the remaining nodes to the cluster.
 
-    Creating the control-plane join command
+There are two types of join commands:
+- One for joining **control-plane (master) nodes**
+- One for joining **worker nodes**
 
-    Syncing PKI and etcd certs
+These commands were displayed at the end of the `kubeadm init` output. If you didn’t copy them, you can regenerate them. 
 
-    Running kubeadm join on master 2 and 3
-### 	Join Workers
+⚠️ The certificates and the decryption key expire after two hours.
+
+### Additional Masters
+
+#### Generate Certificates
+
+If you need to re-upload the certificates and generate a new decryption key, use the following command on a control plane node that is already joined to the cluster:
+```bash
+sudo kubeadm init phase upload-certs --upload-certs
+kubeadm certs certificate-key
+```
+#### Generate Token
+
+Paired with the certificate, you'll need a new token, this will print the whole join command as control plane: 
+```bash
+sudo kubeadm token create --print-join-command --certificate-key <certificate-key>
+```
+#### Join the Control Plane
+
+You can now join any number of control-plane node by running the command above or given by the `kubeadm init` command:
+```bash
+sudo kubeadm join <control-plane-endpoint> --token <token> --discovery-token-ca-cert-hash <discovery-token-ca-cert-hash> --control-plane --certificate-key <certificate-key>
+```
+
+### Join Workers
+
+Again here if you missed the output of the `kubeadm init`, you can generate a new token and the full `join` command:
+```bash
+sudo kubeadm token create --print-join-command
+```
+
+Then you can 
+
+
+
 
     Generating and running the worker kubeadm join command
 
