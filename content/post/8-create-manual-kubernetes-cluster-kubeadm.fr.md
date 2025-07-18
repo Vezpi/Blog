@@ -1,11 +1,15 @@
 ---
 slug: create-manual-kubernetes-cluster-kubeadm
-title: Template
-description: 
-date: 
+title: Créer un Cluster Kubernetes Hautement Disponible avec kubeadm sur des VMs
+description: Guide étape par étape pour créer manuellement un cluster Kubernetes hautement disponible sur des machines virtuelles avec kubeadm.
+date: 2025-07-18
 draft: true
-tags: 
+tags:
+  - kubernetes
+  - highly-available
+  - kubeadm
 categories:
+  - homelab
 ---
 
 ## Intro
@@ -615,21 +619,21 @@ __ [cilium-test-1] All 73 tests (739 actions) successful, 50 tests skipped, 1 sc
 
 ⌛ Ce test de connectivité peut prendre jusqu’à **30 minutes**.
 
-## Deploying a Sample Application
-
-    Creating a simple Deployment and Service
-
-    Exposing it via NodePort or LoadBalancer
-
-    Verifying functionality
-
+---
 ## Conclusion
 
-    Summary of the steps
+Dans cet article, nous avons vu comment **créer manuellement un cluster Kubernetes** à l’aide de `kubeadm`, sur un ensemble de 6 machines Ubuntu (3 masters et 3 workers) préalablement déployées avec Terraform sur Proxmox.
 
-    When to use this manual method
+Nous avons suivi les étapes suivantes :
+- Préparation des nœuds avec les outils, modules noyau et runtime nécessaires
+- Installation des paquets Kubernetes
+- Initialisation du cluster depuis le premier nœud master
+- Ajout des autres nœuds du plan de contrôle et les workers
+- Vérification de l’état et du bon fonctionnement du cluster
 
+Cette approche manuelle permet de mieux comprendre comment un cluster Kubernetes est construit en interne. C’est une excellente base avant de passer à l’automatisation dans les prochains articles, en utilisant des outils comme Ansible.
 
+Restez connectés, la suite sera axée sur l’automatisation de tout ça !
 
 
 
