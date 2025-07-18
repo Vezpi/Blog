@@ -6,7 +6,6 @@ date: 2025-07-18
 draft: false
 tags:
   - kubernetes
-  - highly-available
   - kubeadm
 categories:
   - homelab
@@ -187,7 +186,7 @@ sudo apt-mark hold kubectl
 
 Une fois tous les nœuds préparés, on peut initialiser le **plan de contrôle** Kubernetes sur le **premier nœud master**.
 
-### Initialisation
+### Amorcer le Cluster
 
 Exécutez la commande suivante pour amorcer le cluster:
 ```bash

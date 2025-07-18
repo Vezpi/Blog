@@ -6,7 +6,6 @@ date: 2025-07-18
 draft: false
 tags:
   - kubernetes
-  - highly-available
   - kubeadm
 categories:
   - homelab
@@ -57,7 +56,7 @@ On my infrastructure, the nodes resolve the hostnames each other using my DNS se
 
 ### OS Updates
 
-My VMs are running **Ubuntu 24.04.2 LTS**. Cloud-init handles the updates after the provision in that case, let's make sure everything is up to date and install packages needed to add Kubernetes repository:
+My VMs are running **Ubuntu 24.04.2 LTS**. Cloud-init handles the updates after the provision in that case, but let's make sure everything is up to date and install packages needed to add Kubernetes repository:
 ```bash
 sudo apt update && sudo apt upgrade -y
 sudo apt install -y apt-transport-https ca-certificates curl gpg
@@ -187,7 +186,7 @@ sudo apt-mark hold kubectl
 
 Once all nodes are prepared, it’s time to initialize the Kubernetes control plane on the **first master node**.
 
-### Initialization
+### Bootstrap the Cluster
 
 Run the following command to bootstrap the cluster:
 ```bash
