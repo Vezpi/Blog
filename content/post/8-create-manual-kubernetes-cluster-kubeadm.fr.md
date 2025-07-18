@@ -190,7 +190,7 @@ Une fois tous les nœuds préparés, on peut initialiser le **plan de contrôle*
 Exécutez la commande suivante pour amorcer le cluster:
 ```bash
 sudo kubeadm init \
-  --control-plane-endpoint "k8s_lab.lab.vezpi.me:6443" \
+  --control-plane-endpoint "k8s-lab.lab.vezpi.me:6443" \
   --upload-certs \
   --pod-network-cidr=10.10.0.0/16
 ```
@@ -200,7 +200,7 @@ sudo kubeadm init \
 - `--upload-certs` : Télécharge les certificats qui doivent être partagés entre toutes les masters du cluster.
 - `--pod-network-cidr` : Sous-réseau à utiliser pour le CNI.
 
-ℹ️ Le nom DNS `k8s_lab.lab.vezpi.me` est géré dans mon homelab par **Unbound DNS**, cela résout sur mon interface d'**OPNsense** où un service **HAProxy** écoute sur le port 6443 et équilibre la charge entre les 3 nœuds du plan de contrôle.
+ℹ️ Le nom DNS `k8s-lab.lab.vezpi.me` est géré dans mon homelab par **Unbound DNS**, cela résout sur mon interface d'**OPNsense** où un service **HAProxy** écoute sur le port 6443 et équilibre la charge entre les 3 nœuds du plan de contrôle.
 
 Cette étape va :
 - Initialiser la base `etcd` et les composants du plan de contrôle.
