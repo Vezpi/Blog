@@ -10,7 +10,8 @@ categories:
 
 ## Intro
 
+After have created a Kubernetes cluster with `kubeadm` in [that post]({{< ref "post/8-create-manual-kubernetes-cluster-kubeadm" >}}), my first goal is to expose a pod externally with a URL and secured with a TLS certificate verified by Let's Encrypt.
 
-In this article, I will explain how I achieve to expose a pod externally with a URL and secured with a TLS certificate verified by Let's Encrypt.
+To achieve that
 
 ###
