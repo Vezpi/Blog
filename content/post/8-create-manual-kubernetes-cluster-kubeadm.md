@@ -15,7 +15,7 @@ categories:
 
 In this [previous article]({{< ref "post/7-terraform-create-proxmox-module" >}}), I explained how to deploy VMs using a **Terraform** module with **Proxmox** and ended up with 6 VMs, 3 masters and 3 workers nodes, based on [cloud-init template]({{< ref "post/1-proxmox-cloud-init-vm-template" >}}).
 
-Now that the infrastructure is ready, let’s move on to the next step: **manually building a Kubernetes cluster** using `kubeadm`, highly available using stacked `etcd`.
+Now that the infrastructure is ready, let’s move on to the next step: **manually building a Kubernetes cluster** in my homelab using `kubeadm`, highly available using stacked `etcd`.
 
 In this post, I’ll walk through each step of the installation process of a Kubernetes cluster. I will not rely on automation tools to configure the nodes for now, to better understand what are the steps involved in a Kubernetes cluster bootstrapping. Automation will be covered in future posts.
 
@@ -618,7 +618,7 @@ __ [cilium-test-1] All 73 tests (739 actions) successful, 50 tests skipped, 1 sc
 
 🚀 Our highly available Kubernetes cluster is ready!
 
-In this post, we walked through the **manual creation of a Kubernetes cluster** using `kubeadm`, on top of 6 Ubuntu VMs (3 masters and 3 workers) previously provisioned with Terraform on Proxmox.
+In this post, we walked through the **manual creation of a Kubernetes cluster** in my homelab using `kubeadm`, on top of 6 Ubuntu VMs (3 masters and 3 workers) previously provisioned with Terraform on Proxmox.
 
 We went step by step:
 - Preparing the nodes with the required tools, kernel modules, and container runtime

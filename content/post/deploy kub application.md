@@ -18,5 +18,38 @@ To achieve that, I will need several components:
 - Ingress Controller: TODO add oneline description
 - TLS Certificates: TODO add oneline description
 
+## Services
 
+TODO add why we need service  
+
+### What is a Kubernetes Service
+
+### Different Kubernetes Services
+#### ClusterIP
+#### NodePort
+#### LoadBalancer
+### Expose a Pod Externally with BGP
+#### Using an IP Address
+#### Using a URL
+
+## Ingress
+
+TODO add why we need service  
+### What is a Kubernetes Ingress
+
+### How Ingress Work
+
+## Ingress Controller
+
+### What is an Ingress Controller
+
+### Which Ingress Controller to Use
+
+### Install NGINX Ingress Controller
+
+### Associate a Service to an Ingress
+
+### Use HTTPS
+
+## TLS Certificate
 ###

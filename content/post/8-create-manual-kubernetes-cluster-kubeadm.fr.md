@@ -15,7 +15,7 @@ categories:
 
 Dans cet [article précédent]({{< ref "post/7-terraform-create-proxmox-module" >}}), j'expliquais comment déployer des VMs avec un module **Terraform** sur **Proxmox** et j'avais terminé avec 6 VMs, 3 nœuds masters et 3 nœuds workers, en m'appuyant sur un [template cloud-init]({{< ref "post/1-proxmox-cloud-init-vm-template" >}}).
 
-Maintenant que l'infrastructure est prête, passons à l'étape suivante : **créer manuellement un cluster Kubernetes** avec `kubeadm`, hautement disponible utilisant `etcd` empilé.
+Maintenant que l'infrastructure est prête, passons à l'étape suivante : **créer manuellement un cluster Kubernetes** dans mon homelab avec `kubeadm`, hautement disponible utilisant `etcd` empilé.
 
 Dans cet article, je vais détailler chaque étape de l'installation d’un cluster Kubernetes. Je n'utiliserai pas d'outil d'automatisation pour configurer les nœuds pour le moment, afin de mieux comprendre les étapes impliquées dans le bootstrap d’un cluster Kubernetes. L'automatisation sera couverte dans de futurs articles.
 
@@ -621,7 +621,7 @@ __ [cilium-test-1] All 73 tests (739 actions) successful, 50 tests skipped, 1 sc
 
 🚀 Notre cluster Kubernetes hautement disponible est prêt !
 
-Dans cet article, nous avons vu comment **créer manuellement un cluster Kubernetes** à l’aide de `kubeadm`, sur un ensemble de 6 machines Ubuntu (3 masters et 3 workers) préalablement déployées avec Terraform sur Proxmox.
+Dans cet article, nous avons vu comment **créer manuellement un cluster Kubernetes** dans mon homelab à l’aide de `kubeadm`, sur un ensemble de 6 machines Ubuntu (3 masters et 3 workers) préalablement déployées avec Terraform sur Proxmox.
 
 Nous avons suivi les étapes suivantes :
 - Préparation des nœuds avec les outils, modules noyau et runtime nécessaires
