@@ -18,6 +18,12 @@ To achieve that, I will need several components:
 - Ingress Controller: TODO add oneline description
 - TLS Certificates: TODO add oneline description
 
+For these components to work, I will have to install new products. To install them, I will use Helm
+## Helm
+
+### Install Helm
+explain install Helm
+
 ## Services
 
 TODO add why we need service  
@@ -28,7 +34,21 @@ TODO add why we need service
 #### ClusterIP
 #### NodePort
 #### LoadBalancer
-### Expose a Pod Externally with BGP
+## Expose a LoadBalancer Service with BGP
+
+### What is BGP
+
+#### Traditional MetalLB Approach
+
+#### BGP with Cilium
+
+### Enable BGP
+
+#### Enable BGP in OPNsense
+
+#### Enable BGP in Cilium
+
+### Provisioning Your First LoadBalancer with BGP
 #### Using an IP Address
 #### Using a URL
 
