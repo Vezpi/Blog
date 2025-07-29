@@ -24,21 +24,35 @@ For these components to work, I will have to install new products. To install th
 ### Install Helm
 explain install Helm
 
-## Services
+## Kubernetes Services
 
 TODO add why we need service  
 
 ### What is a Kubernetes Service
 
-### Different Kubernetes Services
+explain what is a Service and its purpose
+### Different Services
+
+give the list of differents services
 #### ClusterIP
+
+explain what ClusterIP services are
 #### NodePort
+
+explain what NodePort services are
 #### LoadBalancer
+
+explain what LoadBalancer services are
 ## Expose a LoadBalancer Service with BGP
+
+explain that
 
 ### What is BGP
 
+explain BGP
 #### Traditional MetalLB Approach
+
+previous approach
 
 #### BGP with Cilium
 
@@ -52,10 +66,12 @@ TODO add why we need service
 #### Using an IP Address
 #### Using a URL
 
-## Ingress
+## Kubernetes Ingress
 
 TODO add why we need service  
 ### What is a Kubernetes Ingress
+
+explain what is an Ingress and its purpose
 
 ### How Ingress Work
 
@@ -63,14 +79,25 @@ TODO add why we need service
 
 ### What is an Ingress Controller
 
+explain what is an Ingress Controller and its purpose
+
 ### Which Ingress Controller to Use
 
+comparison between ingress controller
+which one I picked and why
 ### Install NGINX Ingress Controller
 
+detail installation of NGINX Ingress Controller
+verify ingress controller service
 ### Associate a Service to an Ingress
 
-### Use HTTPS
+
+
+oneline to explain how to use https
 
 ## TLS Certificate
 
-secretariat.sogecer@
+
+
+
+
