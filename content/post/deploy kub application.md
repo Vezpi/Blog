@@ -49,18 +49,27 @@ explain what NodePort services are
 explain what LoadBalancer services are
 
 ---
-## Expose a LoadBalancer Service with BGP
+## Expose a `LoadBalancer` Service with BGP
 
-explain that
+At first, I was thinking of using **MetalLB** to expose the IP of my services to my home network. This is what I used in the past when I was using my ISP box as router. After reading this post, [Use Cilium BGP integration with OPNsense](https://devopstales.github.io/kubernetes/cilium-opnsense-bgp/), I could do it differently using **BGP** with my OPNsense router.
+### What Is BGP?
 
-### What is BGP
+BGP (Border Gateway Protocol) is a routing protocol used to exchange network routes between systems. In the Kubernetes homelab context, BGP allows your Kubernetes nodes to advertise IPs  directly to your **network router or firewall**. Your **router then knows** how to reach the IPs managed by your cluster.
 
-explain BGP
-#### Traditional MetalLB Approach
+So instead of MetalLB managing IP allocation and ARP replies, your nodes directly tell your router: “Hey, I own 192.168.1.240”.
+### Legacy MetalLB Approach
 
-previous approach
+Without BGP, MetalLB in Layer 2 mode works like this:
+- Assigns a LoadBalancer IP (e.g., `192.168.1.240`) from a pool.
+- One node responds to **ARP** for that IP on your LAN.
 
-#### BGP with Cilium
+I know that MetalLB can also work with BGP, but what if my CNI (Cilium) can handle it out of the box?
+### BGP with Cilium
+
+With Cilium + BGP, you get:
+- Cilium’s agent on the node advertises LoadBalancer IPs over BGP.
+- Your router learns that IP and routes to the correct node.
+- No need for MetalLB.
 
 ### BGP Setup
 
