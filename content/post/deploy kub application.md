@@ -18,12 +18,16 @@ To achieve that, I will need several components:
 - Ingress Controller: TODO add oneline description
 - TLS Certificates: TODO add oneline description
 
-For these components to work, I will have to install new products. To install them, I will use Helm
+---
 ## Helm
 
-### Install Helm
+For these components to work, I will have to install new products. To install them, I will use Helm
+### Why Helm
 explain install Helm
+### Install Helm
 
+
+---
 ## Kubernetes Services
 
 TODO add why we need service  
@@ -43,6 +47,8 @@ explain what NodePort services are
 #### LoadBalancer
 
 explain what LoadBalancer services are
+
+---
 ## Expose a LoadBalancer Service with BGP
 
 explain that
@@ -56,16 +62,17 @@ previous approach
 
 #### BGP with Cilium
 
-### Enable BGP
+### BGP Setup
 
-#### Enable BGP in OPNsense
+#### On OPNsense
 
-#### Enable BGP in Cilium
+#### In Cilium
 
-### Provisioning Your First LoadBalancer with BGP
+### Deploying a LoadBalancer with BGP
 #### Using an IP Address
 #### Using a URL
 
+---
 ## Kubernetes Ingress
 
 TODO add why we need service  
@@ -75,6 +82,8 @@ explain what is an Ingress and its purpose
 
 ### How Ingress Work
 
+
+---
 ## Ingress Controller
 
 ### What is an Ingress Controller
@@ -92,12 +101,29 @@ verify ingress controller service
 ### Associate a Service to an Ingress
 
 
-
 oneline to explain how to use https
 
-## TLS Certificate
+---
+## Secure Connection with TLS
 
+to use https
 
+### Cert-Manager
 
+#### Install Cert-Manager
+
+install with helm
+#### Setup Cert-Manager
+
+verify clusterissuer
+
+### Add TLS in an Ingress
+
+ingress tls code
+
+verify 
+
+---
+## Conclusion
 
 
