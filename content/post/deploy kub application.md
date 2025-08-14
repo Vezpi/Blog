@@ -349,12 +349,10 @@ On its own, an Ingress is just a set of routing rules. It doesn’t actually han
 - Opens HTTP(S) ports on a `LoadBalancer` or `NodePort` service.
 - Routes traffic to the correct `Service` based on the `Ingress` rules.
 
-Think of it as a reverse proxy (like NGINX or Traefik), but integrated with Kubernetes.
-
-Since I’m looking for something simple, stable, well-maintained, and with a large community, I went with **NGINX Ingress Controller**.
+Popular controllers include NGINX, Traefik, HAProxy, and more. Since I was looking for something simple, stable, and widely adopted, I picked the **NGINX Ingress Controller**.
 ### Install NGINX Ingress Controller
 
-I install it using Helm, I set `controller.ingressClassResource.default=true` to define `nginx` as default for all my future ingresses:
+I used Helm to install the controller, and I set `controller.ingressClassResource.default=true` so that all my future ingresses use it by default:
 ```bash
 helm install ingress-nginx \
   --repo=https://kubernetes.github.io/ingress-nginx \
@@ -362,95 +360,52 @@ helm install ingress-nginx \
   --create-namespace ingress-nginx \
   --set controller.ingressClassResource.default=true
 ```
-```plaintext
-NAME: ingress-nginx
-LAST DEPLOYED: Wed Jul 23 15:44:47 2025
-NAMESPACE: ingress-nginx
-STATUS: deployed
-REVISION: 1
-TEST SUITE: None
-NOTES:
-The ingress-nginx controller has been installed.
-It may take a few minutes for the load balancer IP to be available.
-You can watch the status by running 'kubectl get service --namespace ingress-nginx ingress-nginx-controller --output wide --watch'
 
-An example Ingress that makes use of the controller:
-  apiVersion: networking.k8s.io/v1
-  kind: Ingress
-  metadata:
-    name: example
-    namespace: foo
-  spec:
-    ingressClassName: nginx
-    rules:
-      - host: www.example.com
-        http:
-          paths:
-            - pathType: Prefix
-              backend:
-                service:
-                  name: exampleService
-                  port:
-                    number: 80
-              path: /
-    # This section is only required if TLS is to be enabled for the Ingress
-    tls:
-      - hosts:
-        - www.example.com
-        secretName: example-tls
-
-If TLS is enabled for the Ingress, a Secret containing the certificate and key must also be provided:
-
-  apiVersion: v1
-  kind: Secret
-  metadata:
-    name: example-tls
-    namespace: foo
-  data:
-    tls.crt: <base64 encoded cert>
-    tls.key: <base64 encoded key>
-```
-
-My NGINX Ingress Controller is now installed and its service picked the 2nd IP in the load balancer range, `192.168.55.21`:
+The controller is deployed and exposes a `LoadBalancer` service. In my setup, it picked the second available IP in the BGP range:
 ```bash
 NAME                       TYPE           CLUSTER-IP      EXTERNAL-IP     PORT(S)                      AGE   SELECTOR
 ingress-nginx-controller   LoadBalancer   10.106.236.13   192.168.55.21   80:31195/TCP,443:30974/TCP   75s   app.kubernetes.io/component=controller,app.kubernetes.io/instance=ingress-nginx,app.kubernetes.io/name=ingress-nginx
 ```
 
->💡 I want to make sure my controller will always pick the same IP. 
+### Reserving a Static IP for the Controller
 
-I will create 2 separate pools, one dedicated for the Ingress Controller with only one IP, and another one for anything else.
+I want to make sure the Ingress Controller always receives the same IP address. To do this, I created **two separate Cilium IP pools**:
+- One dedicated for the Ingress Controller with a single IP.
+- One for everything else.
 ```yaml
 ---
-apiVersion: "cilium.io/v2alpha1"
+# Pool for Ingress Controller
+apiVersion: cilium.io/v2alpha1
 kind: CiliumLoadBalancerIPPool
 metadata:
-  name: "ingress-nginx"
+  name: ingress-nginx
 spec:
   blocks:
-  - cidr: "192.168.55.55/32" # Ingress Controller IP
+    - cidr: 192.168.55.55/32
   serviceSelector:
     matchLabels:
       app.kubernetes.io/name: ingress-nginx
       app.kubernetes.io/component: controller
 ---
-apiVersion: "cilium.io/v2alpha1"
+# Default pool for other services
+apiVersion: cilium.io/v2alpha1
 kind: CiliumLoadBalancerIPPool
 metadata:
-  name: "default"
+  name: default
 spec:
   blocks:
-  - start: "192.168.55.100" # LB Start IP
-    stop: "192.168.55.250" # LB Stop IP
+    - start: 192.168.55.100
+      stop: 192.168.55.250
   serviceSelector:
-	matchExpressions:
-	- key: app.kubernetes.io/name
-	  operator: NotIn
-	  values:
-		- ingress-nginx
+    matchExpressions:
+      - key: app.kubernetes.io/name
+        operator: NotIn
+        values:
+          - ingress-nginx
+
 ```
 
-After replacing the previous pool by these two, my Ingress Controller got the desired IP `192.168.55.55` and my `test-lb` service picked the first one `192.168.55.100` in the new range as expected.
+After replacing the previous shared pool with these two, the Ingress Controller got the desired IP `192.168.55.55`, and the `test-lb` service picked `192.168.55.100` as expected:
 ```bash
 NAMESPACE       NAME                                 TYPE           CLUSTER-IP       EXTERNAL-IP      PORT(S)                      AGE
 default         test-lb                              LoadBalancer   10.100.167.198   192.168.55.100   80:31350/TCP                 6h34m
@@ -461,7 +416,7 @@ ingress-nginx   ingress-nginx-controller             LoadBalancer   10.106.236.1
 
 Now let’s wire up a service to this controller.
 
-We transform our `LoadBalancer` service to a standard `ClusterIP` and add a minimal Ingress definition to expose my test pod over HTTP:
+First, I update the original `LoadBalancer` service and convert it into a `ClusterIP` (since the Ingress Controller will now expose it externally):
 ```yaml
 ---
 apiVersion: v1
@@ -495,8 +450,17 @@ spec:
                   number: 80  
 ```
 
+Then I apply the `Ingress` manifest as shown earlier to expose the service over HTTP.
 
-![Pasted_image_20250803215654.png](img/Pasted_image_20250803215654.png)
+Since I'm using the Caddy plugin on OPNsense, I still need a local Layer 4 route to forward traffic for `test.vezpi.me` to the NGINX Ingress Controller IP (`192.168.55.55`). I simply create a new rule in the Caddy plugin.
+
+![Create Layer4 router in Caddy plugin for OPNsense](img/opnsense-caddy-create-layer4-route-http.png)
+
+Now let’s test it in the browser:
+![  ](img/ingress-controller-nginx-test-simple-webserver.png)
+Test Ingress on HTTP
+
+✅ Our pod is now reachable on its HTTP URL using an Ingress. Second step complete!
 
 ---
 ## Secure Connection with TLS
