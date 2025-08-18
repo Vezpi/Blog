@@ -465,13 +465,24 @@ Test Ingress on HTTP
 ---
 ## Secure Connection with TLS
 
-oneline to explain how to use https
+Exposing services over HTTP works, but in practice we almost always want to use **HTTPS**. That’s where TLS certificates comes in, it encrypts traffic between clients and your cluster, ensuring security and trust.
 
 ### Cert-Manager
 
+To automate certificate management in Kubernetes, we use **Cert-Manager**. It can request, renew, and manage TLS certificates without manual intervention.
+
 #### Install Cert-Manager
 
-install with helm
+We deploy it with Helm on the cluster:
+```bash
+helm repo add jetstack https://charts.jetstack.io
+helm repo update
+helm install cert-manager jetstack/cert-manager \
+  --namespace cert-manager \
+  --create-namespace \
+  --set crds.enabled=true
+```
+
 #### Setup Cert-Manager
 
 verify clusterissuer
