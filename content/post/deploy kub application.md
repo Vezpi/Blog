@@ -358,7 +358,8 @@ helm install ingress-nginx \
   --repo=https://kubernetes.github.io/ingress-nginx \
   --namespace=ingress-nginx \
   --create-namespace ingress-nginx \
-  --set controller.ingressClassResource.default=true
+  --set controller.ingressClassResource.default=true \
+  --set controller.config.strict-validate-path-type=false
 ```
 
 The controller is deployed and exposes a `LoadBalancer` service. In my setup, it picked the second available IP in the BGP range:
@@ -402,7 +403,6 @@ spec:
         operator: NotIn
         values:
           - ingress-nginx
-
 ```
 
 After replacing the previous shared pool with these two, the Ingress Controller got the desired IP `192.168.55.55`, and the `test-lb` service picked `192.168.55.100` as expected:
@@ -465,7 +465,7 @@ Test Ingress on HTTP
 ---
 ## Secure Connection with TLS
 
-Exposing services over HTTP works, but in practice we almost always want to use **HTTPS**. That’s where TLS certificates comes in, it encrypts traffic between clients and your cluster, ensuring security and trust.
+Exposing services over plain HTTP is fine for testing, but in practice we almost always want **HTTPS**. TLS certificates encrypt traffic and provides authenticity and trust to users.
 
 ### Cert-Manager
 
@@ -485,15 +485,152 @@ helm install cert-manager jetstack/cert-manager \
 
 #### Setup Cert-Manager
 
-verify clusterissuer
+Next, we configure a **ClusterIssuer** for Let’s Encrypt. This resource tells Cert-Manager how to request certificates:
+```yaml
+---
+apiVersion: cert-manager.io/v1
+kind: ClusterIssuer
+metadata:
+  name: letsencrypt-staging
+spec:
+  acme:
+    server: https://acme-staging-v02.api.letsencrypt.org/directory
+    email: <email>
+    privateKeySecretRef:
+      name: letsencrypt--key
+    solvers:
+    - http01:
+        ingress:
+          ingressClassName: nginx
+```
+
+ℹ️ Here I define the **staging** Let’s Encrypt ACME server for testing purposes. Staging certificates are not trusted by browsers, but they prevent hitting Let’s Encrypt’s strict rate limits during development.
+
+Apply it:
+```bash
+kubectl apply -f clusterissuer.yaml
+```
+
+Verify if your `ClusterIssuer` is `Ready`:
+```bash
+kubectl get clusterissuers.cert-manager.io                                                    
+NAME                  READY   AGE
+letsencrypt-staging   True    14m
+```
+
+If it doesn’t become `Ready`, use `kubectl describe` on the resource to troubleshoot.
 
 ### Add TLS in an Ingress
 
-ingress tls code
+Now we can secure our service with TLS by adding a `tls` section in the `Ingress` spec and referencing the `ClusterIssuer`:
+```yaml
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: test-ingress-https
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /
+    cert-manager.io/cluster-issuer: letsencrypt-staging
+spec:
+  tls:
+    - hosts:
+      - test.vezpi.me
+      secretName: test-vezpi-me-tls
+  rules:
+    - host: test.vezpi.me
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: test-lb
+                port:
+                  number: 80
+```
 
-verify 
+Behind the scenes, Cert-Manager goes through this workflow to issue the certificate:
+- Detects the `Ingress` with `tls` and the `ClusterIssuer`.
+- Creates a Certificate CRD that describes the desired cert + Secret storage.
+- Creates an Order CRD to represent one issuance attempt with Let’s Encrypt.
+- Creates a Challenge CRD (e.g., HTTP-01 validation).
+- Provisions a temporary solver Ingress/Pod to solve the challenge.
+- Creates a CertificateRequest CRD and sends the CSR to Let’s Encrypt.
+- Receives the signed certificate and stores it in a Kubernetes Secret.
+- The Ingress automatically uses the Secret to serve HTTPS.
+    
+
+✅ Once this process completes, your Ingress is secured with a TLS certificate.
+![TLS certificate verified with the staging Let's Encrypt server](img/k8s-test-deploy-service-tls-certificate-staging-lets-encrypt.png)
+
+### Switch to Production Certificates
+
+Once staging works, we can safely switch to the **production** ACME server to get a trusted certificate from Let’s Encrypt:
+```yaml
+---
+apiVersion: cert-manager.io/v1
+kind: ClusterIssuer
+metadata:
+  name: letsencrypt
+spec:
+  acme:
+    server: https://acme-v02.api.letsencrypt.org/directory
+    email: <email>
+    privateKeySecretRef:
+      name: letsencrypt-key
+    solvers:
+    - http01:
+        ingress:
+          ingressClassName: nginx
+```
+
+Update the `Ingress` to reference the new `ClusterIssuer`:
+```yaml
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: test-ingress-https
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt
+spec:
+  tls:
+    - hosts:
+      - test.vezpi.me
+      secretName: test-vezpi-me-tls
+  rules:
+    - host: test.vezpi.me
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: test-lb
+                port:
+                  number: 80
+```
+
+Since the staging certificate is still stored in the Secret, I delete it to trigger a fresh request against production:
+```bash
+kubectl delete secret test-vezpi-me-tls
+```
+
+🎉 My `Ingress` is now secured with a valid TLS certificate from Let’s Encrypt. Requests to `https://test.vezpi.me` are encrypted end-to-end and routed by the NGINX Ingress Controller to my `nginx` pod:
+![Ingress HTTPS with certificate verified by Let's Encrypt](img/k8s-deploy-test-service-tls-certificate-lets-encrypt.png)
+
 
 ---
 ## Conclusion
 
+In this journey, I started from the basics, exposing a single pod with a `LoadBalancer` service, and step by step built a production-ready setup:
+- Learned about **Kubernetes Services** and their different types.
+- Used **BGP with Cilium** and OPNsense to assign external IPs directly from my network.
+- Introduced **Ingress** to scale better, exposing multiple services through a single entry point.
+- Installed the **NGINX Ingress Controller** to handle routing.
+- Automated certificate management with **Cert-Manager**, securing my services with Let’s Encrypt TLS certificates.
 
+🚀 The result: my pod is now reachable at a real URL, secured with HTTPS, just like any modern web application.
+
+This is a huge milestone in my homelab Kubernetes journey, in the next article, I'd like to explore persistent storage to be able to use my **Ceph** cluster on **Proxmox**.
