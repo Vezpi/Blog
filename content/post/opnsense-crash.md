@@ -9,9 +9,11 @@ categories:
 ---
 ## Intro
 
-Why I’m sharing this story
+This week, I experienced my first real problem on my homelab, which caused my whole home network to go down. 
 
-A quick disclaimer: not everything went smoothly
+My OPNsense router crashed and after trying to recover , I finally had to reinstall it from scratch and restore almost all the configuration, thanks to a single XML file.
+
+In that story, I will try to explain how 
 
 ## The Calm Before the Storm
 
