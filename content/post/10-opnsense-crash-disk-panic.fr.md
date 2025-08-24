@@ -21,6 +21,8 @@ Ce genre d’exercice est la pire chose que vous souhaitez voir arriver, parce q
 
 Ma box OPNsense tournait parfaitement depuis des mois. Routeur, pare-feu, DNS, DHCP, VLANs, VPN, reverse proxy et même contrôleur UniFi : toutes les pièces de mon homelab passe par elle. Mais pas seulement, elle fournit aussi Internet à la maison.
 
+![Diagram of my home network ](img/homelab-network-schema.png)
+
 Cette box est le cœur de mon réseau, sans elle, je ne peux quasiment rien faire. J’ai détaillé son fonctionnement dans ma section [Homelab]({{< ref "page/homelab" >}}). Tout “fonctionnait juste”, et je ne m’en inquiétait pas. J’étais confiant, sa sauvegarde vivait uniquement à l’intérieur de la machine…
 
 Peut-être trop confiant.

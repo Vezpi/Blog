@@ -21,6 +21,8 @@ This kind of exercise is the worst thing you want to happen because it's never f
 
 My OPNsense box had been running smoothly for months. Router, firewall, DNS, DHCP, VLANs, VPN, reverse proxy and even UniFi controller: all the pieces of my homelab run through it. but not only, it is also serving internet at home.
 
+![Diagram of my home network ](img/homelab-network-schema.png)
+
 This box is the heart of my network, without it, I can hardly do anything. I have detailed how this is working in my [Homelab]({{< ref "page/homelab" >}}) section. It was “just working,” and I wasn’t worried about it. I felt confident, its backup was living only inside the machine...
 
 Maybe too confident.
