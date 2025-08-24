@@ -2,8 +2,8 @@
 slug: opnsense-crash-disk-panic
 title: My OPNsense Router Crash, from Panic to Reborn
 description: The story of how I survived an OPNsense crash with a failing disk and why one backup XML made all the difference.
-date: 2025-08-22
-draft: true
+date: 2025-08-24
+draft: false
 tags:
   - opnsense
 categories:

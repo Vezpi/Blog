@@ -2,8 +2,8 @@
 slug: opnsense-crash-disk-panic
 title: Mon Routeur OPNsense Crash, de la Panique à la Renaissance
 description: L'histoire sur comment j’ai survécu à un crash OPNsense à cause d'une disque défaillant et pourquoi un fichier XML a tout changé.
-date: 2025-08-22
-draft: true
+date: 2025-08-24
+draft: false
 tags:
   - opnsense
 categories:
