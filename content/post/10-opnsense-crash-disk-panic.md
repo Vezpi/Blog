@@ -1,7 +1,7 @@
 ---
-slug:
-title: Template
-description:
+slug: opnsense-crash-disk-panic
+title: My OPNsense Router Crash, from Panic to Reborn
+description: The story of how I survived an OPNsense crash with a failing disk and why one backup XML made all the difference.
 date: 2025-08-22
 draft: true
 tags:
@@ -213,11 +213,11 @@ Initially I wanted my router to be in its own hardware because I thought it was 
 
 ## Conclusion
 
-My OPNsense router went from a random reboot to a dead disk, with a rollercoaster of troubleshooting. In the end, I'm happy with the result, it taught me more than any smooth upgrade ever could.
+My OPNsense router went from a random reboot to a dead disk, with a rollercoaster of troubleshooting. In the end, I'm almost happy with what happened, it taught me more than any smooth upgrade ever could.
 
 If you run OPNsense (or any router), remember this:  
 **Keep a backup off the box.**
 
-Because when things go wrong, and eventually they will, that backup can save your homelab. Thanks to that one little XML file, what could have been a complete disaster ended as just a painful, but very educational, weekend.
+Because when things go wrong, and eventually they will, that one little XML file can save your homelab.
 
 Stay safe, make backups.

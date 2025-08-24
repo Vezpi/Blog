@@ -1,7 +1,7 @@
 ---
-slug:
-title: Template
-description:
+slug: opnsense-crash-disk-panic
+title: Mon Routeur OPNsense Crash, de la Panique à la Renaissance
+description: L'histoire sur comment j’ai survécu à un crash OPNsense à cause d'une disque défaillant et pourquoi un fichier XML a tout changé.
 date: 2025-08-22
 draft: true
 tags:
@@ -208,9 +208,7 @@ Reconfigurer AdGuard Home n'était pas bien compliqué, finalement mon DNS fonct
 
 Je dois sérieusement repenser ma stratégie de sauvegarde. J’ai toujours repoussé, jusqu’à ce qu’il soit trop tard. Ça faisait longtemps que je n’avais pas subi une panne matérielle. Quand ça arrive, ça pique.
 
-Au départ, je pensais qu’un routeur sur son propre hardware était plus sûr. J’avais tort. Je réfléchis à une virtualisation sous Proxmox pour l’avoir en haute dispo. Un beau projet en perspective !
-
----
+Au départ, je pensais qu’un routeur sur son propre hardware était plus sûr. J’avais tort. Je vais réfléchir à une virtualisation sous Proxmox pour l’avoir en haute dispo. Un beau projet en perspective !
 
 ## Conclusion
 
@@ -219,6 +217,6 @@ Mon routeur OPNsense est passé d’un simple redémarrage aléatoire à un disq
 Si vous utilisez OPNsense (ou n’importe quel routeur), retenez ça :  
 **Gardez une sauvegarde hors de la machine.**
 
-Parce que quand ça casse — et ça finira par casser — c’est ce petit fichier XML qui peut sauver tout votre homelab.
+Parce que quand ça casse, et ça finira par casser, c’est ce petit fichier XML qui peut sauver tout votre homelab.
 
-Faites des sauvegardes. Restez safe.
+Restez safe, faites des sauvegardes.
