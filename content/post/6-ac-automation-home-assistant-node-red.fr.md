@@ -142,7 +142,7 @@ Pour pouvoir ajuster la température sans avoir à modifier tout le workflow, j�
 Ces valeurs représentent la température de base utilisée pour le calcul des seuils, en fonction des offsets que je détaillerai plus loin.
 
 Le premier nœud est un `trigger state node` qui regroupe les 6 entités. Si je modifie l’une de ces valeurs, le nœud est déclenché :  
-![Node-RED trigger state node for sliders](img/node-red-trigger-state-nmode-for-sliders.png)
+![Node-RED trigger state node for sliders](img/node-red-trigger-state-mode-for-sliders.png)
 
 Le deuxième nœud est un `function node`, qui permet de déterminer la pièce concernée :
 ```js
@@ -675,7 +675,7 @@ Parfois, pour une raison ou une autre, on souhaite utiliser la climatisation man
 Node-RED utilise son propre utilisateur dans Home Assistant, donc si une unité change d’état sans cet utilisateur, c’est qu’une intervention manuelle a eu lieu.
 
 Le premier nœud est un `trigger state node`, qui envoie un message dès qu’une unité AC change d’état :  
-![Pasted_image_20250626221149.png](img/Pasted_image_20250626221149.png)
+![node-red-trigger-state-unit-change.png](img/node-red-trigger-state-unit-change.png)
 
 Le deuxième est un `function node` qui associe l’unité avec son minuteur :
 ```js

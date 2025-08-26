@@ -142,7 +142,7 @@ To have a control over the temperature without having to change the workflow, I 
 These values are the base temperature used for the calculation of the threshold, depending off the offset which I will detail further.
 
 The first node is a `trigger state node`, with all 6 entities combined. If I change one value, the node is triggered:  
-![Node-RED trigger state node for sliders](img/node-red-trigger-state-nmode-for-sliders.png)
+![Node-RED trigger state node for sliders](img/node-red-trigger-state-mode-for-sliders.png)
 
 The second node is a `function node`, to determine the room affected:
 ```js
@@ -668,7 +668,7 @@ The second node is another `call service node` which will start the lock timer o
 Sometime, for some reason, we want to use the AC manually. When we do, we don't want the workflow to change our manual setting, at least for some time. Node-RED is using its own user in Home Assistant, so when an AC unit change state without this user, this was manually done.
 
 The first node is a `trigger state node`, which will send a message when any AC unit is changing state:  
-![Pasted_image_20250626221149.png](img/Pasted_image_20250626221149.png)
+![node-red-trigger-state-unit-change.png](img/node-red-trigger-state-unit-change.png)
 
 The second is a `function node` which willassociate the unit with its timer:
 ```js
