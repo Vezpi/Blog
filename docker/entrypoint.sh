@@ -14,6 +14,9 @@ if [ "$BRANCH" = "preview" ]; then
   DRAFTS="--buildDrafts --buildFuture"
 fi
 
+# Clean blog dir
+rm -rf "$CLONE_DIR"
+
 # Clone repo
 echo "- Cloning $REPO_URL (branch: $BRANCH)..."
 git clone --recurse-submodules --branch "$BRANCH" "$REPO_URL" "$CLONE_DIR"
