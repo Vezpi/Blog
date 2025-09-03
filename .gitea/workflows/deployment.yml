@@ -211,7 +211,7 @@ jobs:
     runs-on: ubuntu
     if: always() && needs.Check-Rebuild.outputs.dev_lock_present == 'false'
     env:
-      NTFY_URL: https://ntfy.vezpi.me
+      NTFY_URL: https://ntfy.vezpi.com
       NTFY_TOPIC: blog
       NTFY_TOKEN: ${{ secrets.NTFY_CREDENTIALS }}
     steps:
