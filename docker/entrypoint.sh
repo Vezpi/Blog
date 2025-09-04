@@ -2,7 +2,7 @@
 set -e
 
 # Configuration
-REPO_URL="${REPO_URL:-https://git.vezpi.me/Vezpi/blog.git}"
+REPO_URL="${REPO_URL:-https://git.vezpi.com/Vezpi/blog.git}"
 URL="${URL:-blog.vezpi.com}"
 BRANCH="${BRANCH:-preview}"
 CLONE_DIR="${CLONE_DIR:-/blog}"
