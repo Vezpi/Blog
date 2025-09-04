@@ -25,7 +25,7 @@ jobs:
       dev_lock_present: ${{ steps.check_dev_lock.outputs.locked }}
     steps:
       - name: Checkout Repository
-        run: git clone --branch preview https://${{ secrets.REPO_TOKEN }}@git.vezpi.me/Vezpi/blog.git .
+        run: git clone --branch preview https://${{ secrets.REPO_TOKEN }}@git.vezpi.com/Vezpi/blog.git .
 
       - name: Check Latest Hugo Version
         id: get_latest
@@ -89,7 +89,7 @@ jobs:
         shell: sh
     steps:
       - name: Checkout Repository
-        run: git clone --branch preview https://${{ secrets.REPO_TOKEN }}@git.vezpi.me/Vezpi/blog.git .
+        run: git clone --branch preview https://${{ secrets.REPO_TOKEN }}@git.vezpi.com/Vezpi/blog.git .
 
       - name: Build Docker Image
         run: |  
