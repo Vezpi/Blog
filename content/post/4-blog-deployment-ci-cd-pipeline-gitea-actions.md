@@ -20,7 +20,7 @@ Since the blog is automatically redeployed every time I modify content in Obsidi
 
 ## Securing the Blog Deployment
 
-Currently, my blog redeploys automatically on every change to the `main` branch of the [Git repository](https://git.vezpi.me/Vezpi/Blog) hosted on my **Gitea** instance, using a **Gitea Actions** workflow. Every change made in my **Obsidian** vault is automatically pushed to this branch.
+Currently, my blog redeploys automatically on every change to the `main` branch of the [Git repository](https://git.vezpi.com/Vezpi/Blog) hosted on my **Gitea** instance, using a **Gitea Actions** workflow. Every change made in my **Obsidian** vault is automatically pushed to this branch.
 
 ![Workflow depuis l'écriture de notes sur Obsidian au Blog publié](img/obsidian-blog-gitea-actions-workflow.png)
 
@@ -96,7 +96,7 @@ By default, a `nginx` container simply starts the web server. But here I wanted 
 set -e
 
 # Configuration
-REPO_URL="${REPO_URL:-https://git.vezpi.me/Vezpi/blog.git}"
+REPO_URL="${REPO_URL:-https://git.vezpi.com/Vezpi/blog.git}"
 URL="${URL:-blog.vezpi.com}"
 BRANCH="${BRANCH:-preview}"
 CLONE_DIR="${CLONE_DIR:-/blog}"
@@ -177,7 +177,7 @@ Here is the new configuration of my `runner` in my Gitea stack, also managed via
     container_name: gitea_runner
     restart: always
     environment:
-      - GITEA_INSTANCE_URL=https://git.vezpi.me
+      - GITEA_INSTANCE_URL=https://git.vezpi.com
       - GITEA_RUNNER_REGISTRATION_TOKEN=<token>
       - GITEA_RUNNER_NAME=self-hosted
       - GITEA_RUNNER_LABELS=ubuntu:docker://node:lts,alpine:docker://node:lts-alpine,docker:docker://docker:cli
@@ -241,7 +241,7 @@ jobs:
       docker_folder_changed: ${{ steps.docker_folder.outputs.changed }}
     steps:
       - name: Checkout Repository
-        run: git clone --branch preview https://${{ secrets.REPO_TOKEN }}@git.vezpi.me/Vezpi/blog.git .
+        run: git clone --branch preview https://${{ secrets.REPO_TOKEN }}@git.vezpi.com/Vezpi/blog.git .
 
       - name: Check Latest Hugo Version
         id: get_latest
@@ -296,7 +296,7 @@ jobs:
         shell: sh
     steps:
       - name: Checkout Repository
-        run: git clone --branch preview https://${{ secrets.REPO_TOKEN }}@git.vezpi.me/Vezpi/blog.git .
+        run: git clone --branch preview https://${{ secrets.REPO_TOKEN }}@git.vezpi.com/Vezpi/blog.git .
 
       - name: Build Docker Image
         run: |  

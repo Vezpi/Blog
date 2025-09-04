@@ -52,7 +52,7 @@ The idea is simple:
 1. I write blog content in my Obsidian vault, under a specific `Blog` folder.
 2. When I'm done editing the file, the Obisdian Git plugin automatically commits and push updates to the Gitea repository
 3. When Gitea receives that push, a first Gitea Action is triggered.
-4. The first action syncs the updated blog content to another separate [Git repository](https://git.vezpi.me/Vezpi/blog) which hosts my blog content.
+4. The first action syncs the updated blog content to another separate [Git repository](https://git.vezpi.com/Vezpi/blog) which hosts my blog content.
 5. In that blog repository, another Gitea Action is triggered.
 6. The second Gitea Action generates the static web pages while upgrading Hugo if needed
 7. The blog is now updated (the one you are reading).
@@ -77,7 +77,7 @@ The Obsidian vault is a private Git repository self-hosted in Gitea. I use docke
     container_name: gitea_runner
     restart: on-failure
     environment:
-      - GITEA_INSTANCE_URL=https://git.vezpi.me
+      - GITEA_INSTANCE_URL=https://git.vezpi.com
       - GITEA_RUNNER_REGISTRATION_TOKEN=${GITEA_RUNNER_REGISTRATION_TOKEN}$
       - GITEA_RUNNER_NAME=self-hosted
       - GITEA_RUNNER_LABELS=ubuntu:docker://node:lts,alpine:docker://node:lts-alpine
@@ -139,7 +139,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Clone the blog repository
-        run: git clone https://${{ secrets.REPO_TOKEN }}@git.vezpi.me/Vezpi/blog.git 
+        run: git clone https://${{ secrets.REPO_TOKEN }}@git.vezpi.com/Vezpi/blog.git 
 
       - name: Transfer blog content from Obsidian
         run: |
