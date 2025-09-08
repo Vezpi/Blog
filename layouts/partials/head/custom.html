@@ -1,5 +1,7 @@
 <script defer src="https://analytics.vezpi.com/script.js" data-website-id="e50e5843-1039-4bc8-a3f6-80f60e25ea38"></script>
-<meta kind="{{ .Kind }}" type="{{ .Type }}" url="{{ .RelPermalink }}">
+{{ if or (eq .Kind "taxonomy") (eq .Kind "term") }}
+  <meta name="robots" content="noindex,follow">
+{{ end }}
 {{- if .Params.keywords }}
   <meta name="keywords" content="{{ delimit .Params.keywords ", " }}">
 {{- else if .Params.tags }}
