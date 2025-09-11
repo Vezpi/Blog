@@ -63,13 +63,16 @@ Different zone types can be used for separation:
 My home network uses VLAN, naturally I create a VLAN zone which I name `homelan`, `vmbr0` for the bridge and I don't specify any node to select them all:
 ![Create a VLAN zone in the Proxmox SDN](img/proxmox-create-vlan-zone-homelan.png)
 
-
 ### VNet
 
 VNet are virtual networks which are part of a zone, for a VLAN zone, this is corresponding to a VLAN ID, I create a first VNet `vlan55` in my new zone for my DMZ VLAN with the tag 55:
 ![Create a VNet for the VLAN 55 in the homelan zone](img/proxmox-create-vlan-vnet-homelan.png)
 
+I create as VNets all the VLAN which would need to be attached to a VM. My plans are to create an OPNsense in a VM, that's why I add them almost them all:
+![All my VLANs created in the Proxmox SDN](img/proxmox-sdn-all-vlan-homelan.png)
 
+Once everything is ready, I can apply the SDN configuration. In `Datacenter` > `SDN`, I click on the `Apply` button, after a few seconds, the new zones appear:
+![Apply SDN configuration in Proxmox](img/proxmox-apply-sdn-homelan-configuration.png)
 
-![proxmox-sdn-all-vlan-homelan.png](img/proxmox-sdn-all-vlan-homelan.png)
+## Test the network configuration
 
