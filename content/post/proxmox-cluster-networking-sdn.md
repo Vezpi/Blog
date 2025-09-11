@@ -76,3 +76,8 @@ Once everything is ready, I can apply the SDN configuration. In `Datacenter` > `
 
 ## Test the network configuration
 
+In a old VM which I don't use anymore, I replace the current `vmbr0` with VLAN tag 66 to my new VNet `vlan66`:
+![Change the network bridge in a VM](img/proxmox-change-vm-nic-vlan-vnet.png)
+
+After starting it, the VM gets an IP from the DHCP on OPNsense on that VLAN, which sounds good. I also try to ping another machine:
+![proxmox-console-ping-vm-vlan-66.png](img/proxmox-console-ping-vm-vlan-66.png)
