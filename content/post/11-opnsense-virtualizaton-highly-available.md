@@ -35,4 +35,8 @@ The layout changed a little since the OPNsense crash, I dropped the LACP link wh
 
 As I said in the intro, the plan is simple, replace the OPNsense box by a couple of VM in Proxmox. Basically, I will plug my ISB box directly to the main switch, but the native VLAN will have to change, I will create a VLAN dedicated for my WAN communication.
 
-The real challenge will be located on the Proxmox networking
+The real challenge will be located on the Proxmox networking, with only one NIC to support communication of LAN, WAN and even cluster, all of that on a 1Gbps port, I'm not sure of the outcome.
+
+### Proxmox Networking
+
+My Proxmox networking is quite dumb, I only configured the network on each nodes, not at the cluster level
