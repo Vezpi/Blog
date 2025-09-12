@@ -74,10 +74,54 @@ I create as VNets all the VLAN which would need to be attached to a VM. My plans
 Once everything is ready, I can apply the SDN configuration. In `Datacenter` > `SDN`, I click on the `Apply` button, after a few seconds, the new zones appear:
 ![Apply SDN configuration in Proxmox](img/proxmox-apply-sdn-homelan-configuration.png)
 
-## Test the network configuration
+## Test the Network Configuration
 
 In a old VM which I don't use anymore, I replace the current `vmbr0` with VLAN tag 66 to my new VNet `vlan66`:
 ![Change the network bridge in a VM](img/proxmox-change-vm-nic-vlan-vnet.png)
 
 After starting it, the VM gets an IP from the DHCP on OPNsense on that VLAN, which sounds good. I also try to ping another machine and it works:
-![proxmox-console-ping-vm-vlan-66.png](img/proxmox-console-ping-vm-vlan-66.png)
+![Ping another machine in the same VLAN](img/proxmox-console-ping-vm-vlan-66.png)
+
+## Update Cloud-Init Template and Terraform
+
+To go further, I update the bridge used in my cloud-init template, which I detailed the creation in that [post]({{< ref "post/1-proxmox-cloud-init-vm-template" >}}). Pretty much the same thing I've done with the VM, I replace the current `vmbr0` with VLAN tag 66 with my new VNet `vlan66`.
+
+I also update the Terrafom code to take this change into account:
+![Terraform code change for the vlan66](img/terraform-code-update-vlan66.png)
+
+I quicky check if I don't have regression and can still deploy a VM with Terraform:
+```bash
+terraform apply -var 'vm_name=vm-test-vnet'
+```
+```plaintext
+data.proxmox_virtual_environment_vms.template: Reading...
+data.proxmox_virtual_environment_vms.template: Read complete after 0s [id=23b17aea-d9f7-4f28-847f-41bb013262ea]
+[...]
+Plan: 2 to add, 0 to change, 0 to destroy.
+
+Changes to Outputs:
+  + vm_ip = (known after apply)
+
+Do you want to perform these actions?
+  Terraform will perform the actions described above.
+  Only 'yes' will be accepted to approve.
+
+  Enter a value: yes
+
+proxmox_virtual_environment_file.cloud_config: Creating...
+proxmox_virtual_environment_file.cloud_config: Creation complete after 1s [id=local:snippets/vm.cloud-config.yaml]
+proxmox_virtual_environment_vm.vm: Creating...
+proxmox_virtual_environment_vm.vm: Still creating... [10s elapsed]
+[...]
+proxmox_virtual_environment_vm.vm: Still creating... [3m0s elapsed]
+proxmox_virtual_environment_vm.vm: Creation complete after 3m9s [id=119]
+
+Apply complete! Resources: 2 added, 0 changed, 0 destroyed.
+
+Outputs:
+
+vm_ip = "192.168.66.181"
+```
+
+The VM is deploying without any issue, everything is OK:
+![proxmox-terraform-test-deploy-vlan66.png](img/proxmox-terraform-test-deploy-vlan66.png)
