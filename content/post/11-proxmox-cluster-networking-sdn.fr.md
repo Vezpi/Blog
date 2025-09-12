@@ -3,7 +3,7 @@ slug: proxmox-cluster-networking-sdn
 title: Simplifier la gestion des VLAN dans Proxmox VE avec le SDN
 description: Découvrez comment centraliser la configuration des VLAN dans Proxmox VE grâce aux zones SDN et aux VNets, pour un réseau plus simple et cohérent
 date: 2025-09-12
-draft: true
+draft: false
 tags:
   - proxmox
 categories:
@@ -85,6 +85,7 @@ Dans une vieille VM que je n'utilise plus, je remplace l'actuel `vmbr0` avec le 
 Après l'avoir démarrée, la VM obtient une IP du DHCP d'OPNsense sur ce VLAN, ce qui est super. J'essaye également de ping une autre machine et ça fonctionne :
 ![Ping another machine in the same VLAN](img/proxmox-console-ping-vm-vlan-66.png)
 
+---
 ## Mise à jour de Cloud-Init et Terraform
 
 Pour aller plus loin, j’ai mis à jour le pont réseau utilisé dans mon **template cloud-init**, dont j'avais détaillé la création dans [cet article]({{< ref "post/1-proxmox-cloud-init-vm-template" >}}).  
