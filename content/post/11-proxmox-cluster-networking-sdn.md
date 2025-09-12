@@ -1,8 +1,8 @@
 ---
 slug: proxmox-cluster-networking-sdn
-title: Template
-description:
-date:
+title: Simplifying VLAN Management in Proxmox VE with SDN
+description: Learn how to centralize VLAN configuration in Proxmox VE using SDN zones and VNets, making VM networking easier and more consistent.
+date: 2025-09-12
 draft: true
 tags:
   - proxmox
@@ -13,7 +13,7 @@ categories:
 ## Intro
 
 When I first built my **Proxmox VE 8** cluster, networking wasn’t my main concern. I just wanted to replace an old physical server quickly, so I gave each of my three nodes the same basic config, created the cluster, and started running VMs:
-![Proxmox node network configuration](img/proxmox-node-network-configuration.png)
+![Configuration réseau d’un nœud Proxmox](img/proxmox-node-network-configuration.png)
 
 That worked fine for a while. But as I plan to virtualize my **OPNsense** router, I need something more structured and consistent. This is where Proxmox **S**oftware-**D**efined **N**etworking (SDN) feature comes in.
 
@@ -21,7 +21,7 @@ That worked fine for a while. But as I plan to virtualize my **OPNsense** router
 ## My Homelab Network
 
 By default, every Proxmox node comes with its own local zone, called `localnetwork`, which contains the default Linux bridge (`vmbr0`) as a VNet:
-![Proxmox default localnetwork zones](img/proxmox-default-localnetwork-zone.png)
+![Proxmox default `localnetwork` zones](img/proxmox-default-localnetwork-zone.png)
 
 That’s fine for isolated setups, but at the cluster level nothing is coordinated.
 
@@ -35,11 +35,12 @@ Here’s the list of VLANs I use today:
 | User      | 13   | Home network                 |
 | IoT       | 37   | IoT and untrusted equipments |
 | DMZ       | 55   | Internet facing              |
-| Lab       | 66   | Lab network, trusted         |
+| Lab       | 66   | Lab network                  |
 | Heartbeat | 77   | Proxmox cluster heartbeat    |
-| Ceph      | 99   | Ceph                         |
+| Ceph      | 99   | Ceph storage                 |
 | VPN       | 1337 | Wireguard network            |
 
+---
 ## Proxmox SDN Overview
 
 Proxmox Software-Defined Networking makes it possible to define cluster-wide virtual zones and networks. Instead of repeating VLAN configs on every node, SDN gives you a central view and ensures consistency.
@@ -73,7 +74,7 @@ Then I added VNets for most of my VLANs, since I plan to attach them to an OPNse
 ![All my VLANs created in the Proxmox SDN](img/proxmox-sdn-all-vlan-homelan.png)
 
 Finally, I applied the configuration in **Datacenter → SDN**:
-![Apply SDN configuration in Proxmox](img/proxmox-apply-sdn-homelan-configuration.png)
+![Application de la configuration SDN dans Proxmox](img/proxmox-apply-sdn-homelan-configuration.png)
 
 ---
 ## Test the Network Configuration
@@ -86,10 +87,10 @@ After starting it, the VM gets an IP from the DHCP on OPNsense on that VLAN, whi
 
 ## Update Cloud-Init Template and Terraform
 
-To go further, I update the bridge used in my cloud-init template, which I detailed the creation in that [post]({{< ref "post/1-proxmox-cloud-init-vm-template" >}}). Pretty much the same thing I've done with the VM, I replace the current `vmbr0` with VLAN tag 66 with my new VNet `vlan66`.
+To go further, I update the bridge used in my **cloud-init** template, which I detailed the creation in that [post]({{< ref "post/1-proxmox-cloud-init-vm-template" >}}). Pretty much the same thing I've done with the VM, I replace the current `vmbr0` with VLAN tag 66 with my new VNet `vlan66`.
 
-I also update the Terrafom code to take this change into account:
-![Terraform code change for the vlan66](img/terraform-code-update-vlan66.png)
+I also update the **Terrafom** code to take this change into account:
+![Mise à jour du code Terraform pour vlan66](img/terraform-code-update-vlan66.png)
 
 I quicky check if I don't have regression and can still deploy a VM with Terraform:
 ```bash
@@ -126,11 +127,21 @@ vm_ip = "192.168.66.181"
 ```
 
 The VM is deploying without any issue, everything is OK:
-![VM hardware in Proxmox deployed by Terraform](img/proxmox-terraform-test-deploy-vlan66.png)
+![VM déployée par Terraform sur vlan66](img/proxmox-terraform-test-deploy-vlan66.png)
 
 ---
 ## Conclusion
 
-The implementation of the Proxmox SDN for a VLAN zone is pretty straightforward. I'd like to experiment the other types of zone to see what we can do with them.
+Setting up Proxmox SDN with a **VLAN zone** turned out to be straightforward and very useful. Instead of tagging VLANs manually per VM, I now just pick the right VNet, and everything stays consistent across the cluster.
 
-Now my Proxmox VE cluster is ready to host my OPNsense router, see you next time!
+| Step              | Before SDN                      | After SDN                      |
+| ----------------- | ------------------------------- | ------------------------------ |
+| Attach VM to VLAN | `vmbr0` + set VLAN tag manually | Select the right VNet directly |
+| VLANs on nodes    | Repeated config per node        | Centralized in cluster SDN     |
+| IP management     | Manual or DHCP only             | Optional IPAM via SDN subnets  |
+
+This prepares my cluster to host my **OPNsense router**, and it also sets the stage for future experiments, like trying out VXLAN overlays or EVPN with BGP.
+
+See you next time for the next step!
+
+
