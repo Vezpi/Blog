@@ -39,4 +39,7 @@ The real challenge will be located on the Proxmox networking, with only one NIC 
 
 ### Proxmox Networking
 
-My Proxmox networking is quite dumb, I only configured the network on each nodes, not at the cluster level
+My Proxmox networking was quite dumb until really recently. Initially I only configured the network on each nodes. In that [article]({{< ref "post/11-proxmox-cluster-networking-sdn" >}}), I configured my VLANs in the Proxmox SDN.
+
+Additionally, I have to add extra VLANs for this project, one for the WAN and the other for pfSync
+
