@@ -41,5 +41,26 @@ The real challenge will be located on the Proxmox networking, with only one NIC 
 
 My Proxmox networking was quite dumb until really recently. Initially I only configured the network on each nodes. In that [article]({{< ref "post/11-proxmox-cluster-networking-sdn" >}}), I configured my VLANs in the Proxmox SDN.
 
-Additionally, I have to add extra VLANs for this project, one for the WAN and the other for pfSync
+Additionally, I have to add extra VLANs for this project, one for the WAN and the other for pfSync.
 
+## Proof of Concept
+
+Before rushing into a migration, I want to experiment the high availability setup for OPNsense. The idea would be to:
+1. Add some VLANs on the Proxmox SDN
+2. Build two OPNsense VMs
+3. Configure the high availabilty
+4. Create another client VM
+5. Shutdown the active OPNsense node
+6. See what happen!
+
+### Add VLANs to the Proxmox SDN
+
+For this experiment, I add extra VLANs:
+- 101: POC WAN
+- 102: POC LAN
+- 103: POC pfSync
+
+In the Proxmox UI, I navigate to `Datacenter` > `SDN` > `VNets` and I click `Create`:
+![Create POC VLANs in the Proxmox SDN](img/proxmox-sdn-create-poc-vlans.png)
+
+Once the 3 new VLAN
