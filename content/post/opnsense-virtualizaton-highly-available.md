@@ -63,4 +63,4 @@ For this experiment, I add extra VLANs:
 In the Proxmox UI, I navigate to `Datacenter` > `SDN` > `VNets` and I click `Create`:
 ![Create POC VLANs in the Proxmox SDN](img/proxmox-sdn-create-poc-vlans.png)
 
-Once the 3 new VLAN
+Once the 3 new VLAN have been created, I apply the configuratipn
