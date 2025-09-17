@@ -63,4 +63,35 @@ For this experiment, I add extra VLANs:
 In the Proxmox UI, I navigate to `Datacenter` > `SDN` > `VNets` and I click `Create`:
 ![Create POC VLANs in the Proxmox SDN](img/proxmox-sdn-create-poc-vlans.png)
 
-Once the 3 new VLAN have been created, I apply the configuratipn
+Once the 3 new VLAN have been created, I apply the configuration.
+
+### Create Fake ISP Box VM
+
+
+![Pasted_image_20250917205522.png](img/Pasted_image_20250917205522.png)
+
+```yaml
+network:
+  version: 2
+  ethernets:
+    eth0:
+      addresses:
+        - 10.101.0.254/24
+    enp6s19:
+      dhcp4: true
+```
+
+```bash
+echo "net.ipv4.ip_forward=1" | sudo tee -a /etc/sysctl.conf
+sudo sysctl -p
+```
+
+Install dnsmasq
+
+```bash
+sudo apt install dnsmasq -y
+```
+
+```bash
+sudo systemctl restart dnsmasq
+```
