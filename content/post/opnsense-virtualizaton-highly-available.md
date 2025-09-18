@@ -47,16 +47,17 @@ Additionally, I have to add extra VLANs for this project, one for the WAN and th
 
 Before rushing into a migration, I want to experiment the high availability setup for OPNsense. The idea would be to:
 1. Add some VLANs on the Proxmox SDN
-2. Build two OPNsense VMs
-3. Configure the high availabilty
-4. Create another client VM
-5. Shutdown the active OPNsense node
-6. See what happen!
+2. Create Fake ISP box
+3. Build two OPNsense VMs
+4. Configure the high availabilty
+5. Create another client VM
+6. Shutdown the active OPNsense node
+7. See what happen!
 
-### Add VLANs to the Proxmox SDN
+### Add VLANs in the Homelab
 
 For this experiment, I add extra VLANs:
-- 101: POC WAN
+- 101: POC WAN 
 - 102: POC LAN
 - 103: POC pfSync
 
@@ -85,6 +86,9 @@ network:
 echo "net.ipv4.ip_forward=1" | sudo tee -a /etc/sysctl.conf
 sudo sysctl -p
 ```
+
+sudo apt install iptables-persistent -y
+sudo netfilter-persistent save
 
 Install dnsmasq
 
