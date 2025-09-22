@@ -46,7 +46,7 @@ Additionally, I have to add extra VLANs for this project, one for the WAN and th
 ## Proof of Concept
 
 Before rushing into a migration, I want to experiment the high availability setup for OPNsense. The idea would be to:
-1. Add some VLANs on the Proxmox SDN
+1. Add some VLANs in my Homelab
 2. Create Fake ISP box
 3. Build two OPNsense VMs
 4. Configure the high availabilty
@@ -54,7 +54,7 @@ Before rushing into a migration, I want to experiment the high availability setu
 6. Shutdown the active OPNsense node
 7. See what happen!
 
-### Add VLANs in the Homelab
+### Add VLANs in my Homelab
 
 For this experiment, I add extra VLANs:
 - 101: POC WAN 
@@ -66,11 +66,16 @@ In the Proxmox UI, I navigate to `Datacenter` > `SDN` > `VNets` and I click `Cre
 
 Once the 3 new VLAN have been created, I apply the configuration.
 
+Additionally, I add these 3 VLANs in my UniFi controller, here only a name and the VLAN id are sufficient to broadcast the VLANs on the network. All declared VLANs are passing through the trunks where my Proxmox VE nodes are connected.
+
 ### Create Fake ISP Box VM
 
+For this experience, I will simulate my current ISP box by a VM, `fake-freebox`, which will route the traffic between the POC WAN and the POC LAN networks. This VM will serve a DHCP server with only one lease, as my ISP box is doing. I clone my cloud-init template:
+![proxmox-clone-template-fake-freebox.png](img/proxmox-clone-template-fake-freebox.png)
 
-![Pasted_image_20250917205522.png](img/Pasted_image_20250917205522.png)
-
+I add another NIC, then I edit the Netplan configuration to have:
+- `eth0` (POC WAN VLAN 101): static IP address `10.101.0.254/24`
+- enp6s19 (Lab VLAN 66): DHCP address given by my current OPNsense router
 ```yaml
 network:
   version: 2
@@ -82,20 +87,77 @@ network:
       dhcp4: true
 ```
 
+I enable packet forward to allow this VM to route traffic:
 ```bash
 echo "net.ipv4.ip_forward=1" | sudo tee -a /etc/sysctl.conf
 sudo sysctl -p
 ```
 
+I set up masquerading for this interface to avoid packet being dropped on my real network by the OPNsense router:
+```bash
+sudo iptables -t nat -A POSTROUTING -o enp6s19 -j MASQUERADE
 sudo apt install iptables-persistent -y
 sudo netfilter-persistent save
+```
 
-Install dnsmasq
+I install `dnsmasq`, a small dhcp server:
 
 ```bash
 sudo apt install dnsmasq -y
 ```
 
+I edit the file `/etc/dnsmasq.conf` to configure `dnsmasq`  to serve only one lease `10.101.0.150` with DNS pointing to the OPNsense IP:
+```
+interface=eth0
+bind-interfaces
+dhcp-range=10.101.0.150,10.101.0.150,255.255.255.0,12h
+dhcp-option=3,10.101.0.254      # default gateway = this VM
+dhcp-option=6,192.168.66.1      # DNS server  
+```
+
+I restart the dnsmasq service to apply the configuration:
 ```bash
 sudo systemctl restart dnsmasq
 ```
+
+The `fake-freebox` VM is now ready to serve DHCP on VLAN 101 and serve only one lease.
+
+### Build OPNsense VMs
+
+First I download the OPNsense ISO from their website and I upload it to one of my Proxmox VE node storage:
+![proxmox-upload-opnsense-iso.png](img/proxmox-upload-opnsense-iso.png)
+
+
+I create the first VM from that node which I name `poc-opnsense-1`:
+- I keep the OS type as Linux, even though OPNsense is based on FreeBSD
+- I select `q35` machine type and `OVMH (UEFI)` BIOS setting, EFI storage on my Ceph pool
+- For the disk, I set the disk size to 20GiB
+- 2 vCPU with 2048 MB of RAM
+- I select the VLAN 101 (POC WAN) for the NIC*
+- Once the VM creation wizard is finished, I add a second NIC in the VLAN 102 (POC LAN)
+- ![[proxmox-create-poc-vm-opnsense.png]]
+
+
+Before starting it, I clone this one to prepare the next one: `poc-opnsense-2`
+
+Booting fails, I disabled secure boot:
+![Pasted_image_20250922145822.png](img/Pasted_image_20250922145822.png)
+
+The VM finally boots on the ISO, I don't touch anything until I get into that screen:
+![opnsense-vm-installation-welcome.png](img/opnsense-vm-installation-welcome.png)
+
+I enter the installation mode using the user `installer` and password `opnsense`. I select the French keyboard and select the `Install (UFS)` mode. I have a warning about RAM space but I proceed anyway.
+
+I select the QEMU hard disk of 20GB as destination and launch the installation:
+![opnsense-vm-installation-progress-bar.png](img/opnsense-vm-installation-progress-bar.png)
+
+Once the installation is finished, I skip the root password change, I remove the ISO from the drive and select the reboot option at the end of the installation wizard.
+
+When the VM has reboot, I log as `root` with the default password `opnsense` and land in the CLI menu:
+![opnsense-vm-installation-cli-menu.png](img/opnsense-vm-installation-cli-menu.png)
+
+I select the option 1 to assign interfaces, as the installer inverted them for my setup:
+![opnsense-vm-installation-assign-interfaces.png](img/opnsense-vm-installation-assign-interfaces.png)
+
+Now my WAN interface is getting the IP address 10.101.0.150/24 from my `fake-freebox` VM. Then I configure the LAN interface with `10.102.0.2/24` and configure a DHCP pool from `10.102.0.10` to `10.102.0.99`:
+![opnsense-vm-installation-interfaces-configured.png](img/opnsense-vm-installation-interfaces-configured.png)
