@@ -49,7 +49,7 @@ Before rushing into a migration, I want to experiment the high availability setu
 1. Add some VLANs in my Homelab
 2. Create Fake ISP box
 3. Build two OPNsense VMs
-4. Configure the high availabilty
+4. Configure high availability
 5. Create another client VM
 6. Shutdown the active OPNsense node
 7. See what happen!
@@ -135,15 +135,15 @@ I create the first VM from that node which I name `poc-opnsense-1`:
 - 2 vCPU with 2048 MB of RAM
 - I select the VLAN 101 (POC WAN) for the NIC*
 - Once the VM creation wizard is finished, I add a second NIC in the VLAN 102 (POC LAN)
-- ![[proxmox-create-poc-vm-opnsense.png]]
+![proxmox-create-poc-vm-opnsense.png](img/proxmox-create-poc-vm-opnsense.png)
 
 
 Before starting it, I clone this one to prepare the next one: `poc-opnsense-2`
 
-Booting fails, I disabled secure boot:
-![Pasted_image_20250922145822.png](img/Pasted_image_20250922145822.png)
+Now I can start the VM, but the boot fails with an access denied. I enter the BIOS, navigate to Device Manager > Secure Boot Configuration, there I uncheck the `Attempt Secure Boot` option and restart the VM:
+![proxmox-disable-secure-boot-option.png](img/proxmox-disable-secure-boot-option.png)
 
-The VM finally boots on the ISO, I don't touch anything until I get into that screen:
+Now the VM boots on the ISO, I touch nothing until I get into that screen:
 ![opnsense-vm-installation-welcome.png](img/opnsense-vm-installation-welcome.png)
 
 I enter the installation mode using the user `installer` and password `opnsense`. I select the French keyboard and select the `Install (UFS)` mode. I have a warning about RAM space but I proceed anyway.
@@ -161,3 +161,14 @@ I select the option 1 to assign interfaces, as the installer inverted them for m
 
 Now my WAN interface is getting the IP address 10.101.0.150/24 from my `fake-freebox` VM. Then I configure the LAN interface with `10.102.0.2/24` and configure a DHCP pool from `10.102.0.10` to `10.102.0.99`:
 ![opnsense-vm-installation-interfaces-configured.png](img/opnsense-vm-installation-interfaces-configured.png)
+
+✅ The first VM is ready, I start over for the second OPNsense VM, `poc-opnsense-2` which will have the IP `10.102.0.3`
+
+### Configure High Availability
+
+
+
+
+![Pasted_image_20250922202056.png](img/Pasted_image_20250922202056.png)
+
+![Pasted_image_20250922202211.png](img/Pasted_image_20250922202211.png)
