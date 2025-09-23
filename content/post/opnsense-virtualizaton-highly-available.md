@@ -57,9 +57,9 @@ Before rushing into a migration, I want to experiment the high availability setu
 ### Add VLANs in my Homelab
 
 For this experiment, I add extra VLANs:
-- 101: POC WAN 
-- 102: POC LAN
-- 103: POC pfSync
+- 101: *POC WAN* 
+- 102: *POC LAN*
+- 103: *POC pfSync*
 
 In the Proxmox UI, I navigate to `Datacenter` > `SDN` > `VNets` and I click `Create`:
 ![Create POC VLANs in the Proxmox SDN](img/proxmox-sdn-create-poc-vlans.png)
@@ -70,11 +70,11 @@ Additionally, I add these 3 VLANs in my UniFi controller, here only a name and t
 
 ### Create Fake ISP Box VM
 
-For this experience, I will simulate my current ISP box by a VM, `fake-freebox`, which will route the traffic between the POC WAN and the POC LAN networks. This VM will serve a DHCP server with only one lease, as my ISP box is doing. I clone my cloud-init template:
+For this experience, I will simulate my current ISP box by a VM, `fake-freebox`, which will route the traffic between the *POC WAN* and the *POC LAN* networks. This VM will serve a DHCP server with only one lease, as my ISP box is doing. I clone my cloud-init template:
 ![proxmox-clone-template-fake-freebox.png](img/proxmox-clone-template-fake-freebox.png)
 
 I add another NIC, then I edit the Netplan configuration to have:
-- `eth0` (POC WAN VLAN 101): static IP address `10.101.0.254/24`
+- `eth0` (*POC WAN* VLAN 101): static IP address `10.101.0.254/24`
 - enp6s19 (Lab VLAN 66): DHCP address given by my current OPNsense router
 ```yaml
 network:
@@ -133,8 +133,8 @@ I create the first VM from that node which I name `poc-opnsense-1`:
 - I select `q35` machine type and `OVMH (UEFI)` BIOS setting, EFI storage on my Ceph pool
 - For the disk, I set the disk size to 20GiB
 - 2 vCPU with 2048 MB of RAM
-- I select the VLAN 101 (POC WAN) for the NIC*
-- Once the VM creation wizard is finished, I add a second NIC in the VLAN 102 (POC LAN)
+- I select the VLAN 101 (*POC WAN*) for the NIC
+- Once the VM creation wizard is finished, I add a second NIC in the VLAN 102 (*POC LAN*) and a third in the VLAN 103 (*POC pfSync*)
 ![proxmox-create-poc-vm-opnsense.png](img/proxmox-create-poc-vm-opnsense.png)
 
 
@@ -166,9 +166,11 @@ Now my WAN interface is getting the IP address 10.101.0.150/24 from my `fake-fre
 
 ### Configure High Availability
 
+Now both of the OPNsense VMs are operational, I want to configure the instances from their WebGUI. To be able to do that, I need to have access from the *POC LAN* VLAN to the OPNsense interfaces in that network. Simple way to do that, connect a WIndows VM in that VLAN and browse to the OPNsense IP address on port 443:
+![opnsense-vm-webgui-from-poc-lan.png](img/opnsense-vm-webgui-from-poc-lan.png)
+
+I start the quick start wizard on both instance to configure the hostname, timezone, DNS server
 
 
 
-![Pasted_image_20250922202056.png](img/Pasted_image_20250922202056.png)
 
-![Pasted_image_20250922202211.png](img/Pasted_image_20250922202211.png)
