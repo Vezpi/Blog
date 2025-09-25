@@ -169,8 +169,18 @@ Now my WAN interface is getting the IP address 10.101.0.150/24 from my `fake-fre
 Now both of the OPNsense VMs are operational, I want to configure the instances from their WebGUI. To be able to do that, I need to have access from the *POC LAN* VLAN to the OPNsense interfaces in that network. Simple way to do that, connect a WIndows VM in that VLAN and browse to the OPNsense IP address on port 443:
 ![opnsense-vm-webgui-from-poc-lan.png](img/opnsense-vm-webgui-from-poc-lan.png)
 
-I start the quick start wizard on both instance to configure the hostname, timezone, DNS server
+The first thing I do is to assign the third NIC, the `vtnet2` to the *pfSync* interface:
+![opnsense-vm-assign-pfsync-interface.png](img/opnsense-vm-assign-pfsync-interface.png)
+
+I enable the interface on each instance and configure it with a static IP address:
+- **poc-opnsense-1**: `10.103.0.2/24`
+- **poc-opnsense-2**: `10.103.0.3/24`
+
+Then I configure the HA in `System` > `High Availability` > `Settings`, on the master (`poc-opnsense-1`) I configure both the `General Settings` and the `Synchronization Settings`. On the backup (`poc-opnsense-2`) I only configure the `General Settings`:
+![opnsense-vm-high-availability-settings.png](img/opnsense-vm-high-availability-settings.png)
 
 
 
 
+OPEN FIREWALL
+OUTBOUND NAT ?
