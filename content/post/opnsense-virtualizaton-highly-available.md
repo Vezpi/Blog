@@ -176,11 +176,8 @@ I enable the interface on each instance and configure it with a static IP addres
 - **poc-opnsense-1**: `10.103.0.2/24`
 - **poc-opnsense-2**: `10.103.0.3/24`
 
+On both instances, I create a firewall rule to allow communication coming from this network on that *pfSync* interface:
+![opnsense-vm-firewall-allow-pfsync.png](img/opnsense-vm-firewall-allow-pfsync.png)
+
 Then I configure the HA in `System` > `High Availability` > `Settings`, on the master (`poc-opnsense-1`) I configure both the `General Settings` and the `Synchronization Settings`. On the backup (`poc-opnsense-2`) I only configure the `General Settings`:
 ![opnsense-vm-high-availability-settings.png](img/opnsense-vm-high-availability-settings.png)
-
-
-
-
-OPEN FIREWALL
-OUTBOUND NAT ?
