@@ -215,7 +215,7 @@ The last thing I need to configure is the WAN interface, my ISP box is only givi
 
 In Proxmox WebGUI, I copy the MAC address of the net0 interface (*POC WAN*) from `poc-opnsense-1` and paste it to the one in `poc-opnsense-2`.
 
-
+To handle the activation WAN interface on the master node
 
 
 
