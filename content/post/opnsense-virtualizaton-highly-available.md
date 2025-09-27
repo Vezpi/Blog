@@ -164,10 +164,12 @@ Now my WAN interface is getting the IP address 10.101.0.150/24 from my `fake-fre
 
 ✅ The first VM is ready, I start over for the second OPNsense VM, `poc-opnsense-2` which will have the IP `10.102.0.3`
 
-### Configure High Availability
+### Configure OPNsense Highly Available
 
 Now both of the OPNsense VMs are operational, I want to configure the instances from their WebGUI. To be able to do that, I need to have access from the *POC LAN* VLAN to the OPNsense interfaces in that network. Simple way to do that, connect a WIndows VM in that VLAN and browse to the OPNsense IP address on port 443:
 ![opnsense-vm-webgui-from-poc-lan.png](img/opnsense-vm-webgui-from-poc-lan.png)
+
+#### Add pfSync Interface
 
 The first thing I do is to assign the third NIC, the `vtnet2` to the *pfSync* interface:
 ![opnsense-vm-assign-pfsync-interface.png](img/opnsense-vm-assign-pfsync-interface.png)
@@ -179,5 +181,44 @@ I enable the interface on each instance and configure it with a static IP addres
 On both instances, I create a firewall rule to allow communication coming from this network on that *pfSync* interface:
 ![opnsense-vm-firewall-allow-pfsync.png](img/opnsense-vm-firewall-allow-pfsync.png)
 
-Then I configure the HA in `System` > `High Availability` > `Settings`, on the master (`poc-opnsense-1`) I configure both the `General Settings` and the `Synchronization Settings`. On the backup (`poc-opnsense-2`) I only configure the `General Settings`:
+#### Setup High Availability
+
+Then I configure the HA in `System` > `High Availability` > `Settings`. On the master (`poc-opnsense-1`) I configure both the `General Settings` and the `Synchronization Settings`. On the backup (`poc-opnsense-2`) I only configure the `General Settings`:
 ![opnsense-vm-high-availability-settings.png](img/opnsense-vm-high-availability-settings.png)
+
+Once applied, I can verify that it is ok on the `Status` page:
+![opnsense-vm-high-availability-status.png](img/opnsense-vm-high-availability-status.png)
+
+#### Create Virtual IP Address
+
+Now I need to create the VIP for the LAN interface, an IP address shared across the cluster. The master node will claim that IP which is the gateway given to the clients. The VIP will use the CARP, Common Address Redundancy Protocol for failover. To create it, navigate to `Interfaces` > `Virtual IPs` > `Settings`:
+![opnsense-vm-create-vip-carp.png](img/opnsense-vm-create-vip-carp.png)
+
+To replicate the config to the backup node, go to `System` > `High Availability` > `Status` and clikc the `Synchronize and reconfigure all` button. To verify, on both node navigate to `Interfaces` > `Virtual IPs` > `Status`. The master node should have the VIP active with the status `MASTER`, and the backup node with the status `BACKUP`.
+
+#### Reconfigure DHCP
+
+I need to reconfigure the DHCP for HA. Dnsmasq does not support DHCP lease synchronization, I have to configure the two instances independently, they would serve both DHCP lease at the same time.
+
+On the master node, in `Services` > `Dnsmasq DNS & DHCP` > `General`, I tick the `Disable HA sync` box. Then in `DHCP ranges`, I edit the current one and also tick the `Disable HA sync` box. In `DHCP options`, I add the option `router [3]` with the value 10.102.0.1, to advertise the VIP address:
+![opnsense-vm-dnsmasq-add-option.png](img/opnsense-vm-dnsmasq-add-option.png)
+
+I clone that rule for the option `dns-server [6]` with the same address.
+
+On the backup node, in `Services` > `Dnsmasq DNS & DHCP` > `General`, I also tick the `Disable HA sync` box, but I also set the value `5` to `DHCP reply delay`. This would give enough time to the master node to provide a DHCP lease before the backup node. In `DHCP ranges`, I edit the current one and give a smaller pool, different than the master's. Here I also tick the `Disable HA sync` box.
+
+Now I can safely sync my services like described above, this will only propagate the DHCP options, which are mean to be the same.
+
+#### WAN Interface
+
+The last thing I need to configure is the WAN interface, my ISP box is only giving me one IP address over DHCP, I don't want my 2 VMs compete to claim it. To handle that, I will give my 2 VMs the same MAC for the WAN interface, then I need to find a solution to enable the WAN interface only on the master node.
+
+In Proxmox WebGUI, I copy the MAC address of the net0 interface (*POC WAN*) from `poc-opnsense-1` and paste it to the one in `poc-opnsense-2`.
+
+
+
+
+
+
+backup not having gateway: adding gateway on LAN with IP of the master node
+
