@@ -213,9 +213,61 @@ Now I can safely sync my services like described above, this will only propagate
 
 The last thing I need to configure is the WAN interface, my ISP box is only giving me one IP address over DHCP, I don't want my 2 VMs compete to claim it. To handle that, I will give my 2 VMs the same MAC for the WAN interface, then I need to find a solution to enable the WAN interface only on the master node.
 
-In Proxmox WebGUI, I copy the MAC address of the net0 interface (*POC WAN*) from `poc-opnsense-1` and paste it to the one in `poc-opnsense-2`.
+In the Proxmox WebGUI, I copy the MAC address of the net0 interface (*POC WAN*) from `poc-opnsense-1` and paste it to the one in `poc-opnsense-2`.
 
-To handle the activation WAN interface on the master node
+To handle the activation of the WAN interface on the master node while deactivating the backup, I could use a script. On CARP event, scripts located in `/usr/local/etc/rc.syshood.d/carp` are played. I found this [Gist](https://gist.github.com/spali/2da4f23e488219504b2ada12ac59a7dc#file-10-wancarp) which is exactly what I wanted.
+
+I copy this script in `/usr/local/etc/rc.syshood.d/carp/10-wan` on both nodes:
+```php
+#!/usr/local/bin/php
+<?php
+
+require_once("config.inc");
+require_once("interfaces.inc");
+require_once("util.inc");
+require_once("system.inc");
+
+$subsystem = !empty($argv[1]) ? $argv[1] : '';
+$type = !empty($argv[2]) ? $argv[2] : '';
+
+if ($type != 'MASTER' && $type != 'BACKUP') {
+    log_error("Carp '$type' event unknown from source '{$subsystem}'");
+    exit(1);
+}
+
+if (!strstr($subsystem, '@')) {
+    log_error("Carp '$type' event triggered from wrong source '{$subsystem}'");
+    exit(1);
+}
+
+$ifkey = 'wan';
+
+if ($type === "MASTER") {
+    log_error("enable interface '$ifkey' due CARP event '$type'");
+    $config['interfaces'][$ifkey]['enable'] = '1';
+    write_config("enable interface '$ifkey' due CARP event '$type'", false);
+    interface_configure(false, $ifkey, false, false);
+} else {
+    log_error("disable interface '$ifkey' due CARP event '$type'");
+    unset($config['interfaces'][$ifkey]['enable']);
+    write_config("disable interface '$ifkey' due CARP event '$type'", false);
+    interface_configure(false, $ifkey, false, false);
+}
+```
+
+### Test Failover
+
+Time for testing! OPNsense provides a way to enter CARP maintenance mode. Before pushing the button, my master has its WAN interface enabled and the backup doesn't:
+![opnsense-vm-carp-status.png](img/opnsense-vm-carp-status.png)
+
+Once I enter the CARP maintenance mode, the master node become backup and vice versa, the WAN interface get disabled while it's enabling on the other node. I was pinging outside of the network while switching and experienced not a single drop!
+
+Finally, I simulate a crash by powering off the master and the magic happens! Here I have only one packet lost and, thanks to the firewall state sync, I can even keep my SSH connection alive.
+
+## Conclusion
+
+
+
 
 
 
