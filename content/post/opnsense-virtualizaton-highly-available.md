@@ -1,5 +1,5 @@
 ---
-slug: opnsense-virtualizaton-highly-available
+slug: opnsense-virtualization-highly-available
 title: Template
 description:
 date:
@@ -7,75 +7,67 @@ draft: true
 tags:
   - opnsense
   - proxmox
+  - high-availability
 categories:
   - homelab
 ---
 ## Intro
 
-I recently encountered my first real problem, my physical OPNsense box crashed because of a kernel panic, I've detailed what happened in that [post]({{< ref "post/10-opnsense-crash-disk-panic" >}}).
+I recently encountered my first real problem, my physical **OPNsense** box crashed because of a kernel panic, I've detailed what happened in that [post]({{< ref "post/10-opnsense-crash-disk-panic" >}}). 
 
-After this event, I came up with an idea to enhance the stability of the lab: **Virtualize OPNsense**.
+That failure made me rethink my setup. A unique firewall is a single point of failure, so to improve resilience I decided to take a new approach: **virtualize OPNsense**.
 
-The idea is pretty simple on paper, create an OPNsense VM on the **Proxmox** cluster and replace the current physical box by this VM. The challenge would be to have both the LAN and the WAN on the same physical link, involving true network segregation.
+Of course, just running one VM wouldn’t be enough. To get real redundancy, I need two OPNsense instances in **High Availability**, with one active and the other standing by.
 
-Having only one OPNsense VM would not solve my problem. I want to implement High Availability, the bare minimum would be to have 2 OPNsense instances, as active/passive.
+Before rolling this out in my network, I wanted to demonstrate the idea in my homelab. 
+In this post, I’ll walk through the proof of concept: deploying two OPNsense VMs inside a **Proxmox VE** cluster and configuring them to provide a highly available firewall.
 
 ---
-## Current Setup
+## Current Infrastructure
 
-Currently, I have my ISB box, a *Freebox*, in bridge mode which is connected to the port `igc0` of my OPNsense box, the **WAN**. On `igc1`, my **LAN** is connected to my main switch on a trunk port with the VLAN1 as native, my management network.
+At the edge of my setup, my ISP modem, a *Freebox* in bridge mode, connects directly to the `igc0` interface of my OPNsense box, serving as the **WAN**. On `igc1`, the **LAN** is linked to my main switch using a trunk port, with VLAN 1 as the native VLAN for my management network.
 
-Connected to that switch are my 3 Proxmox nodes, on trunk port as well with the same native VLAN. Each of my Proxmox nodes have 2 NICs, but the other is dedicated for the Ceph storage network, on a dedicated 2.5GB switch.
+The switch also connects my three Proxmox nodes, each on trunk ports with the same native VLAN. Every node has two NICs: one for general networking and the other dedicated to the Ceph storage network, which runs through a separate 2.5 Gbps switch.
 
-The layout changed a little since the OPNsense crash, I dropped the LACP link which was not giving any value:
+Since the OPNsense crash, I’ve simplified things by removing the LACP link, it wasn’t adding real value:
 ![homelan-current-physical-layout.png](img/homelan-current-physical-layout.png)
 
+
+Until recently, Proxmox networking on my cluster was very basic: each node was configured individually with no real overlay logic. That changed after I explored Proxmox SDN, where I centralized VLAN definitions across the cluster. I described that step in [this article]({{< ref "post/11-proxmox-cluster-networking-sdn" >}}).
+
 ---
-## Target Layout
-
-As I said in the intro, the plan is simple, replace the OPNsense box by a couple of VM in Proxmox. Basically, I will plug my ISB box directly to the main switch, but the native VLAN will have to change, I will create a VLAN dedicated for my WAN communication.
-
-The real challenge will be located on the Proxmox networking, with only one NIC to support communication of LAN, WAN and even cluster, all of that on a 1Gbps port, I'm not sure of the outcome.
-
-### Proxmox Networking
-
-My Proxmox networking was quite dumb until really recently. Initially I only configured the network on each nodes. In that [article]({{< ref "post/11-proxmox-cluster-networking-sdn" >}}), I configured my VLANs in the Proxmox SDN.
-
-Additionally, I have to add extra VLANs for this project, one for the WAN and the other for pfSync.
-
 ## Proof of Concept
 
-Before rushing into a migration, I want to experiment the high availability setup for OPNsense. The idea would be to:
+Time to move into the lab. Here are the main steps:
 1. Add some VLANs in my Homelab
-2. Create Fake ISP box
+2. Create Fake ISP router
 3. Build two OPNsense VMs
 4. Configure high availability
-5. Create another client VM
-6. Shutdown the active OPNsense node
-7. See what happen!
+5. Test failover
+
+![Diagram of the POC for OPNsense high availability](img/poc-opnsense-diagram.png)
 
 ### Add VLANs in my Homelab
 
-For this experiment, I add extra VLANs:
-- 101: *POC WAN* 
-- 102: *POC LAN*
-- 103: *POC pfSync*
+For this experiment, I create 3 new VLANs:
+- **VLAN 101**: *POC WAN* 
+- **VLAN 102**: *POC LAN*
+- **VLAN 103**: *POC pfSync*
 
 In the Proxmox UI, I navigate to `Datacenter` > `SDN` > `VNets` and I click `Create`:
 ![Create POC VLANs in the Proxmox SDN](img/proxmox-sdn-create-poc-vlans.png)
 
 Once the 3 new VLAN have been created, I apply the configuration.
 
-Additionally, I add these 3 VLANs in my UniFi controller, here only a name and the VLAN id are sufficient to broadcast the VLANs on the network. All declared VLANs are passing through the trunks where my Proxmox VE nodes are connected.
+Additionally, I add these 3 VLANs in my UniFi Controller. Here only the VLAN ID and name are needed, since the controller will propagate them through the trunks connected to my Proxmox VE nodes.
 
 ### Create Fake ISP Box VM
 
-For this experience, I will simulate my current ISP box by a VM, `fake-freebox`, which will route the traffic between the *POC WAN* and the *POC LAN* networks. This VM will serve a DHCP server with only one lease, as my ISP box is doing. I clone my cloud-init template:
-![proxmox-clone-template-fake-freebox.png](img/proxmox-clone-template-fake-freebox.png)
+To simulate my current ISP modem, I built a VM named `fake-freebox`. This VM routes traffic between the _POC WAN_ and _POC LAN_ networks and runs a DHCP server that serves only one lease, just like my real Freebox in bridge mode.
 
-I add another NIC, then I edit the Netplan configuration to have:
+This VM has 2 NICs, I configure Netplan with:
 - `eth0` (*POC WAN* VLAN 101): static IP address `10.101.0.254/24`
-- enp6s19 (Lab VLAN 66): DHCP address given by my current OPNsense router
+- enp6s19 (Lab VLAN 66): DHCP address given by my current OPNsense router, my upstream
 ```yaml
 network:
   version: 2
@@ -93,20 +85,19 @@ echo "net.ipv4.ip_forward=1" | sudo tee -a /etc/sysctl.conf
 sudo sysctl -p
 ```
 
-I set up masquerading for this interface to avoid packet being dropped on my real network by the OPNsense router:
+Then I set up masquerading so packets leaving through the lab network wouldn’t be dropped by my production OPNsense:
 ```bash
 sudo iptables -t nat -A POSTROUTING -o enp6s19 -j MASQUERADE
 sudo apt install iptables-persistent -y
 sudo netfilter-persistent save
 ```
 
-I install `dnsmasq`, a small dhcp server:
-
+I install `dnsmasq` as a lightweight DHCP server:
 ```bash
 sudo apt install dnsmasq -y
 ```
 
-I edit the file `/etc/dnsmasq.conf` to configure `dnsmasq`  to serve only one lease `10.101.0.150` with DNS pointing to the OPNsense IP:
+I configure `/etc/dnsmasq.conf` to serve exactly one lease (`10.101.0.150`) with DNS pointing to my real OPNsense router, in the *Lab* VLAN:
 ```
 interface=eth0
 bind-interfaces
@@ -124,84 +115,89 @@ The `fake-freebox` VM is now ready to serve DHCP on VLAN 101 and serve only one 
 
 ### Build OPNsense VMs
 
-First I download the OPNsense ISO from their website and I upload it to one of my Proxmox VE node storage:
-![proxmox-upload-opnsense-iso.png](img/proxmox-upload-opnsense-iso.png)
+First I download the OPNsense ISO and upload it to one of my Proxmox nodes:
+![Upload the OPNsense ISO into Proxmox](img/proxmox-upload-opnsense-iso.png)
 
+#### VM Creation
 
-I create the first VM from that node which I name `poc-opnsense-1`:
-- I keep the OS type as Linux, even though OPNsense is based on FreeBSD
-- I select `q35` machine type and `OVMH (UEFI)` BIOS setting, EFI storage on my Ceph pool
-- For the disk, I set the disk size to 20GiB
-- 2 vCPU with 2048 MB of RAM
-- I select the VLAN 101 (*POC WAN*) for the NIC
-- Once the VM creation wizard is finished, I add a second NIC in the VLAN 102 (*POC LAN*) and a third in the VLAN 103 (*POC pfSync*)
-![proxmox-create-poc-vm-opnsense.png](img/proxmox-create-poc-vm-opnsense.png)
+I create the first VM `poc-opnsense-1`, with the following settings:
+- OS type:  Linux(even though OPNsense is FreeBSD-based)
+- Machine type: `q35`
+- BIOS: `OVMF (UEFI)`, EFI storage on my Ceph pool
+- Disk: 20 GiB also on Ceph
+- CPU/RAM: 2 vCPU, 2 GiB RAM
+- NICs:
+	1. VLAN 101 (POC WAN)
+	2. VLAN 102 (POC LAN)
+	3. VLAN 103 (POC pfSync)
+![OPNsense VM settings in Proxmox](img/proxmox-create-poc-vm-opnsense.png)
 
+ℹ️ Before booting it, I clone this VM to prepare the second one: `poc-opnsense-2`
 
-Before starting it, I clone this one to prepare the next one: `poc-opnsense-2`
+On first boot, I hit an “access denied” error. To fix this, I enter the BIOS, go to **Device Manager > Secure Boot Configuration**, uncheck _Attempt Secure Boot_, and restart the VM:
+![Disable Secure Boot in Proxmox BIOS](img/proxmox-disable-secure-boot-option.png)
 
-Now I can start the VM, but the boot fails with an access denied. I enter the BIOS, navigate to Device Manager > Secure Boot Configuration, there I uncheck the `Attempt Secure Boot` option and restart the VM:
-![proxmox-disable-secure-boot-option.png](img/proxmox-disable-secure-boot-option.png)
+#### OPNsense Installation
 
-Now the VM boots on the ISO, I touch nothing until I get into that screen:
-![opnsense-vm-installation-welcome.png](img/opnsense-vm-installation-welcome.png)
+The VM boots on the ISO, I touch nothing until I get into the login screen:
+![OPNsense CLI login screen in LiveCD](img/opnsense-vm-installation-welcome.png)
 
-I enter the installation mode using the user `installer` and password `opnsense`. I select the French keyboard and select the `Install (UFS)` mode. I have a warning about RAM space but I proceed anyway.
+I log in as `installer` / `opnsense` and launch the installer. I select the QEMU hard disk of 20GB as destination and launch the installation:
+![OPNsense installation progress bar](img/opnsense-vm-installation-progress-bar.png)
 
-I select the QEMU hard disk of 20GB as destination and launch the installation:
-![opnsense-vm-installation-progress-bar.png](img/opnsense-vm-installation-progress-bar.png)
+Once the installation is finished, I remove the ISO from the drive and restart the machine.
 
-Once the installation is finished, I skip the root password change, I remove the ISO from the drive and select the reboot option at the end of the installation wizard.
+#### OPNsense basic configuration
 
-When the VM has reboot, I log as `root` with the default password `opnsense` and land in the CLI menu:
-![opnsense-vm-installation-cli-menu.png](img/opnsense-vm-installation-cli-menu.png)
+After reboot, I log in as `root` / `opnsense` and get into the CLI menu:
+![OPNsense CLI login screen after fresh installation](img/opnsense-vm-installation-cli-menu.png)
 
-I select the option 1 to assign interfaces, as the installer inverted them for my setup:
-![opnsense-vm-installation-assign-interfaces.png](img/opnsense-vm-installation-assign-interfaces.png)
+Using option 1, I reassigned interfaces:
+![OPNsense interface configuration using CLI](img/opnsense-vm-installation-assign-interfaces.png)
 
-Now my WAN interface is getting the IP address 10.101.0.150/24 from my `fake-freebox` VM. Then I configure the LAN interface with `10.102.0.2/24` and configure a DHCP pool from `10.102.0.10` to `10.102.0.99`:
-![opnsense-vm-installation-interfaces-configured.png](img/opnsense-vm-installation-interfaces-configured.png)
+The WAN interface successfully pulled `10.101.0.150/24` from the `fake-freebox`. I set the LAN interface to `10.102.0.2/24` and configured a DHCP pool from `10.102.0.10` to `10.102.0.99`:
+![OPNsense WAN interface getting IP from `fake-freebox` VM](img/opnsense-vm-installation-interfaces-configured.png)
 
 ✅ The first VM is ready, I start over for the second OPNsense VM, `poc-opnsense-2` which will have the IP `10.102.0.3`
 
 ### Configure OPNsense Highly Available
 
-Now both of the OPNsense VMs are operational, I want to configure the instances from their WebGUI. To be able to do that, I need to have access from the *POC LAN* VLAN to the OPNsense interfaces in that network. Simple way to do that, connect a WIndows VM in that VLAN and browse to the OPNsense IP address on port 443:
-![opnsense-vm-webgui-from-poc-lan.png](img/opnsense-vm-webgui-from-poc-lan.png)
+Now both of the OPNsense VMs are operational, I want to configure the instances from their WebGUI. To be able to do that, I need to have access from the *POC LAN* VLAN to the OPNsense interfaces in that network. Simple way to do that, connect a Windows VM in that VLAN and browse to the OPNsense IP address on port 443:
+![OPNsense WebGUI from Windows VM](img/opnsense-vm-webgui-from-poc-lan.png)
 
 #### Add pfSync Interface
 
-The first thing I do is to assign the third NIC, the `vtnet2` to the *pfSync* interface:
-![opnsense-vm-assign-pfsync-interface.png](img/opnsense-vm-assign-pfsync-interface.png)
+The first thing I do is to assign the third NIC, the `vtnet2` to the *pfSync* interface. This network will be used by the firewalls to communicate between each others, this is one the VLAN *POC pfSync*:
+![Add pfSync interface in OPNsense](img/opnsense-vm-assign-pfsync-interface.png)
 
 I enable the interface on each instance and configure it with a static IP address:
 - **poc-opnsense-1**: `10.103.0.2/24`
 - **poc-opnsense-2**: `10.103.0.3/24`
 
 On both instances, I create a firewall rule to allow communication coming from this network on that *pfSync* interface:
-![opnsense-vm-firewall-allow-pfsync.png](img/opnsense-vm-firewall-allow-pfsync.png)
+![Create new firewall rule on pfSync interface to allow any traffic in that network](img/opnsense-vm-firewall-allow-pfsync.png)
 
 #### Setup High Availability
 
 Then I configure the HA in `System` > `High Availability` > `Settings`. On the master (`poc-opnsense-1`) I configure both the `General Settings` and the `Synchronization Settings`. On the backup (`poc-opnsense-2`) I only configure the `General Settings`:
-![opnsense-vm-high-availability-settings.png](img/opnsense-vm-high-availability-settings.png)
+![OPNsense High Availability settings](img/opnsense-vm-high-availability-settings.png)
 
 Once applied, I can verify that it is ok on the `Status` page:
-![opnsense-vm-high-availability-status.png](img/opnsense-vm-high-availability-status.png)
+![OPNsense High Availability status](img/opnsense-vm-high-availability-status.png)
 
 #### Create Virtual IP Address
 
 Now I need to create the VIP for the LAN interface, an IP address shared across the cluster. The master node will claim that IP which is the gateway given to the clients. The VIP will use the CARP, Common Address Redundancy Protocol for failover. To create it, navigate to `Interfaces` > `Virtual IPs` > `Settings`:
-![opnsense-vm-create-vip-carp.png](img/opnsense-vm-create-vip-carp.png)
+![Create CARP virtual IP in OPNsense](img/opnsense-vm-create-vip-carp.png)
 
-To replicate the config to the backup node, go to `System` > `High Availability` > `Status` and clikc the `Synchronize and reconfigure all` button. To verify, on both node navigate to `Interfaces` > `Virtual IPs` > `Status`. The master node should have the VIP active with the status `MASTER`, and the backup node with the status `BACKUP`.
+To replicate the config to the backup node, go to `System` > `High Availability` > `Status` and click the `Synchronize and reconfigure all` button. To verify, on both node navigate to `Interfaces` > `Virtual IPs` > `Status`. The master node should have the VIP active with the status `MASTER`, and the backup node with the status `BACKUP`.
 
 #### Reconfigure DHCP
 
 I need to reconfigure the DHCP for HA. Dnsmasq does not support DHCP lease synchronization, I have to configure the two instances independently, they would serve both DHCP lease at the same time.
 
 On the master node, in `Services` > `Dnsmasq DNS & DHCP` > `General`, I tick the `Disable HA sync` box. Then in `DHCP ranges`, I edit the current one and also tick the `Disable HA sync` box. In `DHCP options`, I add the option `router [3]` with the value 10.102.0.1, to advertise the VIP address:
-![opnsense-vm-dnsmasq-add-option.png](img/opnsense-vm-dnsmasq-add-option.png)
+![Edit DHCP options for Dnsmasq in OPNsense](img/opnsense-vm-dnsmasq-add-option.png)
 
 I clone that rule for the option `dns-server [6]` with the same address.
 
@@ -211,11 +207,11 @@ Now I can safely sync my services like described above, this will only propagate
 
 #### WAN Interface
 
-The last thing I need to configure is the WAN interface, my ISP box is only giving me one IP address over DHCP, I don't want my 2 VMs compete to claim it. To handle that, I will give my 2 VMs the same MAC for the WAN interface, then I need to find a solution to enable the WAN interface only on the master node.
+The last thing I need to configure is the WAN interface, my ISP box is only giving me one IP address over DHCP, I don't want my 2 VMs compete to claim it. To handle that, I give my 2 VMs the same MAC for the WAN interface, then I need to find a solution to enable the WAN interface only on the master node.
 
 In the Proxmox WebGUI, I copy the MAC address of the net0 interface (*POC WAN*) from `poc-opnsense-1` and paste it to the one in `poc-opnsense-2`.
 
-To handle the activation of the WAN interface on the master node while deactivating the backup, I could use a script. On CARP event, scripts located in `/usr/local/etc/rc.syshood.d/carp` are played. I found this [Gist](https://gist.github.com/spali/2da4f23e488219504b2ada12ac59a7dc#file-10-wancarp) which is exactly what I wanted.
+To handle the activation of the WAN interface on the master node while deactivating the backup, I can use a script. On CARP event, scripts located in `/usr/local/etc/rc.syshood.d/carp` are played. I found this [Gist](https://gist.github.com/spali/2da4f23e488219504b2ada12ac59a7dc#file-10-wancarp) which is exactly what I wanted.
 
 I copy this script in `/usr/local/etc/rc.syshood.d/carp/10-wan` on both nodes:
 ```php
@@ -258,19 +254,12 @@ if ($type === "MASTER") {
 ### Test Failover
 
 Time for testing! OPNsense provides a way to enter CARP maintenance mode. Before pushing the button, my master has its WAN interface enabled and the backup doesn't:
-![opnsense-vm-carp-status.png](img/opnsense-vm-carp-status.png)
+![OPNsense CARP maintenance mode](img/opnsense-vm-carp-status.png)
 
 Once I enter the CARP maintenance mode, the master node become backup and vice versa, the WAN interface get disabled while it's enabling on the other node. I was pinging outside of the network while switching and experienced not a single drop!
 
-Finally, I simulate a crash by powering off the master and the magic happens! Here I have only one packet lost and, thanks to the firewall state sync, I can even keep my SSH connection alive.
+Finally, I simulate a crash by powering off the master node and the magic happens! Here I have only one packet lost and, thanks to the firewall state sync, I can even keep my SSH connection alive.
 
 ## Conclusion
 
-
-
-
-
-
-
-backup not having gateway: adding gateway on LAN with IP of the master node
 
