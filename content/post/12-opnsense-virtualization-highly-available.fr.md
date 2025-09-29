@@ -1,7 +1,7 @@
 ---
 slug: opnsense-virtualization-highly-available
-title: Build a Highly Available OPNsense Cluster on Proxmox VE
-description: A proof of concept showing how to virtualize OPNsense on Proxmox VE, configure high availability with CARP and pfSync and handle a single WAN IP.
+title: Construire un Cluster OPNsense Hautement Disponible sur Proxmox VE
+description: Une preuve de concept montrant comment virtualiser OPNsense sur Proxmox VE, configurer la haute disponibilité avec CARP et pfSync, et gérer une seule IP WAN
 date: 2025-09-29
 draft: true
 tags:
@@ -278,4 +278,4 @@ Cette preuve de concept démontre qu’il est possible de faire tourner **OPNsen
 
 Le résultat est à la hauteur : failover transparent, synchro des états, et connexions actives qui survivent à un crash.  Le point le plus délicat reste la gestion du bail WAN, mais le hook CARP règle ce problème.
 
-🚀 Prochaine étape : préparer la migration de mon réseau de production vers ce cluster HA virtuel, avec un minimum de coupures. Restez connecté !
+🚀 Prochaine étape : préparer un nouveau cluster OPNsense HA sur Proxmox en vue de remplacer complètement ma box physique actuel. Restez à l'écoute !

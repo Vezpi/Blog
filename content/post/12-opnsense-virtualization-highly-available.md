@@ -280,4 +280,4 @@ This proof of concept showed that running **OPNsense in high availability on Pro
 
 The setup behave exactly as expected, seamless failover, synchronized firewall states, and even live sessions surviving a node crash. The most delicate part was handling the WAN lease, since my ISP modem only provides one IP, but the CARP hook script solved that challenge.
 
-🚀 The next milestone will be carefully planning the migration of my network into this virtual HA pair with minimal downtime, stay tuned!
+🚀 The next milestone will be to prepare a new OPNsense HA cluster with the aim to completely replace my current physical box. Stay tuned!
