@@ -162,24 +162,26 @@ The WAN interface successfully pulled `10.101.0.150/24` from the `fake-freebox`.
 
 ### Configure OPNsense Highly Available
 
-Now both of the OPNsense VMs are operational, I want to configure the instances from their WebGUI. To be able to do that, I need to have access from the *POC LAN* VLAN to the OPNsense interfaces in that network. Simple way to do that, connect a Windows VM in that VLAN and browse to the OPNsense IP address on port 443:
+With both OPNsense VMs operational, it’s time to configure them from the WebGUI. To access the interface, I connected a Windows VM into the _POC LAN_ VLAN and browsed to the OPNsense IP on port 443:
 ![OPNsense WebGUI from Windows VM](img/opnsense-vm-webgui-from-poc-lan.png)
 
 #### Add pfSync Interface
 
-The first thing I do is to assign the third NIC, the `vtnet2` to the *pfSync* interface. This network will be used by the firewalls to communicate between each others, this is one the VLAN *POC pfSync*:
+The third NIC (`vtnet2`) is assigned to the _pfSync_ interface. This dedicated network allows the two firewalls to synchronize states on the VLAN *POC pfSync*:
 ![Add pfSync interface in OPNsense](img/opnsense-vm-assign-pfsync-interface.png)
 
 I enable the interface on each instance and configure it with a static IP address:
 - **poc-opnsense-1**: `10.103.0.2/24`
 - **poc-opnsense-2**: `10.103.0.3/24`
 
-On both instances, I create a firewall rule to allow communication coming from this network on that *pfSync* interface:
+Then, I add a firewall rule on each node to allow all traffic coming from this network on that *pfSync* interface:
 ![Create new firewall rule on pfSync interface to allow any traffic in that network](img/opnsense-vm-firewall-allow-pfsync.png)
 
 #### Setup High Availability
 
-Then I configure the HA in `System` > `High Availability` > `Settings`. On the master (`poc-opnsense-1`) I configure both the `General Settings` and the `Synchronization Settings`. On the backup (`poc-opnsense-2`) I only configure the `General Settings`:
+Next, in `System` > `High Availability` > `Settings`.
+- On the master (`poc-opnsense-1`), I configure both the `General Settings` and the `Synchronization Settings`.
+- On the backup (`poc-opnsense-2`), only `General Settings` are needed, you don't want your backup overwrite the master config.
 ![OPNsense High Availability settings](img/opnsense-vm-high-availability-settings.png)
 
 Once applied, I can verify that it is ok on the `Status` page:
