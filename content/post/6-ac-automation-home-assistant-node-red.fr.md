@@ -1,6 +1,6 @@
 ---
 slug: ac-automation-home-assistant-node-red
-title: Automatisation complète de la clim avec Home Assistant et Node-RED
+title: Automatisation Complète de la Climatisation avec Home Assistant et Node-RED
 description: Comment j’automatise ma clim avec Home Assistant et Node-RED pour réagir à la température, l’humidité et à tous les évènements quotidiens.
 date: 2025-06-27
 draft: false

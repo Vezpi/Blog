@@ -22,7 +22,7 @@ Cette panne m’a fait repenser mon installation. Un seul pare-feu est un point 
 Avant de déployer ça sur mon réseau, j’ai voulu valider l’idée dans mon homelab. Dans cet article, je vais détailler la preuve de concept : déployer deux VM OPNsense dans un cluster **Proxmox VE** et les configurer pour fournir un pare-feu hautement disponible.
 
 ---
-## Current Infrastructure
+## Infrastructure Actuelle
 
 Au sommet de mon installation, mon modem FAI, une _Freebox_ en mode bridge, relié directement à l’interface `igc0` de ma box OPNsense, servant d’interface **WAN**. Sur `igc1`, le **LAN** est connecté à mon switch principal via un port trunk, avec le VLAN 1 comme VLAN natif pour mon réseau de management.
 
