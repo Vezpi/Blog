@@ -7,6 +7,7 @@ draft: false
 tags:
   - kubernetes
   - kubeadm
+  - high-availability
 categories:
   - homelab
 ---

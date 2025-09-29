@@ -1,7 +1,7 @@
 ---
 slug: proxmox-cluster-networking-sdn
 title: Simplifier la gestion des VLAN dans Proxmox VE avec le SDN
-description: Découvrez comment centraliser la configuration des VLAN dans Proxmox VE grâce aux zones SDN et aux VNets, pour un réseau plus simple et cohérent
+description: Découvrez comment centraliser la configuration des VLAN dans Proxmox VE grâce aux zones SDN et aux VNets, pour un réseau plus simple et cohérent.
 date: 2025-09-12
 draft: false
 tags:

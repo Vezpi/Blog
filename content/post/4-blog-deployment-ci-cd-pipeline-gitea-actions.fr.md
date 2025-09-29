@@ -1,7 +1,7 @@
 ---
 slug: blog-deployment-ci-cd-pipeline-gitea-actions
 title: Pipeline CI/CD du Déploiment du Blog avec Gitea Actions
-description: Comment j'ai sécurisé le déploiement automatisé de mon blog self-hosted construit avec Hugo en mettant en place un pipeline CI/CD à l'aide de Gitea Actions
+description: Comment j'ai sécurisé le déploiement automatisé de mon blog self-hosted construit avec Hugo en mettant en place un pipeline CI/CD à l'aide de Gitea Actions.
 date: 2025-06-05
 draft: false
 tags:

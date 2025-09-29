@@ -1,7 +1,7 @@
 ---
 slug: opnsense-virtualization-highly-available
 title: Construire un Cluster OPNsense Hautement Disponible sur Proxmox VE
-description: Une preuve de concept montrant comment virtualiser OPNsense sur Proxmox VE, configurer la haute disponibilité avec CARP et pfSync, et gérer une seule IP WAN
+description: Une preuve de concept montrant comment virtualiser OPNsense sur Proxmox VE, configurer la haute disponibilité avec CARP et pfSync, et gérer une seule IP WAN.
 date: 2025-09-29
 draft: false
 tags:

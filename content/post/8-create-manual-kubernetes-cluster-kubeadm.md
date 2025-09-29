@@ -1,12 +1,13 @@
 ---
 slug: create-manual-kubernetes-cluster-kubeadm
 title: Create a Highly Available Kubernetes Cluster with kubeadm on VMs
-description: Step-by-step guide to manually build a highly available Kubernetes cluster on virtual machines using kubeadm
+description: Step-by-step guide to manually build a highly available Kubernetes cluster on virtual machines using kubeadm.
 date: 2025-07-18
 draft: false
 tags:
   - kubernetes
   - kubeadm
+  - high-availability
 categories:
   - homelab
 ---
