@@ -52,4 +52,6 @@ I also create the `vlan44` for the *pfSync* VLAN, then I apply this configuratio
 
 Now that the VLAN configuration is done, I can start buiding my VMs.
 
-I don't want to go into much details about the VM creation, I already detailed it in the previous  [post]({{< ref "post/12-opnsense-virtualization-highly-available" >}}),
+I don't want to go into much details about the VM creation, I already detailed it in the previous  [post]({{< ref "post/12-opnsense-virtualization-highly-available" >}}).
+
+The first VM is named `cerbere-head1`
