@@ -13,7 +13,7 @@ categories:
 
 ## Intro
 
-In my previous post, I've set up a PoC to validate the possibility to create a cluster of 2 **OPNsense** VMs in **Proxmox VE** and make the firewall highly available.
+In my previous [post]({{< ref "post/12-opnsense-virtualization-highly-available" >}}), I've set up a PoC to validate the possibility to create a cluster of 2 **OPNsense** VMs in **Proxmox VE** and make the firewall highly available.
 
 This time, I will cover the creation of my future OPNsense cluster from scratch, plan the cut over and finally migrate from my current physical box.
 
@@ -52,4 +52,4 @@ I also create the `vlan44` for the *pfSync* VLAN, then I apply this configuratio
 
 Now that the VLAN configuration is done, I can start buiding my VMs.
 
-This time I already have the ISO uploaded 
+I don't want to go into much details about the VM creation, I already detailed it in the previous  [post]({{< ref "post/12-opnsense-virtualization-highly-available" >}}),
