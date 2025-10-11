@@ -50,8 +50,8 @@ I also create the `vlan44` for the *pfSync* VLAN, then I apply this configuratio
 
 ## Create the VMs
 
-Now that the VLAN configuration is done, I can start buiding my VMs.
+Now that the VLAN configuration is done, I can start buiding the virtual machines on Proxmox.
 
 I don't want to go into much details about the VM creation, I already detailed it in the previous  [post]({{< ref "post/12-opnsense-virtualization-highly-available" >}}).
 
-The first VM is named `cerbere-head1`
+The first VM is named `cerbere-head1`, I didn't tell you? My current firewall is named `cerbere`, it makes even more sense now!
