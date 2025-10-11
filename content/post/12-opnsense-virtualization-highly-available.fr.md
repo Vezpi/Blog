@@ -122,8 +122,8 @@ Je crée la première VM `poc-opnsense-1` avec les paramètres suivants :
 - Type d’OS : Linux (même si OPNsense est basé sur FreeBSD)
 - Type de machine : `q35`
 - BIOS : `OVMF (UEFI)`, stockage EFI sur mon pool Ceph
-- Disque : 20 Gio sur Ceph
-- CPU/RAM : 2 vCPU, 2 Gio de RAM
+- Disque : 20 Go sur Ceph
+- CPU/RAM : 2 vCPU, 2 Go de RAM
 - Cartes réseau :
     1. VLAN 101 (_POC WAN_)
     2. VLAN 102 (_POC LAN_)

@@ -52,6 +52,20 @@ I also create the `vlan44` for the *pfSync* VLAN, then I apply this configuratio
 
 Now that the VLAN configuration is done, I can start buiding the virtual machines on Proxmox.
 
-I don't want to go into much details about the VM creation, I already detailed it in the previous  [post]({{< ref "post/12-opnsense-virtualization-highly-available" >}}).
+The first VM is named `cerbere-head1` (I didn't tell you? My current firewall is named `cerbere`, it makes even more sense now!) Here are the settings:
+- OS type: Linux
+- Machine type: `q35`
+- BIOS: `OVMF (UEFI)`
+- Disk: 20 GiB on Ceph storage
+- CPU/RAM: 2 vCPU, 4 GiB RAM
+- NICs:
+	1. `vmbr0` (*Mgmt*)
+	2. `vlan20` (*WAN*)
+	3. `vlan13` *(User)*
+	4. `vlan37` *(IoT)*
+	5. `vlan44` *(pfSync)*
+	6. `vlan55` *(DMZ)*
+	7. `vlan66` *(Lab)*
+![proxmox-cerbere-vm-settings.png](img/proxmox-cerbere-vm-settings.png)
 
-The first VM is named `cerbere-head1`, I didn't tell you? My current firewall is named `cerbere`, it makes even more sense now!
+I don't want to go into much details about OPNsense installation, I already detailed it in the previous [post]({{< ref "post/12-opnsense-virtualization-highly-available" >}}).

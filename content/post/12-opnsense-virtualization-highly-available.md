@@ -120,7 +120,7 @@ First I download the OPNsense ISO and upload it to one of my Proxmox nodes:
 #### VM Creation
 
 I create the first VM `poc-opnsense-1`, with the following settings:
-- OS type:  Linux(even though OPNsense is FreeBSD-based)
+- OS type: Linux (even though OPNsense is FreeBSD-based)
 - Machine type: `q35`
 - BIOS: `OVMF (UEFI)`, EFI storage on my Ceph pool
 - Disk: 20 GiB also on Ceph
