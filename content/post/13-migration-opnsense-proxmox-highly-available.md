@@ -105,3 +105,6 @@ In `System` > `Settings` > `Administration`, I change several things:
 Once I click `Save`, I follow the link given to reach the WebGUI on port `4443`.
 
 ### Interfaces
+
+On both firewalls, I assign the remaining NICs to new interfaces adding a description. The VMs have 7 interfaces, I carefully compare the MAC addresses to not mix them up:
+![opnsense-assign-interfaces.png](img/opnsense-assign-interfaces.png)
