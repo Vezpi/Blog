@@ -105,6 +105,8 @@ In `System` > `Settings` > `Administration`, I change several things:
 Once I click `Save`, I follow the link given to reach the WebGUI on port `4443`.
 
 Time for updates, in System > Firmware > Status, I click on `Check for updates`.  An update is available, I close the banner, head to the bottom and click on `Update`. I'm warned that this update requires a reboot.
+
+Once updated and rebooted,
 ### Interfaces
 
 On both firewalls, I assign the remaining NICs to new interfaces adding a description. The VMs have 7 interfaces, I carefully compare the MAC addresses to not mix them up:
