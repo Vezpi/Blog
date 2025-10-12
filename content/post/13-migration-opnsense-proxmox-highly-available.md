@@ -116,3 +116,4 @@ Finally I restart the VM. Once started, from the Proxmox WebGUI, I can see the I
 
 On both firewalls, I assign the remaining NICs to new interfaces adding a description. The VMs have 7 interfaces, I carefully compare the MAC addresses to not mix them up:
 ![opnsense-assign-interfaces.png](img/opnsense-assign-interfaces.png)
+
