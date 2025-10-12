@@ -78,4 +78,4 @@ While these routers are not managing the networks, I give them my current OPNsen
 
 ## Configure OPNsense
 
-Initially I thought about restoring my current OPNsense config on the VM, but as I didn't documented the first time, I take the opportunity to start over.
+Initially I thought about restoring my current OPNsense config on the VM. But as I didn't document the configuration process the first time, I take the opportunity to start over.
