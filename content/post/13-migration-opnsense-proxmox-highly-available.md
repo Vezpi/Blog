@@ -68,4 +68,5 @@ The first VM is named `cerbere-head1` (I didn't tell you? My current firewall is
 	7. `vlan66` *(Lab)*
 ![proxmox-cerbere-vm-settings.png](img/proxmox-cerbere-vm-settings.png)
 
-I don't want to go into much details about OPNsense installation, I already detailed it in the previous [post]({{< ref "post/12-opnsense-virtualization-highly-available" >}}).
+ℹ️ Now I clone that VM to create `cerbere-head2`, then I proceed with OPNsense installation. I don't want to go into much details about OPNsense installation, I already documented it in the previous [post]({{< ref "post/12-opnsense-virtualization-highly-available" >}}).
+
