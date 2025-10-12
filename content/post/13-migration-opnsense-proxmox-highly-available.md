@@ -75,3 +75,7 @@ After the installation of both OPNsense instances, I give to each of them their 
 - `cerbere-head2`: `192.168.88.3/24`
 
 While these routers are not managing the networks, I give them my current OPNsense routeur as gateway (`192.168.88.1`) to able to reach them from my PC in another VLAN.
+
+## Configure OPNsense
+
+Initially I thought about restoring my current OPNsense config on the VM, but as I didn't documented the first time, I take the opportunity to start over.
