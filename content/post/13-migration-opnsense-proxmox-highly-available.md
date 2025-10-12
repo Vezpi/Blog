@@ -71,5 +71,7 @@ The first VM is named `cerbere-head1` (I didn't tell you? My current firewall is
 ℹ️ Now I clone that VM to create `cerbere-head2`, then I proceed with OPNsense installation. I don't want to go into much details about OPNsense installation, I already documented it in the previous [post]({{< ref "post/12-opnsense-virtualization-highly-available" >}}).
 
 After the installation of both OPNsense instances, I give to each of them their IP in the *Mgmt* network:
-- `cerbere-head1`: 192.168.88.2/24
-- `cerbere-head2`: 192.168.88.3/24
+- `cerbere-head1`: `192.168.88.2/24`
+- `cerbere-head2`: `192.168.88.3/24`
+
+While these routers are not managing the networks, I give them my current OPNsense routeur as gateway (`192.168.88.1`) to able to reach them from my PC in another VLAN.
