@@ -106,7 +106,12 @@ Once I click `Save`, I follow the link given to reach the WebGUI on port `4443`.
 
 Time for updates, in System > Firmware > Status, I click on `Check for updates`.  An update is available, I close the banner, head to the bottom and click on `Update`. I'm warned that this update requires a reboot.
 
-Once updated and rebooted, I go to System > Firmware > `Plugins`, I tick the box to show community plugins. For now I only install the QEMU guest agent, `os-qemu-guest-agent`.
+Once updated and rebooted, I go to `System` > `Firmware` > `Plugins`, I tick the box to show community plugins. For now I only install the QEMU guest agent, `os-qemu-guest-agent`, to allow communication between the VM and the Proxmox host. 
+
+This requires a shutdown. On Proxmox, I enable the `QEMU Guest Agent` in the VM options:
+![proxmox-opnsense-enable-qemu-guest-agent.png](img/proxmox-opnsense-enable-qemu-guest-agent.png)
+
+Finally I restart the VM. Once started, from the Proxmox WebGUI, I can see the IPs of the VM which confirms the guest agent is working.
 ### Interfaces
 
 On both firewalls, I assign the remaining NICs to new interfaces adding a description. The VMs have 7 interfaces, I carefully compare the MAC addresses to not mix them up:
