@@ -17,6 +17,7 @@ In my previous [post]({{< ref "post/12-opnsense-virtualization-highly-available"
 
 This time, I will cover the creation of my future OPNsense cluster from scratch, plan the cut over and finally migrate from my current physical box.
 
+---
 ## Build the Foundation
 
 For the real thing, I'll have to connect the WAN, coming from my ISP box, to my main switch. For that I have to add a VLAN to transport this flow to my Proxmox nodes.
@@ -48,6 +49,7 @@ In `Datacenter` > `SDN` > `VNets`, I create a new VNet, name it `vlan20` to foll
 
 I also create the `vlan44` for the *pfSync* VLAN, then I apply this configuration and we are done with the SDN.
 
+---
 ## Create the VMs
 
 Now that the VLAN configuration is done, I can start buiding the virtual machines on Proxmox.
@@ -76,6 +78,30 @@ After the installation of both OPNsense instances, I give to each of them their 
 
 While these routers are not managing the networks, I give them my current OPNsense routeur as gateway (`192.168.88.1`) to able to reach them from my PC in another VLAN.
 
+---
 ## Configure OPNsense
 
 Initially I thought about restoring my current OPNsense config on the VM. But as I didn't document the configuration process the first time, I take the opportunity to start over.
+
+### System
+
+The system configuration is done on both firewalls. In `System` > `Settings` > `General`, I configure the basic:
+- **Hostname**: `cerbere-head1` (`cerbere-head2` for the second one).
+- **Domain**: `mgmt.vezpi.com`.
+- **Time zone**: `Europe/Paris`.
+- **Language**: `English`.
+- **Theme**: `opnsense-dark`.
+- **Prefer IPv4 over IPv6**: tick the box to prefer IPv4.
+
+Then, in `System` > `Access` > `Users`, I create a new user, I don't like sticking with the defaults `root`. I add this user in the `admins`  group, while removing `root` from it.
+
+In `System` > `Settings` > `Administration`, I change several things:
+- **TCP port**: from `443` to `4443`, to free port 443 for the reverse proxy coming next.
+-  **Alternate Hostnames**: `cerbere.vezpi.com` which will be the URL to reach the firewall by the reverse proxy.
+- **Access log**: enabled.
+- **Secure Shell Server**: enabled.
+- **Authentication Method:** permit password login (no `root` login).
+- **Sudo**: `No password`.
+Once I click `Save`, I follow the link given to reach the WebGUI on port `4443`.
+
+### Interfaces
