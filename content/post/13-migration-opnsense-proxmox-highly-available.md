@@ -83,9 +83,10 @@ While these routers are not managing the networks, I give them my current OPNsen
 
 Initially I thought about restoring my current OPNsense config on the VM. But as I didn't document the configuration process the first time, I take the opportunity to start over.
 
+I'll start with the elements that needs to be configured on both firewalls, where each has its own parameters. After I'll create the OPNsense cluster, then configure the master node only as the configuration will be duplicated on the other node.
 ### System
 
-The system configuration is done on both firewalls. In `System` > `Settings` > `General`, I configure the basic:
+I start by the basic, in `System` > `Settings` > `General`:
 - **Hostname**: `cerbere-head1` (`cerbere-head2` for the second one).
 - **Domain**: `mgmt.vezpi.com`.
 - **Time zone**: `Europe/Paris`.
@@ -130,7 +131,37 @@ In the end, the interfaces configuration looks like this:
 | *Lab*     | Static IPv4    | 192.168.66.2/24 | 192.168.66.3/24 |
 I don't configure Virtual IP yet, I'll manage that once high availability has been setup.
 
-### Firewall
+### High Availability
 
+From here we can associate both instances to create a cluster. The last thing I need to do, is to allow the communication on the *pfSync* interface. By default, no communication is allowed on the new interfaces.
 
+From `Firewall` > `Rules` > `pfSync`, I create a new rule on each firewall:
+- **Action**: Pass
+- **Quick**: tick the box to apply immediately on match
+- **Interface**: *pfSync*
+- **Direction**: in
+- **TCP/IP Version**: IPv4
+- **Protocol**: any
+- **Source**: *pfSync* net
+- **Destination**: *pfSync* net
+- **Log**: tick the box to log packets
+- **Category**: OPNsense
+- **Description**: pfSync
+
+Next, I head to `System` > `High Availability` > `Settings`:
+- **Master** (`cerbere-head1`):
+	- **Synchronize all states via**: *pfSync*
+	- **Synchronize Peer IP**: `192.168.44.2`
+	- **Synchronize Config**: `192.168.44.2`
+	- **Remote System Username**: `<username>`
+	- **Remote System Password**: `<password>`
+	- **Services**: Select All
+- **Backup** (`cerbere-head2`):
+	- **Synchronize all states via**: *pfSync*
+	- **Synchronize Peer IP**: `192.168.44.1`
+	- **Synchronize Config**: `192.168.44.1`
+⚠️ Do not fill the XMLRPC Sync fields, only on the master.
+
+In the section `System` > `High Availability` > `Status`, I can verify is the synchronization is working. On this page I can replicate any or all service from my master to my backup node:
+![opnsense-high-availability-status.png](img/opnsense-high-availability-status.png)
 
