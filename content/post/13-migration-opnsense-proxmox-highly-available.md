@@ -166,3 +166,5 @@ In the section `System` > `High Availability` > `Status`, I can verify is the sy
 ![opnsense-high-availability-status.png](img/opnsense-high-availability-status.png)
 
 ### Firewall
+
+Let's configure the core feature of OPNsense, the firewall.
