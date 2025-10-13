@@ -128,3 +128,9 @@ In the end, the interfaces configuration looks like this:
 | *pfSync*  | Static IPv4    | 192.168.44.1/30 | 192.168.44.2/30 |
 | *DMZ*     | Static IPv4    | 192.168.55.2/24 | 192.168.55.3/24 |
 | *Lab*     | Static IPv4    | 192.168.66.2/24 | 192.168.66.3/24 |
+I don't configure Virtual IP yet, I'll manage that once high availability has been setup.
+
+### Firewall
+
+
+
