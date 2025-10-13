@@ -117,3 +117,14 @@ Finally I restart the VM. Once started, from the Proxmox WebGUI, I can see the I
 On both firewalls, I assign the remaining NICs to new interfaces adding a description. The VMs have 7 interfaces, I carefully compare the MAC addresses to not mix them up:
 ![opnsense-assign-interfaces.png](img/opnsense-assign-interfaces.png)
 
+In the end, the interfaces configuration looks like this:
+
+| Interface | Mode           | `cerbere-head1` | `cerbere-head2` |
+| --------- | -------------- | --------------- | --------------- |
+| *LAN*     | Static IPv4    | 192.168.88.2/24 | 192.168.88.3/24 |
+| *WAN*     | DHCPv4 + SLAAC | Enabled         | Disabled        |
+| *User*    | Static IPv4    | 192.168.13.2/24 | 192.168.13.3/24 |
+| *IoT*     | Static IPv4    | 192.168.37.2/24 | 192.168.37.3/24 |
+| *pfSync*  | Static IPv4    | 192.168.44.1/30 | 192.168.44.2/30 |
+| *DMZ*     | Static IPv4    | 192.168.55.2/24 | 192.168.55.3/24 |
+| *Lab*     | Static IPv4    | 192.168.66.2/24 | 192.168.66.3/24 |
