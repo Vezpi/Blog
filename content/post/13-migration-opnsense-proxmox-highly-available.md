@@ -167,4 +167,6 @@ In the section `System` > `High Availability` > `Status`, I can verify is the sy
 
 ### Firewall
 
-Let's configure the core feature of OPNsense, the firewall.
+Let's configure the core feature of OPNsense, the firewall. Now I just have to configure the master, the replication will do the rest for me.
+
+To begin I create an alias, in `Firewall` > `Aliases`, to regroup all my internal networks
