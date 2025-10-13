@@ -162,6 +162,7 @@ Next, I head to `System` > `High Availability` > `Settings`:
 	- **Synchronize Config**: `192.168.44.1`
 ⚠️ Do not fill the XMLRPC Sync fields, only to be filled on the master.
 
-In the section `System` > `High Availability` > `Status`, I can verify is the synchronization is working. On this page I can replicate any or all service from my master to my backup node:
+In the section `System` > `High Availability` > `Status`, I can verify is the synchronization is working. On this page I can replicate any or all services from my master to my backup node:
 ![opnsense-high-availability-status.png](img/opnsense-high-availability-status.png)
 
+### Firewall
