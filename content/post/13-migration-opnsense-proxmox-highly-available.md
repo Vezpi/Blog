@@ -232,3 +232,13 @@ Finally, I want to allow anything from my trusted networks. In `Firewall` > `Rul
 | **Category**               | Trusted                               |
 | **Description**            | Trusted                               |
 
+### DHCP
+
+### DNS
+
+### VPN
+
+### Reverse Proxy
+
+### mDNS Repeater
+
