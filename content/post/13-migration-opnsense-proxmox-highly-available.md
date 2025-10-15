@@ -171,12 +171,13 @@ Let's configure the core feature of OPNsense, the firewall. I don't want to go t
 
 Basically I have 2 kinds of networks, those which I trust, and those which I don't. From this standpoint, I will create two zones. 
 
-Globally, on my untrusted networks, I will allow access to the DNS and to the internet. On the other hand, my trusted networks would have the possibility to reach other VLANs.
+Globally, on my untrusted networks, I will allow access to the DNS and to the internet, not on the other networks. On the other hand, my trusted networks would have the possibility to reach other VLANs.
 
 To begin, in `Firewall` > `Groups`, I create 2 groups to regroup my interfaces:
 - **Trusted**: *Mgmt*, *User*
 - **Untrusted**: *IoT*, *DMZ*, *Lab*
 
-Next, in `Firewall` > `Aliases`, 
+Next, in `Firewall` > `Aliases`, I create an alias `InternalNetworks` to regroup all my internal networks:
+![opnsense-create-alias-internalnetworks.png](img/opnsense-create-alias-internalnetworks.png)
 
-Now let's create the first rule,
+Now to deny access to the internal networks from my untrusted netowrks. In `Firewall` > `Rules` > `Untrusted`, let's create the first rule
