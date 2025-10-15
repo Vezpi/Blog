@@ -167,8 +167,10 @@ In the section `System` > `High Availability` > `Status`, I can verify is the sy
 
 ### Firewall
 
-Let's configure the core feature of OPNsense, the firewall. Now I just have to configure the master, the replication will do the rest for me.
+Let's configure the core feature of OPNsense, the firewall. I don't want to go too crazy with the rules. I only need to configure the master, thanks to the replication.
 
+Basically I have 2 kinds of networks, those which I trust, and those which I don't. From this standpoint, I will create two zones. 
 
+Globally, on my untrusted networks, I will allow access to the DNS and to the internet. On the other hand, my trusted networks would have the possibility to reach other VLANs.
 
 To begin I create an alias, in `Firewall` > `Aliases`, to regroup all my internal networks
