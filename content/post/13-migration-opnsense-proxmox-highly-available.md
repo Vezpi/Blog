@@ -173,4 +173,7 @@ Basically I have 2 kinds of networks, those which I trust, and those which I don
 
 Globally, on my untrusted networks, I will allow access to the DNS and to the internet. On the other hand, my trusted networks would have the possibility to reach other VLANs.
 
-To begin I create an alias, in `Firewall` > `Aliases`, to regroup all my internal networks
+To begin, in `Firewall` > `Groups`, I create two groups to regroup my interfaces:
+- **Trusted**: *Mgmt*, *User*
+- **Untrusted**: *IoT*, *Lab*, *DMZ*
+I create an alias, in `Firewall` > `Aliases`, to regroup all my internal networks
