@@ -180,4 +180,55 @@ To begin, in `Firewall` > `Groups`, I create 2 groups to regroup my interfaces:
 Next, in `Firewall` > `Aliases`, I create an alias `InternalNetworks` to regroup all my internal networks:
 ![opnsense-create-alias-internalnetworks.png](img/opnsense-create-alias-internalnetworks.png)
 
-Now to deny access to the internal networks from my untrusted netowrks. In `Firewall` > `Rules` > `Untrusted`, let's create the first rule
+For all my networks, I want to allow DNS querry on the local DNS. In `Firewall` > `Rules` > `Floating`, let's create the first rule:
+
+| Field                      | Value                                 |
+| -------------------------- | ------------------------------------- |
+| **Action**                 | Pass                                  |
+| **Quick**                  | Apply the action immediately on match |
+| **Interface**              | Trusted, Untrusted                    |
+| **Direction**              | in                                    |
+| **TCP/IP Version**         | IPv4                                  |
+| **Protocol**               | TCP/UDP                               |
+| **Source**                 | InternalNetworks                      |
+| **Destination**            | This Firewall                         |
+| **Destination port range** | from: DNS - to: DNS                   |
+| **Log**                    | Log packets                           |
+| **Category**               | DNS                                   |
+| **Description**            | DNS                                   |
+
+Next I want to allow connections towards the internet. At the same place I create a second rule:
+
+| Field                      | Value                                 |
+| -------------------------- | ------------------------------------- |
+| **Action**                 | Pass                                  |
+| **Quick**                  | Apply the action immediately on match |
+| **Interface**              | Trusted, Untrusted                    |
+| **Direction**              | in                                    |
+| **TCP/IP Version**         | IPv4+IPv6                             |
+| **Protocol**               | any                                   |
+| **Source**                 | InternalNetworks                      |
+| **Destination / Invert**   | Invert the sense of the match         |
+| **Destination**            | InternalNetworks                      |
+| **Destination port range** | from: any - to: any                   |
+| **Log**                    | Log packets                           |
+| **Category**               | Internet                              |
+| **Description**            | Internet                              |
+
+Finally, I want to allow anything from my trusted networks. In `Firewall` > `Rules` > `Trusted`, I create the rule:
+
+| Field                      | Value                                 |
+| -------------------------- | ------------------------------------- |
+| **Action**                 | Pass                                  |
+| **Quick**                  | Apply the action immediately on match |
+| **Interface**              | Trusted                               |
+| **Direction**              | in                                    |
+| **TCP/IP Version**         | IPv4+IPv6                             |
+| **Protocol**               | any                                   |
+| **Source**                 | Trusted net                           |
+| **Destination**            | any                                   |
+| **Destination port range** | from: any - to: any                   |
+| **Log**                    | Log packets                           |
+| **Category**               | Trusted                               |
+| **Description**            | Trusted                               |
+
