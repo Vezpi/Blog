@@ -233,6 +233,18 @@ Finally, I want to allow anything from my trusted networks. In `Firewall` > `Rul
 | **Description**            | Trusted                               |
 
 ### DNS
+
+For the DNS, I will use Unbound. It is a validating, recursive, caching DNS resolver built into OPNsense, which can:
+- Resolve queries from the root servers.
+- Cache results for faster responses.
+- Check domain authenticity with DNSSEC.
+- Add custom records.
+- Register hostname of DHCP leases.
+- Block domains based of blacklist.
+
+I
+
+
 ### DHCP
 ### VPN
 
