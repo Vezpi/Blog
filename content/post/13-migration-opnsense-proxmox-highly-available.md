@@ -242,7 +242,8 @@ For the DNS, I will use Unbound. It is a validating, recursive, caching DNS reso
 - Register hostname of DHCP leases.
 - Block domains based of blacklist.
 
-I
+Let's configure Unbound, in `Services` > `Unbound DNS` > `General`:
+![opnsense-unbound-general-settings.png](img/opnsense-unbound-general-settings.png)
 
 
 ### DHCP
