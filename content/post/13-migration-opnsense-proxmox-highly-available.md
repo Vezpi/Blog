@@ -246,18 +246,14 @@ For the DNS, I will use Unbound. It is a validating, recursive, caching DNS reso
 - Cache results for faster responses.
 - Check domain authenticity with DNSSEC.
 - Add custom records.
-- Register hostname of DHCP leases.
 - Block domains based of blacklist.
 
-Let's configure Unbound, in `Services` > `Unbound DNS` > `General`:
+But for the local zones, I will use forward the requests to Dnsmasq, that's why I will not registering DHCP leases in Unbound.
+
+Let's configure it, in `Services` > `Unbound DNS` > `General`:
 ![opnsense-unbound-general-settings.png](img/opnsense-unbound-general-settings.png)
 
 I don't really modify advanced settings because I don't really know what I'm doing...
-
-Then I configure a bunch of host overrides in `Services` > `Unbound DNS` > `Overrides`, this is custom DNS record you want for your network. Here I will define my Proxmox nodes with their static IP addresses:
-![opnsense-add-host-override.png](img/opnsense-add-host-override.png)
-
-As I set earlier the `Local Zone Type` to `static`, the DNS server will reply **NXDOMAIN** for anything not known for the local domain. For that reason, I need to add every subdomain served by my internal Traefik pointing to my reverse proxy (OPNsense in my current setup).
 
 Finally I configure the blocklist in `Services` > `Unbound DNS` > `Blocklist`. I enable it and use the `[hagezi] Multi PRO mini` list. Initially I was using AdGuard Home, but I want to give this blocklist feature a chance.
 
@@ -269,6 +265,8 @@ Finally I configure the blocklist in `Services` > `Unbound DNS` > `Blocklist`. I
 
 ![opnsense-dnsmasq-dhcp-ranges.png](img/opnsense-dnsmasq-dhcp-ranges.png)
 
+
+![opnsense-dnsmasq-dhcp-options.png](img/opnsense-dnsmasq-dhcp-options.png)
 
 ### VPN
 
