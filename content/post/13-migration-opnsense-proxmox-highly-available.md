@@ -232,6 +232,8 @@ Finally, I want to allow anything from my trusted networks. In `Firewall` > `Rul
 | **Category**               | Trusted                               |
 | **Description**            | Trusted                               |
 
+Great, with these 3 rules, I cover the basic. The remaining rules would be to allow specific equipment to reach out to something else. For example my home assistant instance want to connect to my TV, both are on different VLAN, hence I need a rule to allow it. I won't cover that in this post.
+
 ### DNS
 
 For the DNS, I will use Unbound. It is a validating, recursive, caching DNS resolver built into OPNsense, which can:
