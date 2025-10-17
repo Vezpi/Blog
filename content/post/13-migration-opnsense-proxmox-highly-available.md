@@ -264,6 +264,12 @@ Finally I configure the blocklist in `Services` > `Unbound DNS` > `Blocklist`. I
 ### DHCP
 
 
+
+
+
+![opnsense-dnsmasq-dhcp-ranges.png](img/opnsense-dnsmasq-dhcp-ranges.png)
+
+
 ### VPN
 
 ### Reverse Proxy
