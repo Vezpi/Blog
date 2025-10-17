@@ -165,6 +165,11 @@ Next, I head to `System` > `High Availability` > `Settings`:
 In the section `System` > `High Availability` > `Status`, I can verify is the synchronization is working. On this page I can replicate any or all services from my master to my backup node:
 ![opnsense-high-availability-status.png](img/opnsense-high-availability-status.png)
 
+### Virtual IPs
+
+Now that HA is configured, I can give my networks a VIP shared across my nodes. In `Interfaces` > `Virtual IPs` > `Settings`, I create one VIP for each of my networks using CARP (Common Address Redundancy Protocol). The target is to reuse the IP addresses used by my current OPNsense instance, but as it is still routing my network, I use different IPs for the configuration phase:
+![opnsense-interface-virtual-ips.png](img/opnsense-interface-virtual-ips.png)
+
 ### Firewall
 
 Let's configure the core feature of OPNsense, the firewall. I don't want to go too crazy with the rules. I only need to configure the master, thanks to the replication.
@@ -254,10 +259,7 @@ Then I configure a bunch of host overrides in `Services` > `Unbound DNS` > `Over
 
 As I set earlier the `Local Zone Type` to `static`, the DNS server will reply **NXDOMAIN** for anything not known for the local domain. For that reason, I need to add every subdomain served by my internal Traefik pointing to my reverse proxy (OPNsense in my current setup).
 
-Finally I configure the blocklist in `Services` > `Unbound DNS` > `Blocklist`
-
-
-
+Finally I configure the blocklist in `Services` > `Unbound DNS` > `Blocklist`. I enable it and use the `[hagezi] Multi PRO mini` list. Initially I was using AdGuard Home, but I want to give this blocklist feature a chance.
 
 ### DHCP
 ### VPN
