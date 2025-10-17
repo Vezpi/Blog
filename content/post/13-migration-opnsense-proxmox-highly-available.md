@@ -249,12 +249,12 @@ Let's configure Unbound, in `Services` > `Unbound DNS` > `General`:
 
 I don't really modify advanced settings because I don't really know what I'm doing...
 
-Then I configure a bunch of host overrides, this is custom DNS record you want for your network. Here I will define my Proxmox nodes with their static IP addresses:
+Then I configure a bunch of host overrides in `Services` > `Unbound DNS` > `Overrides`, this is custom DNS record you want for your network. Here I will define my Proxmox nodes with their static IP addresses:
 ![opnsense-add-host-override.png](img/opnsense-add-host-override.png)
 
 As I set earlier the `Local Zone Type` to `static`, the DNS server will reply **NXDOMAIN** for anything not known for the local domain. For that reason, I need to add every subdomain served by my internal Traefik pointing to my reverse proxy (OPNsense in my current setup).
 
-
+Finally I configure the blocklist in `Services` > `Unbound DNS` > `Blocklist`
 
 
 
@@ -266,3 +266,8 @@ As I set earlier the `Local Zone Type` to `static`, the DNS server will reply **
 
 ### mDNS Repeater
 
+
+
+## Verify
+
+DNS blocklist
