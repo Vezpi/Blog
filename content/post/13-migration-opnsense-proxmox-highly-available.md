@@ -262,6 +262,8 @@ As I set earlier the `Local Zone Type` to `static`, the DNS server will reply **
 Finally I configure the blocklist in `Services` > `Unbound DNS` > `Blocklist`. I enable it and use the `[hagezi] Multi PRO mini` list. Initially I was using AdGuard Home, but I want to give this blocklist feature a chance.
 
 ### DHCP
+
+
 ### VPN
 
 ### Reverse Proxy
