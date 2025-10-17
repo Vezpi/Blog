@@ -237,7 +237,7 @@ Finally, I want to allow anything from my trusted networks. In `Firewall` > `Rul
 | **Category**               | Trusted                               |
 | **Description**            | Trusted                               |
 
-Great, with these 3 rules, I cover the basic. The remaining rules would be to allow specific equipment to reach out to something else. For example my home assistant instance want to connect to my TV, both are on different VLAN, hence I need a rule to allow it. I won't cover that in this post.
+Great, with these 3 rules, I cover the basics. The remaining rules would be to allow specific equipment to reach out to something else. For example my home assistant instance want to connect to my TV, both are on different VLAN, hence I need a rule to allow it. I won't cover that in this post.
 
 ### DNS
 
@@ -248,18 +248,19 @@ For the DNS, I will use Unbound. It is a validating, recursive, caching DNS reso
 - Add custom records.
 - Block domains based of blacklist.
 
-But for the local zones, I will use forward the requests to Dnsmasq, that's why I will not registering DHCP leases in Unbound.
+For the local zones, I will use forward the requests to Dnsmasq, hence I will not registering DHCP leases in Unbound.
 
 Let's configure it, in `Services` > `Unbound DNS` > `General`:
 ![opnsense-unbound-general-settings.png](img/opnsense-unbound-general-settings.png)
 
-I don't really modify advanced settings because I don't really know what I'm doing...
+ Then I configure the blocklist in `Services` > `Unbound DNS` > `Blocklist`. I enable it and use the `[hagezi] Multi PRO mini` list. Initially I was using AdGuard Home, but I want to give this blocklist feature a chance.
 
-Finally I configure the blocklist in `Services` > `Unbound DNS` > `Blocklist`. I enable it and use the `[hagezi] Multi PRO mini` list. Initially I was using AdGuard Home, but I want to give this blocklist feature a chance.
+Finally I configure query forwarding for my local domains. In `Services` > `Unbound DNS` > `Query Forwarding`, I add each of my local domains with their reverse lookup (PTR record). The forwarded server is Dnsmasq which I'll configure next:
+![opnsense-unbound-dns-query-forwarding.png](img/opnsense-unbound-dns-query-forwarding.png)
 
 ### DHCP
 
-
+Dnsmasq will be my DHCPv4 server, and as state above, DNS server for my local zones.
 
 
 
