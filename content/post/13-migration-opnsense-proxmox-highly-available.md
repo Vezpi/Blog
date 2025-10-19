@@ -268,8 +268,7 @@ On the backup node, I configure it the same way, the only difference will be the
 Next I configure the DHCP ranges. Both firewalls will have different ranges, the backup node will have smaller ones. On the master, they are configured as follow:
 ![opnsense-dnsmasq-dhcp-ranges.png](img/opnsense-dnsmasq-dhcp-ranges.png)
 
-Then I set some DHCP options for each domain: the router, the dns server and the domain name
-
+Then I set some DHCP options for each domain: the router, the dns server and the domain name:
 ![opnsense-dnsmasq-dhcp-options.png](img/opnsense-dnsmasq-dhcp-options.png)
 
 
