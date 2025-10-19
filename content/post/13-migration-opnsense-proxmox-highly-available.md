@@ -241,7 +241,13 @@ Great, with these 3 rules, I cover the basics. The remaining rules would be to a
 
 ### DHCP
 
-Dnsmasq will be my DHCPv4 server, but beware because it is not synchronize leases in the cluster. In HA setup, both firewalls will serve DHCP at the same time, with slight different configuration to not overlap. Dnsmasq will also act as DNS, but only for my local zones. In `Services` > `Dnsmasq DNS & DHCP` > `General`, I configure as follow:
+For the DHCP, I choose Dnsmasq. In my current installation I use ISC DHCPv4, but as it is now deprecated, I prefer to replace it. 
+
+Beware because it is not synchronize leases in HA. To workaround this, both firewalls will serve DHCP at the same time, with slight different configuration to not overlap. 
+
+Dnsmasq will also act as DNS, but only for my local zones. 
+
+In `Services` > `Dnsmasq DNS & DHCP` > `General`, I configure the master firewall as follow:
 - **Default**
 	- **Enable**: Yes
 	- **Interface**: *Mgmt*, *User*, *IoT*, *DMZ* and *Lab*
@@ -253,10 +259,13 @@ Dnsmasq will be my DHCPv4 server, but beware because it is not synchronize lease
 	- **DHCP FQDN**: Enabled
 	- **DHCP local domain**: Enabled
 	- **DHCP authoritative**: Enabled
+	- **DHCP reply delay**: 0
 	- **DHCP register firewall rules**: Enabled
 	- **Disable HA sync**: Enabled
 
-Next
+On the backup node, I configure it the same way, the only difference will be the **DHCP reply delay** which I set to **10**. This will let the time to my master node to fulfill requests if it is alive.
+
+Next I configure the DHCP ranges,
 
 
 
