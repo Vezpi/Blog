@@ -241,8 +241,29 @@ Great, with these 3 rules, I cover the basics. The remaining rules would be to a
 
 ### DHCP
 
-Dnsmasq will be my DHCPv4 server and my DNS, but only for my local zones. In `Services` > `Dnsmasq DNS & DHCP` > `General`, I enable it and select the interfaces where I
+Dnsmasq will be my DHCPv4 server, but beware because it is not synchronize leases in the cluster. In HA setup, both firewalls will serve DHCP at the same time, with slight different configuration to not overlap. Dnsmasq will also act as DNS, but only for my local zones. In `Services` > `Dnsmasq DNS & DHCP` > `General`, I configure as follow:
+- **Default**
+	- **Enable**: Yes
+	- **Interface**: *Mgmt*, *User*, *IoT*, *DMZ* and *Lab*
+- **DNS**
+	- **Listen por**t: 53053
+- **DNS Query Forwarding** 
+	- **Do not forward to system defined DNS servers**: Enabled
+- **DHCP**
+	- **DHCP FQDN**: Enabled
+	- **DHCP local domain**: Enabled
+	- **DHCP authoritative**: Enabled
+	- **DHCP register firewall rules**: Enabled
+	- **Disable HA sync**: Enabled
 
+Next
+
+
+
+![opnsense-dnsmasq-dhcp-ranges.png](img/opnsense-dnsmasq-dhcp-ranges.png)
+
+
+![opnsense-dnsmasq-dhcp-options.png](img/opnsense-dnsmasq-dhcp-options.png)
 
 
 ### DNS
@@ -267,12 +288,6 @@ Finally I configure query forwarding for my local domains. In `Services` > `Unbo
 
 
 
-
-![opnsense-dnsmasq-dhcp-ranges.png](img/opnsense-dnsmasq-dhcp-ranges.png)
-
-
-![opnsense-dnsmasq-dhcp-options.png](img/opnsense-dnsmasq-dhcp-options.png)
-
 ### VPN
 
 ### Reverse Proxy
@@ -281,6 +296,10 @@ Finally I configure query forwarding for my local domains. In `Services` > `Unbo
 
 
 
+
+## Switch
+
+Enable DHCP
 ## Verify
 
 
