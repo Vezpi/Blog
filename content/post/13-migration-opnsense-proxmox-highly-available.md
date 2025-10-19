@@ -265,10 +265,7 @@ In `Services` > `Dnsmasq DNS & DHCP` > `General`, I configure the master firewal
 
 On the backup node, I configure it the same way, the only difference will be the **DHCP reply delay** which I set to **10**. This will let the time to my master node to fulfill requests if it is alive.
 
-Next I configure the DHCP ranges,
-
-
-
+Next I configure the DHCP ranges. Both firewalls will have different ranges, the backup node will have smaller ones. On the master, they are configured as follow:
 ![opnsense-dnsmasq-dhcp-ranges.png](img/opnsense-dnsmasq-dhcp-ranges.png)
 
 
