@@ -239,6 +239,12 @@ Finally, I want to allow anything from my trusted networks. In `Firewall` > `Rul
 
 Great, with these 3 rules, I cover the basics. The remaining rules would be to allow specific equipment to reach out to something else. For example my home assistant instance want to connect to my TV, both are on different VLAN, hence I need a rule to allow it. I won't cover that in this post.
 
+### DHCP
+
+Dnsmasq will be my DHCPv4 server and my DNS, but only for my local zones. In `Services` > `Dnsmasq DNS & DHCP` > `General`, I enable it and select the interfaces where I
+
+
+
 ### DNS
 
 For the DNS, I will use Unbound. It is a validating, recursive, caching DNS resolver built into OPNsense, which can:
@@ -258,9 +264,7 @@ Let's configure it, in `Services` > `Unbound DNS` > `General`:
 Finally I configure query forwarding for my local domains. In `Services` > `Unbound DNS` > `Query Forwarding`, I add each of my local domains with their reverse lookup (PTR record). The forwarded server is Dnsmasq which I'll configure next:
 ![opnsense-unbound-dns-query-forwarding.png](img/opnsense-unbound-dns-query-forwarding.png)
 
-### DHCP
 
-Dnsmasq will be my DHCPv4 server, and as state above, DNS server for my local zones.
 
 
 
@@ -278,5 +282,11 @@ Dnsmasq will be my DHCPv4 server, and as state above, DNS server for my local zo
 
 
 ## Verify
+
+
+
+Firewall
+All sites
+mDNS (chromecast)
 
 DNS blocklist
