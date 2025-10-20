@@ -296,6 +296,14 @@ Finally I configure query forwarding for my local domains. In `Services` > `Unbo
 When I'm not home, I still want to be able to reach my services and enjoy my DNS ad blocker. For that I'm setting up a VPN, with **WireGuard**. It's fast, secure and easy to set up.
 
 In `VPN` > `WireGuard` > `Instances`, I create a new one:
+- **Enabled**: Yes
+- **Name**: Homelan
+- **Public/Private keys**: Keypair generated
+- **Listen port**: 61337
+- **Tunnel address**: 10.13.37.1/24
+- **Depend on (CARP)**: on lan (vhid 1)
+
+Then I enable WireGuard and apply the configuration.
 
 ### Reverse Proxy
 
