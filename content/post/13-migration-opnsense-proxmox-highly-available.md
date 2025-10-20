@@ -269,7 +269,7 @@ Next I configure the DHCP ranges. Both firewalls will have different ranges, the
 Then I set some DHCP options for each domain: the `router`, the `dns-server` and the `domain-name`:
 ![opnsense-dnsmasq-dhcp-options.png](img/opnsense-dnsmasq-dhcp-options.png)
 
-Finally in in the `Hosts` tab, 
+Finally in in the `Hosts` tab, I define static DHCP mappings but also static IP not managed by the DHCP, to have them registered in the DNS.
 
 ### DNS
 
