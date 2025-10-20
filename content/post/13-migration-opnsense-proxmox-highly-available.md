@@ -318,7 +318,11 @@ The next feature I need is a reverse proxy, to redirect incoming requests, to re
 
 On both firewalls, In `System` > `Firmware` > `Plugins`, I tick the box to show community plugins and install `os-caddy`.
 
-I refresh the page and, on the master, in `Services` > `Caddy` > `General Settings`
+I refresh the page and, on the master, in `Services` > `Caddy` > `General Settings`:
+- **Enable Caddy**: Yes
+- **Enable Layer4 Proxy**: Yes
+- ACME: `<my mail address>`
+- **Auto HTTPS**: On (default)
 
 
 ### mDNS Repeater
