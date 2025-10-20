@@ -288,6 +288,8 @@ Let's configure it, in `Services` > `Unbound DNS` > `General`:
 
  Then I configure the blocklist in `Services` > `Unbound DNS` > `Blocklist`. I enable it and select the `[hagezi] Multi PRO mini` list. Initially I was using AdGuard Home, but I want to give this blocklist feature a chance.
 
+To maintain the service of to date, in `System` > `Settings` > `Cron`, I add my first job that runs every night at 2AM to `Update Unbound DNSBLs`.
+
 Finally I configure query forwarding for my local domains. In `Services` > `Unbound DNS` > `Query Forwarding`, I add each of my local domains with their reverse lookup (PTR record). The forwarded server is Dnsmasq which I'll configure next:
 ![opnsense-unbound-dns-query-forwarding.png](img/opnsense-unbound-dns-query-forwarding.png)
 
@@ -444,7 +446,11 @@ Then in `Services` > `mDNS Repeater`, the configuration is pretty straight forwa
 
 ### Service Synchronization
 
-The final step is to synchronize all the services between the master and the backup node in the cluster. 
+The final step is to synchronize all the services between the master and the backup node in the cluster. First in `System` > `High Availability` > `Status`, I click the button to `Synchronize and reconfigure all`.
+
+Then I want to make sure that future changes are synchronized if I omit to replicate them myself. In `System` > `Settings` > `Cron`, I add a new job that runs every night to `HA update and reconfigure backup`.
+
+
 
 ## Switch
 
