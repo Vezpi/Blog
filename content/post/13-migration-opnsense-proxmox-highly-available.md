@@ -303,7 +303,15 @@ In `VPN` > `WireGuard` > `Instances`, I create a new one:
 - **Tunnel address**: 10.13.37.1/24
 - **Depend on (CARP)**: on lan (vhid 1)
 
-Then I enable WireGuard and apply the configuration.
+Once configured, I enable WireGuard and apply the configuration.
+
+Next in the `Peer generator` tab, I fulfill the empty fields for my first device:
+- **Endpoint**: vezpi.com
+- **Name**: S25Ultra
+- **DNS Servers**: 10.13.37.1
+
+Before cl
+
 
 ### Reverse Proxy
 
