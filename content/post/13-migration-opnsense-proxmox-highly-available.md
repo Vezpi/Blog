@@ -269,7 +269,8 @@ Next I configure the DHCP ranges. Both firewalls will have different ranges, the
 Then I set some DHCP options for each domain: the `router`, the `dns-server` and the `domain-name`:
 ![opnsense-dnsmasq-dhcp-options.png](img/opnsense-dnsmasq-dhcp-options.png)
 
-Finally in in the `Hosts` tab, I define static DHCP mappings but also static IP not managed by the DHCP, to have them registered in the DNS.
+Finally in in the `Hosts` tab, I define static DHCP mappings but also static IP not managed by the DHCP, to have them registered in the DNS:
+![opnsense-dnsmasq-dhcp-hosts.png](img/opnsense-dnsmasq-dhcp-hosts.png)
 
 ### DNS
 
@@ -277,23 +278,24 @@ For the DNS, I will use Unbound. It is a validating, recursive, caching DNS reso
 - Resolve queries from the root servers.
 - Cache results for faster responses.
 - Check domain authenticity with DNSSEC.
-- Add custom records.
 - Block domains based of blacklist.
+- Add custom records.
 
 For the local zones, I will use forward the requests to Dnsmasq, hence I will not registering DHCP leases in Unbound.
 
 Let's configure it, in `Services` > `Unbound DNS` > `General`:
 ![opnsense-unbound-general-settings.png](img/opnsense-unbound-general-settings.png)
 
- Then I configure the blocklist in `Services` > `Unbound DNS` > `Blocklist`. I enable it and use the `[hagezi] Multi PRO mini` list. Initially I was using AdGuard Home, but I want to give this blocklist feature a chance.
+ Then I configure the blocklist in `Services` > `Unbound DNS` > `Blocklist`. I enable it and select the `[hagezi] Multi PRO mini` list. Initially I was using AdGuard Home, but I want to give this blocklist feature a chance.
 
 Finally I configure query forwarding for my local domains. In `Services` > `Unbound DNS` > `Query Forwarding`, I add each of my local domains with their reverse lookup (PTR record). The forwarded server is Dnsmasq which I'll configure next:
 ![opnsense-unbound-dns-query-forwarding.png](img/opnsense-unbound-dns-query-forwarding.png)
 
-
-
-
 ### VPN
+
+When I'm not home, I still want to be able to reach my services and enjoy my DNS ad blocker. For that I'm setting up a VPN, with **WireGuard**. It's fast, secure and easy to set up.
+
+In `VPN` > `WireGuard` > `Instances`, I create a new one:
 
 ### Reverse Proxy
 
@@ -314,5 +316,6 @@ Replicate configuration
 Firewall
 All sites
 mDNS (chromecast)
+VPN
 
 DNS blocklist
