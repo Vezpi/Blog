@@ -326,7 +326,9 @@ I refresh the page and, on the master, in `Services` > `Caddy` > `General Settin
 
 There are two types of redirections, the `Reverse Proxy` and the `Layer4 Proxy`. The first one is for HTTPS only, where Caddy will manage the SSL.
 
+#### HTTPS Proxy
 
+In `Services` > `Caddy` > `Reverse Proxy`, I define the services directly managed by Caddy
 
 
 ### mDNS Repeater
