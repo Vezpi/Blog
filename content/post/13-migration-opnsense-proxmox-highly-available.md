@@ -314,15 +314,19 @@ Before clicking `Store and generate next`, from my device, I configure the peer 
 
 ### Reverse Proxy
 
-The next feature I need is a reverse proxy, to redirect incoming requests, to reach my services, such as this blog. For that I use **Caddy**. This service is not installed by default, I need to add a plugin.
+The next feature I need is a reverse proxy, to redirect incoming HTTPS requests, to reach my services, such as this blog. For that I use **Caddy**. This service is not installed by default, I need to add a plugin.
 
 On both firewalls, In `System` > `Firmware` > `Plugins`, I tick the box to show community plugins and install `os-caddy`.
 
 I refresh the page and, on the master, in `Services` > `Caddy` > `General Settings`:
 - **Enable Caddy**: Yes
 - **Enable Layer4 Proxy**: Yes
-- ACME: `<my mail address>`
+- **ACME**: `<my mail address>`
 - **Auto HTTPS**: On (default)
+
+There are two types of redirections, the `Reverse Proxy` and the `Layer4 Proxy`. The first one is for HTTPS only, where Caddy will manage the SSL.
+
+
 
 
 ### mDNS Repeater
