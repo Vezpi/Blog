@@ -337,7 +337,11 @@ Before clicking `Store and generate next`, from my device, I configure the peer 
 
 ### Create VPN Interface
 
-This step is not required, but ease the configuration management for firewall rules. On both firewall, in `Interfaces` > `Assignments`, I assign the `wg0 (WireGuard - Homelan)` interface and name it VPN.
+This step is not required, but ease the configuration management for firewall rules. On both firewall, in `Interfaces` > `Assignments`, I assign the `wg0 (WireGuard - Homelan)` interface and name it *VPN*.
+
+Then in `Interfaces` > `VPN`, I enable this interface.
+
+Finally, in `Firewall` > `Groups`, I add this interface in the *Trusted* group.
 ### Firewall Rule
 
 To allow connections from outside, I need to create a firewall rule on the WAN interface:
