@@ -362,7 +362,28 @@ Finally in the `Handlers` tab, I define to which upstream these domains are forw
 	- **TLS Insecure Skip Verify**: Enabled
 	- **Description**: OPNSense
 
+#### Layer4 Proxy
 
+Most of my services are behind another reverse proxy on my network, Traefik. To let it manage normally its domains, I forward them using `Layer4 Routes`. It prevents Caddy to terminate SSL, the HTTPS stream is left intact.
+
+In `Services` > `Caddy` > `Layer4 Proxy`, I create 3 routes.
+
+The first one is for internet exposed services, like this blog or my Gitea instance:
+- Enabled: Yes
+- Sequence: 1
+- Layer 4
+	- Routing Type: listener_wrappers
+- Layer 7
+	- Matchers: TLS (SNI Client Hello)
+	- Domain: `blog.vezpi.com` `git.vezpi.com`
+	- Terminate SSL: No
+- Upstream
+	- Upstream Domain: `192.168.66.50`
+	- Upstream Port: `443`
+	- Proxy Protocol: v2
+	- Description: External Traefik HTTPS dockerVM
+
+The second one is for internal only services. It is configured pretty much the same but using 
 
 ### mDNS Repeater
 
