@@ -314,9 +314,11 @@ Before clicking `Store and generate next`, from my device, I configure the peer 
 
 ### Reverse Proxy
 
-The next feature I need is a reverse proxy, to redirect incoming requests, to reach my services, such as this blog. For that I use **Caddy**.
+The next feature I need is a reverse proxy, to redirect incoming requests, to reach my services, such as this blog. For that I use **Caddy**. This service is not installed by default, I need to add a plugin.
 
-This service is not installed by default, I need to add a plugin
+On both firewalls, In `System` > `Firmware` > `Plugins`, I tick the box to show community plugins and install `os-caddy`.
+
+I refresh the page and start 
 
 
 ### mDNS Repeater
