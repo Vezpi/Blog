@@ -20,7 +20,7 @@ categories:
 
 In my previous [post]({{< ref "post/12-opnsense-virtualization-highly-available" >}}), I've set up a PoC to validate the possibility to create a cluster of 2 **OPNsense** VMs in **Proxmox VE** and make the firewall highly available.
 
-Now I'm in the preparation to make it real in my homelab. But this time with a real setup, my future OPNsense cluster configuration.
+Now I'm in the preparation to make it real in my homelab. So this time with a real setup, my future OPNsense cluster configuration.
 
 Initially I was thinking of just restoring my current configuration on a OPNsense instance freshly installed. But then I realized that I didn't really documented how I put the pieces together the first time. This is the perfect moment to put things right.
 
@@ -33,8 +33,9 @@ In this post, I will show you how I configure OPNsense, from a fresh installatio
 - DNS with Unbound coupled with Dnsmasq
 - VPN with WireGuard
 - Reverse Proxy with Caddy
+- And more...
 
-Hopefully the next time, I will also cover the VM creation on Proxmox and how I'm managing this migration from my physical OPNsense box to this highly available cluster in VMs. Let's dive in!
+Hopefully the next time, I will also cover the VM creation on Proxmox and how I'm preparing this migration from my physical OPNsense box to this highly available cluster in VMs. Let's dive in!
 
 ---
 ## System
@@ -536,3 +537,4 @@ Then I want to make sure that future changes are synchronized if I omit to repli
 
 ---
 ## Conclusion
+
