@@ -241,11 +241,9 @@ Great, with these 3 rules, I cover the basics. The remaining rules would be to a
 
 ### DHCP
 
-For the DHCP, I choose Dnsmasq. In my current installation I use ISC DHCPv4, but as it is now deprecated, I prefer to replace it. 
+For the DHCP, I choose Dnsmasq. In my current installation I use ISC DHCPv4, but as it is now deprecated, I prefer to replace it. Dnsmasq will also act as DNS, but only for my local zones. 
 
-Beware because it is not synchronize leases in HA. To workaround this, both firewalls will serve DHCP at the same time, with slight different configuration to not overlap. 
-
-Dnsmasq will also act as DNS, but only for my local zones. 
+Beware because it is not synchronizing leases in HA. To workaround this, both firewalls will serve DHCP at the same time, with slight different configuration to not overlap. 
 
 In `Services` > `Dnsmasq DNS & DHCP` > `General`, I configure the master firewall as follow:
 - **Default**
@@ -263,7 +261,7 @@ In `Services` > `Dnsmasq DNS & DHCP` > `General`, I configure the master firewal
 	- **DHCP register firewall rules**: Enabled
 	- **Disable HA sync**: Enabled
 
-On the backup node, I configure it the same way, the only difference will be the **DHCP reply delay** which I set to **10**. This will let the time to my master node to fulfill requests if it is alive.
+On the backup node, I configure it the same, the only difference will be the **DHCP reply delay** which I set to **10**. This will let the time to my master node to fulfill requests if it is alive.
 
 Next I configure the DHCP ranges. Both firewalls will have different ranges, the backup node will have smaller ones. On the master, they are configured as follow:
 ![opnsense-dnsmasq-dhcp-ranges.png](img/opnsense-dnsmasq-dhcp-ranges.png)
@@ -271,6 +269,7 @@ Next I configure the DHCP ranges. Both firewalls will have different ranges, the
 Then I set some DHCP options for each domain: the `router`, the `dns-server` and the `domain-name`:
 ![opnsense-dnsmasq-dhcp-options.png](img/opnsense-dnsmasq-dhcp-options.png)
 
+Finally in in the `Hosts` tab, 
 
 ### DNS
 
@@ -306,6 +305,8 @@ Finally I configure query forwarding for my local domains. In `Services` > `Unbo
 ## Switch
 
 Enable DHCP
+Change VIP
+Replicate configuration
 ## Verify
 
 
