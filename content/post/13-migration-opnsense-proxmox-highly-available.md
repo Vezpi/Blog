@@ -383,8 +383,11 @@ The first one is for internet exposed services, like this blog or my Gitea insta
 	- Proxy Protocol: v2
 	- Description: External Traefik HTTPS dockerVM
 
-The second one is for internal only services. It is configured pretty much the same but using 
+The second one is for internal only services. It is configured pretty much the same but using  access list:
+- Access
+	- Remote IP: `192.168.13.0/24` `192.168.88.0/24` `10.13.37.0/24`
 
+The third one is for Traefik HTTP challenges
 ### mDNS Repeater
 
 
