@@ -321,7 +321,7 @@ On both firewalls, In `System` > `Firmware` > `Plugins`, I tick the box to show 
 I refresh the page and, on the master, in `Services` > `Caddy` > `General Settings`:
 - **Enable Caddy**: Yes
 - **Enable Layer4 Proxy**: Yes
-- **ACME**: `<my mail address>`
+- **ACME**: `<email address>`
 - **Auto HTTPS**: On (default)
 
 There are two types of redirections, the `Reverse Proxy` and the `Layer4 Proxy`. The first one is for HTTPS only, where Caddy will manage the SSL.
@@ -334,15 +334,35 @@ These services should not be exposed to everyone. In the `Access` tab, I create 
 
 Then in the `Domains` tab, I add my domains. For example, this is here I define `cerbere.vezpi.com`, my URL to reach my OPNsense WebGUI:
 - **Enable**: Yes
-- **Protocol**: `https://`
-- **Domain**: `cerbere.vezpi.com`
-- **Port**: leave empty
-- **Certificate**: Auto HTTPS
-- **Description**: OPNsense
-- **Access List**: `Internal`
-- **HTTP Access Log**: Enabled
+- **Frontend**
+	- **Protocol**: `https://`
+	- **Domain**: `cerbere.vezpi.com`
+	- **Port**: leave empty
+	- **Certificate**: Auto HTTPS
+	- **Description**: OPNsense
+- **Access**
+	- **Access List**: `Internal`
+	- **HTTP Access Log**: Enabled
 
-Finally in the `Handlers` tab, I define to which upstream these domains are forwarded to.
+Finally in the `Handlers` tab, I define to which upstream these domains are forwarded to. For `cerbere.vezpi.com` I define this:
+- **Enabled**: Yes
+- **Frontend**
+	- **Domain**: `https://cerbere.vezpi.com`
+	- **Subdomain**: None
+- **Handler**
+	- **Path**: any
+- **Access**
+	- **Access List**: None
+- **Directive**
+	- **Directive**: `reverse_proxy`
+- **Upstream**
+	- **Protocol**: `https://`
+	- **Upstream Domain**: `127.0.0.1`
+	- **Upstream Port**: `4443`
+	- **TLS Insecure Skip Verify**: Enabled
+	- **Description**: OPNSense
+
+
 
 ### mDNS Repeater
 
