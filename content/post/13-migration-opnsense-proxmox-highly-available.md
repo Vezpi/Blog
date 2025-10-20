@@ -435,9 +435,16 @@ Finally, I need to allow connection of these ports on the firewall, one rule for
 
 The last service I want to setup in OPNsense is a mDNS repeater. This is useful for some devices to announce themselves on the network, when not on the same VLAN, such as my printer or my Chromecast. The mDNS repeater get the message from an interface to send it to another one.
 
+This service is also not installed by default, on both firewalls, In `System` > `Firmware` > `Plugins`, I tick the box to show community plugins and install `os-mdns-repeater`.
 
+Then in `Services` > `mDNS Repeater`, the configuration is pretty straight forward:
+- Enable: Yes
+- Enable CARP Failover: Yes
+- Listen Interfaces: *IoT*, *User*
 
+### Service Synchronization
 
+The final step is to synchronize all the services between the master and the backup node in the cluster. 
 
 ## Switch
 
