@@ -454,6 +454,7 @@ Then I want to make sure that future changes are synchronized if I omit to repli
 
 ## Switch
 
+Configure DHCP on both instance
 Enable DHCP
 Change VIP
 Replicate configuration

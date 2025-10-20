@@ -39,6 +39,8 @@ Hopefully the next time, I will also cover the VM creation on Proxmox and how I'
 ---
 ## System
 
+### General
+
 I start with the basics, in `System` > `Settings` > `General`:
 - **Hostname**: `cerbere-head1` (`cerbere-head2` for the second one).
 - **Domain**: `mgmt.vezpi.com`.
@@ -47,7 +49,11 @@ I start with the basics, in `System` > `Settings` > `General`:
 - **Theme**: `opnsense-dark`.
 - **Prefer IPv4 over IPv6**: tick the box to prefer IPv4.
 
+### Users
+
 Then, in `System` > `Access` > `Users`, I create a new user, I don't like sticking with the defaults `root`. I add this user in the `admins`  group, while removing `root` from it.
+
+### Administration
 
 In `System` > `Settings` > `Administration`, I change several things:
 - **TCP port**: from `443` to `4443`, to free port 443 for the reverse proxy coming next.
@@ -58,7 +64,11 @@ In `System` > `Settings` > `Administration`, I change several things:
 - **Sudo**: `No password`.
 Once I click `Save`, I follow the link given to reach the WebGUI on port `4443`.
 
+### Updates
+
 Time for updates, in `System` > `Firmware` > `Status`, I click on `Check for updates`.  An update is available, I close the banner, head to the bottom and click on `Update`. I'm warned that this update requires a reboot.
+
+### QEMU Guest Agent
 
 Once updated and rebooted, I go to `System` > `Firmware` > `Plugins`, I tick the box to show community plugins. For now I only install the **QEMU Guest Agent**, `os-qemu-guest-agent`, to allow communication between the VM and the Proxmox host. 
 
@@ -89,6 +99,8 @@ I don't configure Virtual IPs yet, I'll manage that once high availability has b
 ---
 ## High Availability
 
+### Firewall Rule for pfSync
+
 From here we can associate both instances to create a cluster. The last thing I need to do, is to allow the communication on the *pfSync* interface. By default, no communication is allowed on the new interfaces.
 
 From `Firewall` > `Rules` > `pfSync`, I create a new rule on each firewall:
@@ -108,6 +120,8 @@ From `Firewall` > `Rules` > `pfSync`, I create a new rule on each firewall:
 | **Category**               | OPNsense                              |
 | **Description**            | pfSync                                |
 
+### Configure HA
+
 Next, I head to `System` > `High Availability` > `Settings`:
 - **Master** (`cerbere-head1`):
 	- **Synchronize all states via**: *pfSync*
@@ -122,19 +136,23 @@ Next, I head to `System` > `High Availability` > `Settings`:
 	- **Synchronize Config**: `192.168.44.1`
 ⚠️ Do not fill the XMLRPC Sync fields on the backup node, only to be filled on the master.
 
+### HA Status
+
 In the section `System` > `High Availability` > `Status`, I can verify if the synchronization is working. On this page I can replicate any or all services from my master to my backup node:
 ![opnsense-high-availability-status.png](img/opnsense-high-availability-status.png)
 
 ---
 ## Virtual IPs
 
-Now that HA is configured, I can give my networks a virtual IP shared across my nodes. In `Interfaces` > `Virtual IPs` > `Settings`, I create one VIP for each of my networks using CARP (Common Address Redundancy Protocol). The target is to reuse the IP addresses used by my current OPNsense instance, but as it is still routing my network, I use different IPs for the configuration phase:
+Now that HA is configured, I can give my networks a virtual IP shared across my nodes. In `Interfaces` > `Virtual IPs` > `Settings`, I create one VIP for each of my networks using **CARP** (Common Address Redundancy Protocol). The target is to reuse the IP addresses used by my current OPNsense instance, but as it is still routing my network, I use different IPs for the configuration phase:
 ![opnsense-interface-virtual-ips.png](img/opnsense-interface-virtual-ips.png)
 
 ---
 ## Firewall
 
 Let's configure the core feature of OPNsense, the firewall. I don't want to go too crazy with the rules. I only need to configure the master, thanks to the replication.
+
+### Interface Groups
 
 Basically I have 2 kinds of networks, those which I trust, and those which I don't. From this standpoint, I will create two zones. 
 
@@ -144,8 +162,12 @@ To begin, in `Firewall` > `Groups`, I create 2 zones to regroup my interfaces:
 - **Trusted**: *Mgmt*, *User*
 - **Untrusted**: *IoT*, *DMZ*, *Lab*
 
+### Network Aliases
+
 Next, in `Firewall` > `Aliases`, I create an alias `InternalNetworks` to regroup all my internal networks:
 ![opnsense-create-alias-internalnetworks.png](img/opnsense-create-alias-internalnetworks.png)
+
+### Firewall Rules
 
 For all my networks, I want to allow DNS queries on the local DNS. In `Firewall` > `Rules` > `Floating`, let's create the first rule:
 
@@ -199,14 +221,32 @@ Finally, I want to allow anything from my trusted networks. In `Firewall` > `Rul
 | **Category**               | Trusted                               |
 | **Description**            | Trusted                               |
 
-Great, with these 3 rules, I cover the basics. The remaining rules would be to allow specific equipment to reach out to something else. For example my home assistant instance want to connect to my TV, both are on different VLAN, hence I need a rule to allow it. I won't cover that in this post.
+Great, with these 3 rules, I cover the basics. The remaining rules would be to allow specific equipment to reach out to something else. For example my home assistant instance want to connect to my TV, both are on different VLAN, hence I need a rule to allow it:
+
+| Field                      | Value                                 |
+| -------------------------- | ------------------------------------- |
+| **Action**                 | Pass                                  |
+| **Quick**                  | Apply the action immediately on match |
+| **Interface**              | Lab                                   |
+| **Direction**              | in                                    |
+| **TCP/IP Version**         | IPv4                                  |
+| **Protocol**               | TCP                                   |
+| **Source**                 | 192.168.66.50/32                      |
+| **Destination**            | 192.168.37.30/32                      |
+| **Destination port range** | from: 3000 - to: 3001                 |
+| **Log**                    | Log packets                           |
+| **Category**               | Home Assistant                        |
+| **Description**            | Home assistant to TV                  |
+
 
 ---
 ## DHCP
 
-For the DHCP, I choose Dnsmasq. In my current installation I use ISC DHCPv4, but as it is now deprecated, I prefer to replace it. Dnsmasq will also act as DNS, but only for my local zones. 
+For the DHCP, I choose **Dnsmasq**. In my current installation I use ISC DHCPv4, but as it is now deprecated, I prefer to replace it. Dnsmasq will also act as DNS, but only for my local zones. 
 
 Beware because it is not synchronizing leases in HA. To workaround this, both firewalls will serve DHCP at the same time, with slight different configuration to not overlap. 
+
+### Dnsmasq General Configuration
 
 In `Services` > `Dnsmasq DNS & DHCP` > `General`, I configure the master firewall as follow:
 - **Default**
@@ -226,11 +266,17 @@ In `Services` > `Dnsmasq DNS & DHCP` > `General`, I configure the master firewal
 
 On the backup node, I configure it the same, the only difference will be the **DHCP reply delay** which I set to **10**. This will let the time to my master node to fulfill requests if it is alive.
 
+### DHCP Ranges
+
 Next I configure the DHCP ranges. Both firewalls will have different ranges, the backup node will have smaller ones. On the master, they are configured as follow:
 ![opnsense-dnsmasq-dhcp-ranges.png](img/opnsense-dnsmasq-dhcp-ranges.png)
 
+### DHCP Options
+
 Then I set some DHCP options for each domain: the `router`, the `dns-server` and the `domain-name`:
 ![opnsense-dnsmasq-dhcp-options.png](img/opnsense-dnsmasq-dhcp-options.png)
+
+### Hosts
 
 Finally in in the `Hosts` tab, I define static DHCP mappings but also static IP not managed by the DHCP, to have them registered in the DNS:
 ![opnsense-dnsmasq-dhcp-hosts.png](img/opnsense-dnsmasq-dhcp-hosts.png)
@@ -238,29 +284,37 @@ Finally in in the `Hosts` tab, I define static DHCP mappings but also static IP 
 ---
 ## DNS
 
-For the DNS, I will use Unbound. It is a validating, recursive, caching DNS resolver built into OPNsense, which can:
+For the DNS, I use **Unbound**. It is a validating, recursive, caching DNS resolver built into OPNsense, which can:
 - Resolve queries from the root servers.
 - Cache results for faster responses.
 - Check domain authenticity with DNSSEC.
 - Block domains based of blacklist.
 - Add custom records.
 
-For the local zones, I will use forward the requests to Dnsmasq, hence I will not registering DHCP leases in Unbound.
+For the local zones, I forward the requests to Dnsmasq, hence I will not registering DHCP leases in Unbound.
+
+### Unbound General Settings
 
 Let's configure it, in `Services` > `Unbound DNS` > `General`:
 ![opnsense-unbound-general-settings.png](img/opnsense-unbound-general-settings.png)
 
+### DNS Blocklist
+
  Then I configure the blocklist in `Services` > `Unbound DNS` > `Blocklist`. I enable it and select the `[hagezi] Multi PRO mini` list. Initially I was using AdGuard Home, but I want to give this blocklist feature a chance.
 
-To maintain the service of to date, in `System` > `Settings` > `Cron`, I add my first job that runs every night at 2AM to `Update Unbound DNSBLs`.
+To maintain the service up to date, in `System` > `Settings` > `Cron`, I add my first job that runs every night at 2AM to `Update Unbound DNSBLs`.
 
-Finally I configure query forwarding for my local domains. In `Services` > `Unbound DNS` > `Query Forwarding`, I add each of my local domains with their reverse lookup (PTR record). The forwarded server is Dnsmasq which I'll configure next:
+### Query Forwarding
+
+Finally I configure query forwarding for my local domains to Dnsmasq. In `Services` > `Unbound DNS` > `Query Forwarding`, I add each of my local domains with their reverse lookup (PTR record):
 ![opnsense-unbound-dns-query-forwarding.png](img/opnsense-unbound-dns-query-forwarding.png)
 
 ---
 ## VPN
 
 When I'm not home, I still want to be able to reach my services and enjoy my DNS ad blocker. For that I'm setting up a VPN, with **WireGuard**. It's fast, secure and easy to set up.
+
+### WireGuard Instance Setup
 
 In `VPN` > `WireGuard` > `Instances`, I create a new one:
 - **Enabled**: Yes
@@ -272,12 +326,16 @@ In `VPN` > `WireGuard` > `Instances`, I create a new one:
 
 Once configured, I enable WireGuard and apply the configuration.
 
+### Peer Setup
+
 Next in the `Peer generator` tab, I fulfill the empty fields for my first device:
 - **Endpoint**: `vezpi.com`
 - **Name**: *S25Ultra*
 - **DNS Servers**: `10.13.37.1`
 
 Before clicking `Store and generate next`, from my device, I configure the peer by capturing the QR code. Finally I can save that peer and start over for new ones.
+
+### Firewall Rule
 
 To allow connections from outside, I need to create a firewall rule on the WAN interface:
 
@@ -303,6 +361,8 @@ The next feature I need is a reverse proxy, to redirect incoming HTTPS requests,
 
 On both firewalls, In `System` > `Firmware` > `Plugins`, I tick the box to show community plugins and install `os-caddy`.
 
+### Caddy General Settings
+
 I refresh the page and, on the master, in `Services` > `Caddy` > `General Settings`:
 - **Enable Caddy**: Yes
 - **Enable Layer4 Proxy**: Yes
@@ -311,7 +371,7 @@ I refresh the page and, on the master, in `Services` > `Caddy` > `General Settin
 
 There are two types of redirections, the `Reverse Proxy` and the `Layer4 Proxy`. The first one is for HTTPS only, where Caddy will manage the SSL.
 
-### HTTPS Proxy
+### Reverse Proxy
 
 In `Services` > `Caddy` > `Reverse Proxy`, I define the services directly managed by Caddy.
 
@@ -382,6 +442,8 @@ The third one is for Traefik HTTP challenges for Let's Encrypt:
 	- Upstream Port: 80
 	- Proxy Protocol: Off (default)
 
+### Firewall Rules
+
 Finally, I need to allow connection of these ports on the firewall, one rule for HTTPS and another for HTTP:
 
 | Field                      | Value                                 |
@@ -410,6 +472,13 @@ Then in `Services` > `mDNS Repeater`, the configuration is pretty straight forwa
 - Enable: Yes
 - Enable CARP Failover: Yes
 - Listen Interfaces: *IoT*, *User*
+
+---
+## CARP Failover Script
+
+
+
+
 
 ---
 ## Service Synchronization
