@@ -335,6 +335,9 @@ Next in the `Peer generator` tab, I fulfill the empty fields for my first device
 
 Before clicking `Store and generate next`, from my device, I configure the peer by capturing the QR code. Finally I can save that peer and start over for new ones.
 
+### Create VPN Interface
+
+This step is not required, but ease the configuration management for firewall rules. On both firewall, in `Interfaces` > `Assignments`, I assign the `wg0 (WireGuard - Homelan)` interface and name it VPN.
 ### Firewall Rule
 
 To allow connections from outside, I need to create a firewall rule on the WAN interface:
@@ -519,7 +522,6 @@ if ($type === "MASTER") {
     interface_configure(false, $ifkey, false, false);
 }
 ```
-
 
 ---
 ## Service Synchronization
