@@ -297,23 +297,25 @@ When I'm not home, I still want to be able to reach my services and enjoy my DNS
 
 In `VPN` > `WireGuard` > `Instances`, I create a new one:
 - **Enabled**: Yes
-- **Name**: Homelan
-- **Public/Private keys**: Keypair generated
-- **Listen port**: 61337
-- **Tunnel address**: 10.13.37.1/24
-- **Depend on (CARP)**: on lan (vhid 1)
+- **Name**: *Homelan*
+- **Public/Private keys**: Key-pair generated
+- **Listen port**: `61337`
+- **Tunnel address**: `10.13.37.1/24`
+- **Depend on (CARP)**: on *lan* (vhid 1)
 
 Once configured, I enable WireGuard and apply the configuration.
 
 Next in the `Peer generator` tab, I fulfill the empty fields for my first device:
-- **Endpoint**: vezpi.com
-- **Name**: S25Ultra
-- **DNS Servers**: 10.13.37.1
+- **Endpoint**: `vezpi.com`
+- **Name**: *S25Ultra*
+- **DNS Servers**: `10.13.37.1`
 
-Before cl
-
+Before clicking `Store and generate next`, from my device, I configure the peer by capturing the QR code. Finally I can save that peer and start over for new ones.
 
 ### Reverse Proxy
+
+The next service I 
+
 
 ### mDNS Repeater
 
