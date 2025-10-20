@@ -357,7 +357,7 @@ To allow connections from outside, I need to create a firewall rule on the WAN i
 ---
 ## Reverse Proxy
 
-The next feature I need is a reverse proxy, to redirect incoming HTTPS requests, to reach my services, such as this blog. For that I use **Caddy**. This service is not installed by default, I need to add a plugin.
+The next feature I need is a reverse proxy, to redirect incoming HTTPS requests to reach my services, such as this blog. For that I use **Caddy**. This service is not installed by default, I need to add a plugin.
 
 On both firewalls, In `System` > `Firmware` > `Plugins`, I tick the box to show community plugins and install `os-caddy`.
 
@@ -476,8 +476,49 @@ Then in `Services` > `mDNS Repeater`, the configuration is pretty straight forwa
 ---
 ## CARP Failover Script
 
+In my setup, I only have a single WAN IP address which is served by the DHCP of my ISP box. OPNsense does not provide natively a way to handle this scenario. To manage it, I implement the same trick I used in the [PoC]({{< ref "post/12-opnsense-virtualization-highly-available" >}}).
 
+I copy the MAC of the `net1` interface of `cerbere-head1` and paste it to the same interface for `cerbere-head2`. Doing so, the DHCP lease for the WAN IP address can be shared among the nodes.
 
+⚠️ Warning: Having two machines on the network with the same MAC can cause ARP conflicts and break connectivity. Only one VM should keep its interface active.
+
+Under the hood, in OPNsense, a CARP event triggers some scripts. These are located in `/usr/local/etc/rc.syshook.d/carp/`. To manage WAN interface on each node, I implement this PHP script `10-wan` on both nodes. Depending on their role (master or backup), this will enable or disable their WAN interface:
+```php
+#!/usr/local/bin/php
+<?php
+
+require_once("config.inc");
+require_once("interfaces.inc");
+require_once("util.inc");
+require_once("system.inc");
+
+$subsystem = !empty($argv[1]) ? $argv[1] : '';
+$type = !empty($argv[2]) ? $argv[2] : '';
+
+if ($type != 'MASTER' && $type != 'BACKUP') {
+    log_error("Carp '$type' event unknown from source '{$subsystem}'");
+    exit(1);
+}
+
+if (!strstr($subsystem, '@')) {
+    log_error("Carp '$type' event triggered from wrong source '{$subsystem}'");
+    exit(1);
+}
+
+$ifkey = 'wan';
+
+if ($type === "MASTER") {
+    log_error("enable interface '$ifkey' due CARP event '$type'");
+    $config['interfaces'][$ifkey]['enable'] = '1';
+    write_config("enable interface '$ifkey' due CARP event '$type'", false);
+    interface_configure(false, $ifkey, false, false);
+} else {
+    log_error("disable interface '$ifkey' due CARP event '$type'");
+    unset($config['interfaces'][$ifkey]['enable']);
+    write_config("disable interface '$ifkey' due CARP event '$type'", false);
+    interface_configure(false, $ifkey, false, false);
+}
+```
 
 
 ---
