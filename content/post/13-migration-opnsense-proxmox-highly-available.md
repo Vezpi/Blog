@@ -200,7 +200,7 @@ For all my networks, I want to allow DNS querry on the local DNS. In `Firewall` 
 | **Destination port range** | from: DNS - to: DNS                   |
 | **Log**                    | Log packets                           |
 | **Category**               | DNS                                   |
-| **Description**            | DNS                                   |
+| **Description**            | DNS query                             |
 
 Next I want to allow connections towards the internet. At the same place I create a second rule:
 
@@ -312,6 +312,23 @@ Next in the `Peer generator` tab, I fulfill the empty fields for my first device
 
 Before clicking `Store and generate next`, from my device, I configure the peer by capturing the QR code. Finally I can save that peer and start over for new ones.
 
+To allow connections from outside, I need to create a firewall rule on the WAN interface:
+
+| Field                      | Value                                 |
+| -------------------------- | ------------------------------------- |
+| **Action**                 | Pass                                  |
+| **Quick**                  | Apply the action immediately on match |
+| **Interface**              | WAN                                   |
+| **Direction**              | in                                    |
+| **TCP/IP Version**         | IPv4                                  |
+| **Protocol**               | UDP                                   |
+| **Source**                 | any                                   |
+| **Destination**            | WAN address                           |
+| **Destination port range** | from: 61337 - to: 61337               |
+| **Log**                    | Log packets                           |
+| **Category**               | VPN                                   |
+| **Description**            | WireGuard                             |
+
 ### Reverse Proxy
 
 The next feature I need is a reverse proxy, to redirect incoming HTTPS requests, to reach my services, such as this blog. For that I use **Caddy**. This service is not installed by default, I need to add a plugin.
@@ -384,11 +401,40 @@ The first one is for internet exposed services, like this blog or my Gitea insta
 	- Description: External Traefik HTTPS dockerVM
 
 The second one is for internal only services. It is configured pretty much the same but using  access list:
+- Sequence: 2
 - Access
 	- Remote IP: `192.168.13.0/24` `192.168.88.0/24` `10.13.37.0/24`
 
-The third one is for Traefik HTTP challenges
+The third one is for Traefik HTTP challenges for Let's Encrypt:
+- Sequence: 3
+- Layer 7
+	- Matchers: HTTP (Host Header)
+	- Domain: `blog.vezpi.com` `git.vezpi.com` etc.
+- Upstream:
+	- Upstream Port: 80
+	- Proxy Protocol: Off (default)
+
+Finally, I need to allow connection of these ports on the firewall, one rule for HTTPS and another for HTTP:
+
+| Field                      | Value                                 |
+| -------------------------- | ------------------------------------- |
+| **Action**                 | Pass                                  |
+| **Quick**                  | Apply the action immediately on match |
+| **Interface**              | WAN                                   |
+| **Direction**              | in                                    |
+| **TCP/IP Version**         | IPv4                                  |
+| **Protocol**               | TCP                                   |
+| **Source**                 | any                                   |
+| **Destination**            | WAN address                           |
+| **Destination port range** | from: HTTPS - to: HTTPS               |
+| **Log**                    | Log packets                           |
+| **Category**               | Caddy                                 |
+| **Description**            | Caddy HTTPS                           |
+
 ### mDNS Repeater
+
+The last service I want to setup in OPNsense is a mDNS repeater. This is useful for some devices to announce themselves on the network, when not on the same VLAN, such as my printer or my Chromecast. The mDNS repeater get the message from an interface to send it to another one.
+
 
 
 
