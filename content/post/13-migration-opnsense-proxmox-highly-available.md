@@ -328,8 +328,21 @@ There are two types of redirections, the `Reverse Proxy` and the `Layer4 Proxy`.
 
 #### HTTPS Proxy
 
-In `Services` > `Caddy` > `Reverse Proxy`, I define the services directly managed by Caddy
+In `Services` > `Caddy` > `Reverse Proxy`, I define the services directly managed by Caddy.
 
+These services should not be exposed to everyone. In the `Access` tab, I create a list, called `Internal`, of allowed networks, including my LAN and VPN networks.
+
+Then in the `Domains` tab, I add my domains. For example, this is here I define `cerbere.vezpi.com`, my URL to reach my OPNsense WebGUI:
+- **Enable**: Yes
+- **Protocol**: `https://`
+- **Domain**: `cerbere.vezpi.com`
+- **Port**: leave empty
+- **Certificate**: Auto HTTPS
+- **Description**: OPNsense
+- **Access List**: `Internal`
+- **HTTP Access Log**: Enabled
+
+Finally in the `Handlers` tab, I define to which upstream these domains are forwarded to.
 
 ### mDNS Repeater
 
