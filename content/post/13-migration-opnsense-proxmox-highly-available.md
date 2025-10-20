@@ -314,7 +314,9 @@ Before clicking `Store and generate next`, from my device, I configure the peer 
 
 ### Reverse Proxy
 
-The next service I 
+The next feature I need is a reverse proxy, to redirect incoming requests, to reach my services, such as this blog. For that I use **Caddy**.
+
+This service is not installed by default, I need to add a plugin
 
 
 ### mDNS Repeater
