@@ -58,6 +58,7 @@ Then, in `System` > `Access` > `Users`, I create a new user, I don't like sticki
 
 In `System` > `Settings` > `Administration`, I change several things:
 - **TCP port**: from `443` to `4443`, to free port 443 for the reverse proxy coming next.
+- HTTP Redirect: Disable to free port 80
 -  **Alternate Hostnames**: `cerbere.vezpi.com` which will be the URL to reach the firewall by the reverse proxy.
 - **Access log**: enabled.
 - **Secure Shell Server**: enabled.
