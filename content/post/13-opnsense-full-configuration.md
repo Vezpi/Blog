@@ -24,7 +24,7 @@ Now I'm in the preparation to make it real in my homelab. So this time with a re
 
 Initially I was thinking of just restoring my current configuration on a OPNsense instance freshly installed. But then I realized that I didn't really documented how I put the pieces together the first time. This is the perfect moment to put things right.
 
-In this post, I will show you how I configure OPNsense, from a fresh installation in a couple of VMs, highly available, covering:
+In this post, I will show you how I configure OPNsense highly available, from a fresh installation in a couple of VMs, covering:
 - Global settings
 - Interfaces
 - High Availability with CARP
