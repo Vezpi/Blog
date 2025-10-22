@@ -51,11 +51,7 @@ Initially I was thinking of just restoring my current configuration on the VM fr
 
 ⚠️ I can only have a single WAN IP, shared between the nodes, served by the DHCP of my ISP box. For this reason I won't have a VIP for the WAN and I have to find a solution to share this single IP.
 
-
-
-
-
-Hopefully the next time, I will also cover the VM creation on Proxmox and how I'm preparing this migration from my physical OPNsense box to this highly available cluster in VMs. Let's dive in!
+Hopefully in the next post, if this project lands on my production network, I will also cover the VM creation on Proxmox and how I'm preparing this migration from my physical OPNsense box to this highly available cluster in VMs. Let's dive in!
 
 ---
 ## System
