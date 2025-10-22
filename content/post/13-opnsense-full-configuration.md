@@ -57,13 +57,6 @@ Initially I was thinking of just restoring my current configuration on the VM fr
 
 Hopefully the next time, I will also cover the VM creation on Proxmox and how I'm preparing this migration from my physical OPNsense box to this highly available cluster in VMs. Let's dive in!
 
-TODO
-add section Topology
-add single WAN IP 
-add network diagram
-add IP/VLAN plan
-
-
 ---
 ## System
 
@@ -242,7 +235,7 @@ if ($type === "MASTER") {
 }
 ```
 
-In the Virtua
+In `Interfaces` > `Virtual IPs` > `Status`, I can force a CARP event by entering into `Persistent maintenance mode`. Triggering this allow me to test this script, which disable the WAN interface on the master while enabling it on the backup.
 
 ---
 ## Firewall
