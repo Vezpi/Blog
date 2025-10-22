@@ -47,9 +47,11 @@ In my Proxmox VE cluster, I've created 2 VMs and installed OPNsense. The goal is
 - **vlan55**: *DMZ*
 - **vlan66**: *Lab*
 
+Initially I was thinking of just restoring my current configuration on the VM freshly installed. But then I realized that I didn't really documented how I put the pieces together the first time. This is the perfect moment to put things right.
+
 ⚠️ I can only have a single WAN IP, shared between the nodes, served by the DHCP of my ISP box. For this reason I won't have a VIP for the WAN and I have to find a solution to share this single IP.
 
-Initially I was thinking of just restoring my current configuration on the VM freshly installed. But then I realized that I didn't really documented how I put the pieces together the first time. This is the perfect moment to put things right.
+
 
 
 
@@ -118,15 +120,15 @@ On both firewalls, I assign the remaining NICs to new interfaces adding a descri
 
 In the end, the interfaces configuration looks like this:
 
-| Interface | Mode           | `cerbere-head1` | `cerbere-head2` |
-| --------- | -------------- | --------------- | --------------- |
-| *LAN*     | Static IPv4    | 192.168.88.2/24 | 192.168.88.3/24 |
-| *WAN*     | DHCPv4 + SLAAC | Enabled         | Disabled        |
-| *User*    | Static IPv4    | 192.168.13.2/24 | 192.168.13.3/24 |
-| *IoT*     | Static IPv4    | 192.168.37.2/24 | 192.168.37.3/24 |
-| *pfSync*  | Static IPv4    | 192.168.44.1/30 | 192.168.44.2/30 |
-| *DMZ*     | Static IPv4    | 192.168.55.2/24 | 192.168.55.3/24 |
-| *Lab*     | Static IPv4    | 192.168.66.2/24 | 192.168.66.3/24 |
+| Interface | Mode        | `cerbere-head1` | `cerbere-head2` |
+| --------- | ----------- | --------------- | --------------- |
+| *Mgmt*    | Static IPv4 | 192.168.88.2/24 | 192.168.88.3/24 |
+| *WAN*     | DHCPv4/6    | Enabled         | Disabled        |
+| *User*    | Static IPv4 | 192.168.13.2/24 | 192.168.13.3/24 |
+| *IoT*     | Static IPv4 | 192.168.37.2/24 | 192.168.37.3/24 |
+| *pfSync*  | Static IPv4 | 192.168.44.1/30 | 192.168.44.2/30 |
+| *DMZ*     | Static IPv4 | 192.168.55.2/24 | 192.168.55.3/24 |
+| *Lab*     | Static IPv4 | 192.168.66.2/24 | 192.168.66.3/24 |
 I don't configure Virtual IPs yet, I'll manage that once high availability has been setup.
 
 ---
@@ -155,13 +157,17 @@ From `Firewall` > `Rules` > `pfSync`, I create a new rule on each firewall:
 
 ### Configure HA
 
+
 Next, I head to `System` > `High Availability` > `Settings`:
 - **Master** (`cerbere-head1`):
+- **General Settings**
 	- **Synchronize all states via**: *pfSync*
 	- **Synchronize Peer IP**: `192.168.44.2`, the backup node IP
+- **Configuration Synchronization Settings (XMLRPC Sync)**
 	- **Synchronize Config**: `192.168.44.2`
 	- **Remote System Username**: `<username>`
 	- **Remote System Password**: `<password>`
+- **Services to synchronize (XMLRPC Sync)**
 	- **Services**: Select All
 - **Backup** (`cerbere-head2`):
 	- **Synchronize all states via**: *pfSync*
