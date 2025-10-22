@@ -47,7 +47,10 @@ In my Proxmox VE cluster, I've created 2 VMs and installed OPNsense. The goal is
 - **vlan55**: *DMZ*
 - **vlan66**: *Lab*
 
-Initially I was thinking of just restoring my current configuration on a OPNsense instance freshly installed. But then I realized that I didn't really documented how I put the pieces together the first time. This is the perfect moment to put things right.
+⚠️ I can only have a single WAN IP, shared between the nodes, served by the DHCP of my ISP box. For this reason I won't have a VIP for the WAN and I have to find a solution to share this single IP.
+
+Initially I was thinking of just restoring my current configuration on the VM freshly installed. But then I realized that I didn't really documented how I put the pieces together the first time. This is the perfect moment to put things right.
+
 
 
 Hopefully the next time, I will also cover the VM creation on Proxmox and how I'm preparing this migration from my physical OPNsense box to this highly available cluster in VMs. Let's dive in!
