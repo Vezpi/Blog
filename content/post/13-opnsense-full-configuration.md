@@ -157,7 +157,7 @@ From `Firewall` > `Rules` > `pfSync`, I create a new rule on each firewall:
 
 ### Configure HA
 
-The hi
+The high availability in OPNsense is done at two main layers. The first is the firewall state layer, the synchronization is permanent. The second layer is the configuration (XMLRPC Sync). This part is not automatically sync
 Next, I head to `System` > `High Availability` > `Settings`:
 - **Master** (`cerbere-head1`):
 - **General Settings**
