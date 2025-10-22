@@ -159,10 +159,8 @@ From `Firewall` > `Rules` > `pfSync`, I create a new rule on each firewall:
 
 The high availability in OPNsense is done at two main layers. The first layer is the firewall state, the synchronization is permanent. The second layer is the configuration (XMLRPC Sync). This part is not automatically synchronized and must be done only from the master to backup.
 
-The 
+The HA is setup in `System` > `High Availability` > `Settings`
 #### Master
-Next, I head to `System` > `High Availability` > `Settings`:
-- **Master** (`cerbere-head1`):
 - **General Settings**
 	- **Synchronize all states via**: *pfSync*
 	- **Synchronize Peer IP**: `192.168.44.2`, the backup node IP
@@ -173,8 +171,10 @@ Next, I head to `System` > `High Availability` > `Settings`:
 - **Services to synchronize (XMLRPC Sync)**
 	- **Services**: Select All
 #### Backup (`cerbere-head2`):
+- **General Settings**
 	- **Synchronize all states via**: *pfSync*
 	- **Synchronize Peer IP**: `192.168.44.1`, the master node IP
+
 ⚠️ Do not fill the XMLRPC Sync fields on the backup node, only to be filled on the master.
 
 ### HA Status
@@ -523,57 +523,6 @@ Then in `Services` > `mDNS Repeater`, the configuration is pretty straight forwa
 - Enable: Yes
 - Enable CARP Failover: Yes
 - Listen Interfaces: *IoT*, *User*
-
----
-## CARP Failover Script
-
-TODO
-move this section after VIP
-add how to implement it
-
-In my setup, I only have a single WAN IP address which is served by the DHCP of my ISP box. OPNsense does not provide natively a way to handle this scenario. To manage it, I implement the same trick I used in the [PoC]({{< ref "post/12-opnsense-virtualization-highly-available" >}}).
-
-I copy the MAC of the `net1` interface of `cerbere-head1` and paste it to the same interface for `cerbere-head2`. Doing so, the DHCP lease for the WAN IP address can be shared among the nodes.
-
-⚠️ Warning: Having two machines on the network with the same MAC can cause ARP conflicts and break connectivity. Only one VM should keep its interface active.
-
-Under the hood, in OPNsense, a CARP event triggers some scripts. These are located in `/usr/local/etc/rc.syshook.d/carp/`. To manage WAN interface on each node, I implement this PHP script `10-wan` on both nodes. Depending on their role (master or backup), this will enable or disable their WAN interface:
-```php
-#!/usr/local/bin/php
-<?php
-
-require_once("config.inc");
-require_once("interfaces.inc");
-require_once("util.inc");
-require_once("system.inc");
-
-$subsystem = !empty($argv[1]) ? $argv[1] : '';
-$type = !empty($argv[2]) ? $argv[2] : '';
-
-if ($type != 'MASTER' && $type != 'BACKUP') {
-    log_error("Carp '$type' event unknown from source '{$subsystem}'");
-    exit(1);
-}
-
-if (!strstr($subsystem, '@')) {
-    log_error("Carp '$type' event triggered from wrong source '{$subsystem}'");
-    exit(1);
-}
-
-$ifkey = 'wan';
-
-if ($type === "MASTER") {
-    log_error("enable interface '$ifkey' due CARP event '$type'");
-    $config['interfaces'][$ifkey]['enable'] = '1';
-    write_config("enable interface '$ifkey' due CARP event '$type'", false);
-    interface_configure(false, $ifkey, false, false);
-} else {
-    log_error("disable interface '$ifkey' due CARP event '$type'");
-    unset($config['interfaces'][$ifkey]['enable']);
-    write_config("disable interface '$ifkey' due CARP event '$type'", false);
-    interface_configure(false, $ifkey, false, false);
-}
-```
 
 ---
 ## Service Synchronization
