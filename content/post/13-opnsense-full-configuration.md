@@ -284,12 +284,12 @@ On the backup node, I configure it the same, the only difference will be the **D
 
 ### DHCP Ranges
 
-Next I configure the DHCP ranges. Both firewalls will have different ranges, the backup node will have smaller ones. On the master, they are configured as follow:
+Next I configure the DHCP ranges. Both firewalls will have different ranges, the backup node will have smaller ones (only 10 leases should be enough). On the master, they are configured as follow:
 ![opnsense-dnsmasq-dhcp-ranges.png](img/opnsense-dnsmasq-dhcp-ranges.png)
 
 ### DHCP Options
 
-Then I set some DHCP options for each domain: the `router`, the `dns-server` and the `domain-name`:
+Then I set some DHCP options for each domain: the `router`, the `dns-server` and the `domain-name`. I'm pointing the IP addresses to the interface's VIP:
 ![opnsense-dnsmasq-dhcp-options.png](img/opnsense-dnsmasq-dhcp-options.png)
 
 ### Hosts
