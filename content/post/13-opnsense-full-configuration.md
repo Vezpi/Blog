@@ -22,8 +22,6 @@ In my previous [post]({{< ref "post/12-opnsense-virtualization-highly-available"
 
 Now I'm in the preparation to make it real in my homelab. So this time with a real setup, my future OPNsense cluster configuration.
 
-Initially I was thinking of just restoring my current configuration on a OPNsense instance freshly installed. But then I realized that I didn't really documented how I put the pieces together the first time. This is the perfect moment to put things right.
-
 In this post, I will show you how I configure OPNsense highly available, from a fresh installation in a couple of VMs, covering:
 - Global settings
 - Interfaces
@@ -35,6 +33,23 @@ In this post, I will show you how I configure OPNsense highly available, from a 
 - Reverse Proxy with Caddy
 - And more...
 
+---
+## Context
+
+Before diving into the OPNsense configuration, a little bit of context to understand the choices I made.
+
+In my Proxmox VE cluster, I've created 2 VMs and installed OPNsense. The goal is to replace my single physical box by this cluster. Each VMs have 7 NICs for each network:
+- **vmbr0**: *Mgmt*
+- **vlan20**: *WAN*
+- **vlan13**: *User*
+- **vlan37**: *IoT*
+- **vlan44**: *pfSync*
+- **vlan55**: *DMZ*
+- **vlan66**: *Lab*
+
+Initially I was thinking of just restoring my current configuration on a OPNsense instance freshly installed. But then I realized that I didn't really documented how I put the pieces together the first time. This is the perfect moment to put things right.
+
+
 Hopefully the next time, I will also cover the VM creation on Proxmox and how I'm preparing this migration from my physical OPNsense box to this highly available cluster in VMs. Let's dive in!
 
 TODO
@@ -42,6 +57,7 @@ add section Topology
 add single WAN IP 
 add network diagram
 add IP/VLAN plan
+
 
 ---
 ## System
