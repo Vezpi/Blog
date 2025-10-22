@@ -37,6 +37,12 @@ In this post, I will show you how I configure OPNsense highly available, from a 
 
 Hopefully the next time, I will also cover the VM creation on Proxmox and how I'm preparing this migration from my physical OPNsense box to this highly available cluster in VMs. Let's dive in!
 
+TODO
+add section Topology
+add single WAN IP 
+add network diagram
+add IP/VLAN plan
+
 ---
 ## System
 
@@ -57,13 +63,19 @@ Then, in `System` > `Access` > `Users`, I create a new user, I don't like sticki
 ### Administration
 
 In `System` > `Settings` > `Administration`, I change several things:
-- **TCP port**: from `443` to `4443`, to free port 443 for the reverse proxy coming next.
-- HTTP Redirect: Disable to free port 80
--  **Alternate Hostnames**: `cerbere.vezpi.com` which will be the URL to reach the firewall by the reverse proxy.
-- **Access log**: enabled.
-- **Secure Shell Server**: enabled.
-- **Authentication Method:** permit password login (no `root` login).
-- **Sudo**: `No password`.
+- **Web GUI**
+	- **TCP port**: from `443` to `4443`, to free port 443 for the reverse proxy coming next.
+	- **HTTP Redirect**: Disabled,  to free port 80 for the reverse proxy 
+	-  **Alternate Hostnames**: `cerbere.vezpi.com` which will be the URL to reach the firewall by the reverse proxy.
+	- **Access log**: Enabled.
+- **Secure Shell**
+	- **Secure Shell Server**: Enabled.
+	- **Root Login**: Disabled.
+	- **Authentication Method:** Permit password login (no `root` login).
+	- **Listen Interfaces**: *Mgmt*
+- **Authentication**
+	- **Sudo**: `No password`.
+
 Once I click `Save`, I follow the link given to reach the WebGUI on port `4443`.
 
 ### Updates
@@ -148,6 +160,8 @@ In the section `System` > `High Availability` > `Status`, I can verify if the sy
 
 Now that HA is configured, I can give my networks a virtual IP shared across my nodes. In `Interfaces` > `Virtual IPs` > `Settings`, I create one VIP for each of my networks using **CARP** (Common Address Redundancy Protocol). The target is to reuse the IP addresses used by my current OPNsense instance, but as it is still routing my network, I use different IPs for the configuration phase:
 ![opnsense-interface-virtual-ips.png](img/opnsense-interface-virtual-ips.png)
+
+ℹ️ OPNsense allows by default CARP protocol, there is no need to create specific rules for it.
 
 ---
 ## Firewall
@@ -453,7 +467,7 @@ The third one is for Traefik HTTP challenges for Let's Encrypt:
 
 ### Firewall Rules
 
-Finally, I need to allow connection of these ports on the firewall, one rule for HTTPS and another for HTTP:
+Finally, I need to allow connection of these ports on the firewall, I create one rule for HTTPS (and another for HTTP):
 
 | Field                      | Value                                 |
 | -------------------------- | ------------------------------------- |
@@ -484,6 +498,10 @@ Then in `Services` > `mDNS Repeater`, the configuration is pretty straight forwa
 
 ---
 ## CARP Failover Script
+
+TODO
+move this section after VIP
+add how to implement it
 
 In my setup, I only have a single WAN IP address which is served by the DHCP of my ISP box. OPNsense does not provide natively a way to handle this scenario. To manage it, I implement the same trick I used in the [PoC]({{< ref "post/12-opnsense-virtualization-highly-available" >}}).
 
@@ -539,3 +557,4 @@ Then I want to make sure that future changes are synchronized if I omit to repli
 ---
 ## Conclusion
 
+TODO
