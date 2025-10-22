@@ -407,6 +407,7 @@ Then in the `Domains` tab, I add my domains. For example, this is here I define 
 	- **Domain**: `cerbere.vezpi.com`
 	- **Port**: leave empty
 	- **Certificate**: Auto HTTPS
+	- **HTTP-01 Challenge Redirection**: `192.168.44.2`, for high availability setup
 	- **Description**: OPNsense
 - **Access**
 	- **Access List**: `Internal`
@@ -448,7 +449,7 @@ The first one is for internet exposed services, like this blog or my Gitea insta
 - Upstream
 	- Upstream Domain: `192.168.66.50`
 	- Upstream Port: `443`
-	- Proxy Protocol: v2
+	- Proxy Protocol: `v2`, if your upstream supports it
 	- Description: External Traefik HTTPS dockerVM
 
 The second one is for internal only services. It is configured pretty much the same but using  access list:
