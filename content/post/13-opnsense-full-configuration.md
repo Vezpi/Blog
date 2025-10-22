@@ -577,4 +577,6 @@ Then I want to make sure that future changes are synchronized if I omit to repli
 ---
 ## Conclusion
 
-TODO
+🚀 My OPNsense cluster is now configured and ready to go live!
+
+
