@@ -157,7 +157,7 @@ From `Firewall` > `Rules` > `pfSync`, I create a new rule on each firewall:
 
 ### Configure HA
 
-
+The hi
 Next, I head to `System` > `High Availability` > `Settings`:
 - **Master** (`cerbere-head1`):
 - **General Settings**
@@ -172,7 +172,6 @@ Next, I head to `System` > `High Availability` > `Settings`:
 - **Backup** (`cerbere-head2`):
 	- **Synchronize all states via**: *pfSync*
 	- **Synchronize Peer IP**: `192.168.44.1`, the master node IP
-	- **Synchronize Config**: `192.168.44.1`
 ⚠️ Do not fill the XMLRPC Sync fields on the backup node, only to be filled on the master.
 
 ### HA Status
