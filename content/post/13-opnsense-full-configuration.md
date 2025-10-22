@@ -157,7 +157,10 @@ From `Firewall` > `Rules` > `pfSync`, I create a new rule on each firewall:
 
 ### Configure HA
 
-The high availability in OPNsense is done at two main layers. The first is the firewall state layer, the synchronization is permanent. The second layer is the configuration (XMLRPC Sync). This part is not automatically sync
+The high availability in OPNsense is done at two main layers. The first layer is the firewall state, the synchronization is permanent. The second layer is the configuration (XMLRPC Sync). This part is not automatically synchronized and must be done only from the master to backup.
+
+The 
+#### Master
 Next, I head to `System` > `High Availability` > `Settings`:
 - **Master** (`cerbere-head1`):
 - **General Settings**
@@ -169,7 +172,7 @@ Next, I head to `System` > `High Availability` > `Settings`:
 	- **Remote System Password**: `<password>`
 - **Services to synchronize (XMLRPC Sync)**
 	- **Services**: Select All
-- **Backup** (`cerbere-head2`):
+#### Backup (`cerbere-head2`):
 	- **Synchronize all states via**: *pfSync*
 	- **Synchronize Peer IP**: `192.168.44.1`, the master node IP
 ⚠️ Do not fill the XMLRPC Sync fields on the backup node, only to be filled on the master.
