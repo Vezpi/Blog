@@ -579,4 +579,6 @@ Then I want to make sure that future changes are synchronized if I omit to repli
 
 🚀 My OPNsense cluster is now configured and ready to go live!
 
+The next phase is 
 
+prepare migration
