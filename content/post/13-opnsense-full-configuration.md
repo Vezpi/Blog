@@ -1,9 +1,9 @@
 ---
-slug: opnsense-full-configuration
-title: Template
-description:
-date:
-draft: true
+slug: opnsense-ha-full-configuration
+title: OPNsense HA in Proxmox, my Full Homelab Configuration
+description: Step-by-step OPNsense HA cluster full configuration in Proxmox, interfaces and VIP, firewall, Dnsmasq DHCP, Unbound DNS, WireGuard VPN and Caddy reverse proxy.
+date: 2025-10-23
+draft: false
 tags:
   - opnsense
   - high-availability
@@ -18,27 +18,14 @@ categories:
 
 ## Intro
 
-In my previous [post]({{< ref "post/12-opnsense-virtualization-highly-available" >}}), I've set up a PoC to validate the possibility to create a cluster of 2 **OPNsense** VMs in **Proxmox VE** and make the firewall highly available.
+In my previous [article]({{< ref "post/12-opnsense-virtualization-highly-available" >}}) I set up a PoC to validate building a cluster of two **OPNsense** VMs in **Proxmox VE** to make the firewall highly available. 
 
-Now I'm in the preparation to make it real in my homelab. So this time with a real setup, my future OPNsense cluster configuration.
-
-In this post, I will show you how I configure OPNsense highly available, from a fresh installation in a couple of VMs, covering:
-- Global settings
-- Interfaces
-- High Availability with CARP
-- Firewall
-- DHCP with Dnsmasq
-- DNS with Unbound coupled with Dnsmasq
-- VPN with WireGuard
-- Reverse Proxy with Caddy
-- And more...
-
----
-## Context
+Now I'm preparing to make that real in my homelab, this post documents my real OPNsense cluster configuration, from fresh installs to HA, DNS, DHCP, VPN and reverse proxy.
+### Context
 
 Before diving into the OPNsense configuration, a little bit of context to understand the choices I made.
 
-In my Proxmox VE cluster, I've created 2 VMs and installed OPNsense. The goal is to replace my single physical box by this cluster. Each VMs have 7 NICs for each network:
+In my Proxmox VE cluster, I've created 2 VMs and installed OPNsense. The goal is to replace my single physical box by this cluster. Each VM have 7 NICs for the following networks:
 - **vmbr0**: *Mgmt*
 - **vlan20**: *WAN*
 - **vlan13**: *User*
@@ -68,7 +55,7 @@ I start with the basics, in `System` > `Settings` > `General`:
 
 ### Users
 
-Then, in `System` > `Access` > `Users`, I create a new user, I don't like sticking with the defaults `root`. I add this user in the `admins`  group, while removing `root` from it.
+Then, in `System` > `Access` > `Users`, I create a new user rather than using `root`, add it to the `admins` group, and remove `root` from that group.
 
 ### Administration
 
@@ -90,21 +77,21 @@ Once I click `Save`, I follow the link given to reach the WebGUI on port `4443`.
 
 ### Updates
 
-Time for updates, in `System` > `Firmware` > `Status`, I click on `Check for updates`.  An update is available, I close the banner, head to the bottom and click on `Update`. I'm warned that this update requires a reboot.
+Time for updates, in `System` > `Firmware` > `Status`, I check for firmware updates and apply them (requires reboot).
 
 ### QEMU Guest Agent
 
-Once updated and rebooted, I go to `System` > `Firmware` > `Plugins`, I tick the box to show community plugins. For now I only install the **QEMU Guest Agent**, `os-qemu-guest-agent`, to allow communication between the VM and the Proxmox host. 
+Once updated and rebooted, I go to `System` > `Firmware` > `Plugins`, I tick the box to show community plugins. I install the **QEMU Guest Agent**, `os-qemu-guest-agent`, to allow communication between the VM and the Proxmox host. 
 
 This requires a shutdown. On Proxmox, I enable the `QEMU Guest Agent` in the VM options:
-![proxmox-opnsense-enable-qemu-guest-agent.png](img/proxmox-opnsense-enable-qemu-guest-agent.png)
+Proxmox VM options with QEMU Guest Agent enabled
 
 Finally I restart the VM. Once started, from the Proxmox WebGUI, I can see the IPs of the VM which confirms the guest agent is working.
 
 ---
 ## Interfaces
 
-On both firewalls, I assign the remaining NICs to new interfaces adding a description. The VMs have 7 interfaces, I carefully compare the MAC addresses to not mix them up:
+On both firewalls, I assign the remaining NICs to new interfaces adding a description. The VMs have 7 interfaces, I carefully compare MAC addresses to avoid mixing interfaces:
 ![opnsense-assign-interfaces.png](img/opnsense-assign-interfaces.png)
 
 In the end, the interfaces configuration looks like this:
@@ -118,6 +105,7 @@ In the end, the interfaces configuration looks like this:
 | *pfSync*  | Static IPv4 | 192.168.44.1/30 | 192.168.44.2/30 |
 | *DMZ*     | Static IPv4 | 192.168.55.2/24 | 192.168.55.3/24 |
 | *Lab*     | Static IPv4 | 192.168.66.2/24 | 192.168.66.3/24 |
+
 I don't configure Virtual IPs yet, I'll manage that once high availability has been setup.
 
 ---
@@ -146,7 +134,7 @@ From `Firewall` > `Rules` > `pfSync`, I create a new rule on each firewall:
 
 ### Configure HA
 
-The high availability in OPNsense is done at two main layers. The first layer is the firewall state, the synchronization is permanent. The second layer is the configuration (XMLRPC Sync). This part is not automatically synchronized and must be done only from the master to backup.
+OPNsense HA uses pfSync for firewall state synchronization (real-time) and XMLRPC Sync to push config and services from master → backup (one-way).
 
 The HA is setup in `System` > `High Availability` > `Settings`
 #### Master
@@ -177,7 +165,7 @@ In the section `System` > `High Availability` > `Status`, I can verify if the sy
 Now that HA is configured, I can give my networks a virtual IP shared across my nodes. In `Interfaces` > `Virtual IPs` > `Settings`, I create one VIP for each of my networks using **CARP** (Common Address Redundancy Protocol). The target is to reuse the IP addresses used by my current OPNsense instance, but as it is still routing my network, I use different IPs for the configuration phase:
 ![opnsense-interface-virtual-ips.png](img/opnsense-interface-virtual-ips.png)
 
-ℹ️ OPNsense allows by default CARP protocol, there is no need to create specific rules for it.
+ℹ️ OPNsense allows CARP by default, no special firewall rule required
 
 ---
 ## CARP Failover Script
@@ -242,7 +230,7 @@ Let's configure the core feature of OPNsense, the firewall. I don't want to go t
 
 Basically I have 2 kinds of networks, those which I trust, and those which I don't. From this standpoint, I will create two zones. 
 
-Globally, on my untrusted networks, I will only allow access to the DNS and to the internet, no access towards other networks. On the other hand, my trusted networks would have the possibility to reach other VLANs.
+Globally, my untrusted networks only have access to DNS and the internet. Trusted networks can reach other VLANs.
 
 To begin, in `Firewall` > `Groups`, I create 2 zones to regroup my interfaces:
 - **Trusted**: *Mgmt*, *User*
@@ -330,7 +318,7 @@ Great, with these 3 rules, I cover the basics. The remaining rules would be to a
 
 For the DHCP, I choose **Dnsmasq**. In my current installation I use ISC DHCPv4, but as it is now deprecated, I prefer to replace it. Dnsmasq will also act as DNS, but only for my local zones. 
 
-Beware because it is not synchronizing leases in HA. To workaround this, both firewalls will serve DHCP at the same time, with slight different configuration to not overlap. 
+Dnsmasq doesn't sync leases. To avoid conflicts, both nodes serve DHCP but with staggered reply delay and different ranges. The master covers the main pool, the backup a small fallback pool
 
 ### Dnsmasq General Configuration
 
@@ -339,7 +327,7 @@ In `Services` > `Dnsmasq DNS & DHCP` > `General`, I configure the master firewal
 	- **Enable**: Yes
 	- **Interface**: *Mgmt*, *User*, *IoT*, *DMZ* and *Lab*
 - **DNS**
-	- **Listen por**t: 53053
+	- **Listen port**: 53053
 - **DNS Query Forwarding** 
 	- **Do not forward to system defined DNS servers**: Enabled
 - **DHCP**
@@ -350,7 +338,7 @@ In `Services` > `Dnsmasq DNS & DHCP` > `General`, I configure the master firewal
 	- **DHCP register firewall rules**: Enabled
 	- **Disable HA sync**: Enabled
 
-On the backup node, I configure it the same, the only difference will be the **DHCP reply delay** which I set to **10**. This will let the time to my master node to fulfill requests if it is alive.
+On the backup node, I configure it the same, the only difference will be the **DHCP reply delay** which I set to **10**. This gives the master time to answer DHCP requests before the backup responds.
 
 ### DHCP Ranges
 
@@ -374,10 +362,10 @@ For the DNS, I use **Unbound**. It is a validating, recursive, caching DNS resol
 - Resolve queries from the root servers.
 - Cache results for faster responses.
 - Check domain authenticity with DNSSEC.
-- Block domains based of blacklist.
+- Block domains based on a blacklist.
 - Add custom records.
 
-For the local zones, I forward the requests to Dnsmasq, hence I will not registering DHCP leases in Unbound.
+Unbound is the recursive resolver, for local zones I forward queries to Dnsmasq.
 
 ### Unbound General Settings
 
@@ -450,9 +438,9 @@ To allow connections from outside, I need to create a firewall rule on the WAN i
 ---
 ## Reverse Proxy
 
-The next feature I need is a reverse proxy, to redirect incoming HTTPS requests to reach my services, such as this blog. For that I use **Caddy**. This service is not installed by default, I need to add a plugin.
+The next feature I need is a reverse proxy, to redirect incoming HTTPS requests to reach my services, such as this blog. For that I use **Caddy**. It will listen on port 80/443, that's why I moved the WebGUI off these ports at the beginning.
 
-On both firewalls, In `System` > `Firmware` > `Plugins`, I tick the box to show community plugins and install `os-caddy`.
+This service is not installed by default, I need to add a plugin. On both firewalls, In `System` > `Firmware` > `Plugins`, I tick the box to show community plugins and install `os-caddy`.
 
 ### Caddy General Settings
 
@@ -522,7 +510,7 @@ The first one is for internet exposed services, like this blog or my Gitea insta
 	- Proxy Protocol: `v2`, if your upstream supports it
 	- Description: External Traefik HTTPS dockerVM
 
-The second one is for internal only services. It is configured pretty much the same but using  access list:
+The second one is for internal only services. It is configured pretty much the same but using an access list:
 - Sequence: 2
 - Access
 	- Remote IP: `192.168.13.0/24` `192.168.88.0/24` `10.13.37.0/24`
@@ -560,7 +548,7 @@ Finally, I need to allow connection of these ports on the firewall, I create one
 
 The last service I want to setup in OPNsense is a mDNS repeater. This is useful for some devices to announce themselves on the network, when not on the same VLAN, such as my printer or my Chromecast. The mDNS repeater get the message from an interface to forward it to another one.
 
-This service is also not installed by default, on both firewalls, In `System` > `Firmware` > `Plugins`, I tick the box to show community plugins and install `os-mdns-repeater`.
+This service is also not installed by default. On both firewalls, In `System` > `Firmware` > `Plugins`, I tick the box to show community plugins and install `os-mdns-repeater`.
 
 Then in `Services` > `mDNS Repeater`, the configuration is pretty straight forward:
 - Enable: Yes
@@ -577,8 +565,15 @@ Then I want to make sure that future changes are synchronized if I omit to repli
 ---
 ## Conclusion
 
-🚀 My OPNsense cluster is now configured and ready to go live!
+🚀 My **OPNsense** cluster is now configured and ready to go live!
 
-The next phase is 
+I hope this OPNsense full configuration for my own network, help you with your own setup.
 
-prepare migration
+The next phase is to plan the migration from my current OPNsense box to these two highly available firewalls. This new infrastructure would secure my future operations on the firewall, while removing this SPOF (Single Point Of Failure) of my network.
+
+See you next time to tell how this operation went!
+
+
+
+
+
