@@ -486,7 +486,7 @@ function isModeEligible(mode, temps, humidity, thresholds, currentMode) {
     // For heat mode (inverted logic)
     if (mode === "heat") {
         if (!isCurrent) {
-            const minStart = Math.min(...Object.values(threshold.start));
+            const minStart = Math.max(...Object.values(threshold.start));
             return tempForCheckStart < minStart;
         } else {
             return tempForCheckStop < threshold.stop;
