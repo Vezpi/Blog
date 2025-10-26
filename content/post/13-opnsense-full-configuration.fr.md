@@ -84,7 +84,7 @@ Il est temps de mettre à jour, dans `System` > `Firmware` > `Status`, je v
 Une fois mis à jour et redémarré, je vais dans `System` > `Firmware` > `Plugins`, je coche l'option pour afficher les plugins communautaires. J'installe que le **QEMU Guest Agent**, `os-qemu-guest-agent`, pour permettre la communication entre la VM et l'hôte Proxmox.
 
 Cela nécessite un arrêt. Dans Proxmox, j'active le `QEMU Guest Agent` dans les options de la VM :  
-![proxmox-opnsense-enable-qemu-guest-agent.png](img/proxmox-opnsense-enable-qemu-guest-agent.png)
+![Options d'une VM Proxmox avec QEMU Guest Agent activé](img/proxmox-opnsense-enable-qemu-guest-agent.png)
 
 Finalement je redémarre la VM. Une fois démarrée, depuis la WebGUI de Proxmox, je peux voir les IPs de la VM ce qui confirme que le guest agent fonctionne.
 
@@ -92,7 +92,7 @@ Finalement je redémarre la VM. Une fois démarrée, depuis la WebGUI de Proxmox
 ## Interfaces
 
 Sur les deux pare‑feu, j'assigne les NIC restantes à de nouvelles interfaces en ajoutant une description. Les VMs ont 7 interfaces, je compare attentivement les adresses MAC pour éviter de mélanger les interfaces :
-![opnsense-assign-interfaces.png](img/opnsense-assign-interfaces.png)
+![Assign interfaces menu in OPNsense](img/opnsense-assign-interfaces.png)
 
 Au final, la configuration des interfaces ressemble à ceci :
 
@@ -160,13 +160,13 @@ La HA est configurée dans `System` > `High Availability` > `Settings`
 ### Statut de la HA
 
 Dans `System` > `High Availability` > `Status`, je peux vérifier si la synchronisation fonctionne. Sur cette page je peux répliquer un ou tous les services du master vers le nœud backup :
-![opnsense-high-availability-status.png](img/opnsense-high-availability-status.png)
+![OPNsense high availability status page](img/opnsense-high-availability-status.png)
 
 ---
 ## IPs Virtuelles
 
 Maintenant que la HA est configurée, je peux attribuer à mes réseaux une IP virtuelle partagée entre mes nœuds. Dans `Interfaces` > `Virtual IPs` > `Settings`, je crée un VIP pour chacun de mes réseaux en utilisant **CARP** (Common Address Redundancy Protocol). L'objectif est de réutiliser les adresses IP utilisées par mon instance OPNsense actuelle, mais comme elle route encore mon réseau, j'utilise des IP différentes pour la phase de configuration :
-![opnsense-interface-virtual-ips.png](img/opnsense-interface-virtual-ips.png)
+![Liste des IPs virtuelles dans OPNsense](img/opnsense-interface-virtual-ips.png)
 
 ℹ️ OPNsense permet CARP par défaut, aucune règle de pare‑feu spéciale requise
 
@@ -242,7 +242,7 @@ Pour commencer, dans `Firewall` > `Groups`, je crée 2 zones pour regrouper m
 ### Network Aliases
 
 Ensuite, dans `Firewall` > `Aliases`, je crée un alias `InternalNetworks` pour regrouper tous mes réseaux internes :
-![opnsense-create-alias-internalnetworks.png](img/opnsense-create-alias-internalnetworks.png)
+![Création d'alias pour les réseaux locaux dansOPNsense](img/opnsense-create-alias-internalnetworks.png)
 
 ### Règles de Pare-feu Rules
 
@@ -345,17 +345,17 @@ Sur le nœud backup, je le configure de la même manière, la seule différence 
 ### Plages DHCP
 
 Ensuite je configure les plages DHCP. Les deux pare‑feu auront des plages différentes, le nœud backup aura des plages plus petites (10 baux devraient suffire). Sur le master, elles sont configurées comme suit :
-![opnsense-dnsmasq-dhcp-ranges.png](img/opnsense-dnsmasq-dhcp-ranges.png)
+![OPNsense DHCP ranges in Dnsmasq](img/opnsense-dnsmasq-dhcp-ranges.png)
 
 ### Options DHCP
 
 Puis je définis quelques options DHCP pour chaque domaine : le `router`, le `dns-server` et le `domain-name`. Je pointe les adresses IP vers la VIP de l'interface :
-![opnsense-dnsmasq-dhcp-options.png](img/opnsense-dnsmasq-dhcp-options.png)
+![OPNsense DHCP options in Dnsmasq](img/opnsense-dnsmasq-dhcp-options.png)
 
 ### Hôtes
 
 Enfin, dans l'onglet `Hosts`, je définis des mappings DHCP statiques mais aussi des IP statiques non gérées par le DHCP, pour qu'elles soient enregistrées dans le DNS :
-![opnsense-dnsmasq-dhcp-hosts.png](img/opnsense-dnsmasq-dhcp-hosts.png)
+![Hôtes DHCP de Dnsmasq dans OPNsense](img/opnsense-dnsmasq-dhcp-hosts.png)
 
 ---
 ## DNS
@@ -372,7 +372,7 @@ Unbound est le résolveur récursif, pour les zones locales j'effectue un forwar
 ### Paramètres Généraux d'Unbound
 
 Configurons-le, dans `Services` > `Unbound DNS` > `General` :
-![opnsense-unbound-general-settings.png](img/opnsense-unbound-general-settings.png)
+![OPNsense Unbound DNS general settings](img/opnsense-unbound-general-settings.png)
 
 ### Liste de Blocage DNS 
 
@@ -383,7 +383,7 @@ Pour maintenir le service à jour, dans `System` > `Settings` > `Cron`, j'a
 ### Transfert de Requêtes
 
 Enfin je configure le transfert de requêtes pour mes domaines locaux vers Dnsmasq. Dans `Services` > `Unbound DNS` > `Query Forwarding`, j'ajoute chacun de mes domaines locaux avec leurs reverse lookups (enregistrements PTR) :
-![opnsense-unbound-dns-query-forwarding.png](img/opnsense-unbound-dns-query-forwarding.png)
+![Configuration du transfert de requêtes d'Unbound DNS dans OPNsense](img/opnsense-unbound-dns-query-forwarding.png)
 
 ---
 ## VPN
