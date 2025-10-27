@@ -88,15 +88,29 @@ While these routers are not managing the networks, I give them my current OPNsen
 
 HA in proxmox
 Make sure VM start at proxmox boot
-
+Check conso Watt average
+Check temp average
 ## Switch
 
+Backup OPNsense box
+Disable DHCP on OPNsene box
+Change OPNsense box IPs
+
+Remove GW on VM
 Configure DHCP on both instance
-Enable DHCP
-Change VIP
-Replicate configuration
+Enable DHCP on VM
+Change VIP on VM
+Replicate configuration on VM
+Unplug OPNsense box WAN
+Plug WAN on port 15
+
+
+ 
 ## Verify
 
+Ping VIP
+Vérifier interface
+tests locaux (ssh, ping)
 
 Basic (dhcp, dns, internet)
 Firewall
@@ -109,6 +123,15 @@ Vérifier tous les devices
 
 DNS blocklist
 
+Check load (ram, cpu)
 Failover
 
 Test proxmox full shutdown
+
+## Clean Up
+
+Shutdown OPNsense
+Check watt
+Check temp
+
+## Rollback
