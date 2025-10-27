@@ -70,7 +70,7 @@ The first VM is named `cerbere-head1` (I didn't tell you? My current firewall is
 	7. `vlan66` *(Lab)*
 ![proxmox-cerbere-vm-settings.png](img/proxmox-cerbere-vm-settings.png)
 
-ℹ️ Now I clone that VM to create `cerbere-head2`, then I proceed with OPNsense installation. I don't want to go into much details about OPNsense installation, I already documented it in the previous [post]({{< ref "post/12-opnsense-virtualization-highly-available" >}}).
+ℹ️ Now I clone that VM to create `cerbere-head2`, then I proceed with OPNsense installation. I don't want to go into much details about OPNsense installation, I already documented it in a previous [post]({{< ref "post/12-opnsense-virtualization-highly-available" >}}).
 
 After the installation of both OPNsense instances, I give to each of them their IP in the *Mgmt* network:
 - `cerbere-head1`: `192.168.88.2/24`
@@ -81,7 +81,9 @@ While these routers are not managing the networks, I give them my current OPNsen
 ---
 ## Configure OPNsense
 
+Initially, I thought about restoring my current OPNsense configuration and adapt it to the setup. Then I decided to start over to document and share it. This part was getting so long that I prefered create a dedicated post instead.
 
+📖 You can find the details of the full OPNsense configuration in that [article]({{< ref "post/13-opnsense-full-configuration" >}}).
 
 
 ## TODO
