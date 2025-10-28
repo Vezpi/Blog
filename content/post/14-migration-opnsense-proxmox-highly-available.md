@@ -81,7 +81,9 @@ While these routers are not managing the networks, I give them my current OPNsen
 ---
 ## Configure OPNsense
 
-Initially, I thought about restoring my current OPNsense configuration and adapt it to the setup. Then I decided to start over to document and share it. This part was getting so long that I prefered create a dedicated post instead.
+Initially, I thought about restoring my current OPNsense configuration and adapt it to the setup.
+
+Then I decided to start over to document and share it. This part was getting so long that I prefered create a dedicated post instead.
 
 📖 You can find the details of the full OPNsense configuration in that [article]({{< ref "post/13-opnsense-full-configuration" >}}).
 
