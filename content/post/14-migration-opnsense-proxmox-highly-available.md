@@ -76,7 +76,7 @@ After the installation of both OPNsense instances, I give to each of them their 
 - `cerbere-head1`: `192.168.88.2/24`
 - `cerbere-head2`: `192.168.88.3/24`
 
-While these routers are not managing the networks, I give them my current OPNsense routeur as gateway (`192.168.88.1`) to able to reach them from my PC in another VLAN.
+While these routers are not managing the networks, I give them my current OPNsense routeur as gateway (`192.168.88.1`) to allow me to reach them from my laptop in another VLAN.
 
 ---
 ## Configure OPNsense
@@ -85,7 +85,7 @@ Initially, I thought about restoring my current OPNsense configuration and adapt
 
 Then I decided to start over to document and share it. This part was getting so long that I prefered create a dedicated post instead.
 
-📖 You can find the details of the full OPNsense configuration in that [article]({{< ref "post/13-opnsense-full-configuration" >}}).
+📖 You can find the details of the full OPNsense configuration in that [article]({{< ref "post/13-opnsense-full-configuration" >}}), covering HA, DNS, DHCP, VPN and reverse proxy.
 
 
 ## TODO
