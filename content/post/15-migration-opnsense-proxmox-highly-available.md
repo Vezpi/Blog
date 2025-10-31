@@ -87,7 +87,40 @@ Then I decided to start over to document and share it. This part was getting so 
 
 📖 You can find the details of the full OPNsense configuration in that [article]({{< ref "post/13-opnsense-full-configuration" >}}), covering HA, DNS, DHCP, VPN and reverse proxy.
 
+---
+## Proxmox VM High Availability
 
+Resources (VM or LXC) in Proxmox VE can be tagged as highly available, let see how to set it up.
+
+### Proxmox HA Requirements
+
+First, your Proxmox cluster must allow it. There are some requirements:
+- At least 3 nodes to have quorum
+- Shared storage for your resources
+- Time synchronized
+- Reliable network
+
+A fencing mechanism must be enabled. Fencing is the process of isolating a failed cluster node to ensure it no longer accesses shared resources. This prevents split-brain situations and allows Proxmox HA to safely restart affected VMs on healthy nodes. By default, it is using Linux software watchdog, *softdog*, good enough for me.
+
+It is possible to create HA groups, depending of their resources, locations, etc. In my case I don't create any group. Any nodes of my cluster will manage the highly available resources.
+
+### Configure VM HA
+
+The Proxmox cluster is able to provide HA for the resources, but you need to define the rules.
+
+For each of the VM, at the top, on the `More` button, select `Manage HA`. Define the maximum of restart and relocate, pick a group if needed, then select `started`:
+![proxmox-add-vm-ha.png](img/proxmox-add-vm-ha.png)
+
+My Proxmox cluster will now make sure my VMs are started, but I don't want them on the same node. If this one fails, I will be sad.
+
+Proxmox allows to create node affinity rules and resource affinity as well. I don't mind on which node they run, but not together. I need a resource affinity rule.
+
+In my current Proxmox VE version (8.3.2), I can't create affinity rules from the WebGUI. I have to use the CLI to achieve that. From any node of the cluster, I create the resource affinity rule in `/etc/pve/ha/rules.cfg`:
+```bash
+ ha-manager rules add resource-affinity opnsense-cluster \
+ --affinity negative \
+ --resources vm:122,vm:123       
+```
 ## TODO
 
 HA in proxmox
