@@ -1,17 +1,30 @@
 ---
-slug: 
+slug: proxmox-cluster-upgrade-8-to-9
 title: Template
-description: 
-date: 
+description:
+date:
 draft: true
-tags: 
+tags:
 categories:
 ---
 
+## Intro
 
+My Proxmox VE cluster is almost one year old now, and it's been a while since I didn't update my nodes. Now is the time to move forward and bump it to Proxmox VE 9.
+
+I'm mainly interested in the new HA affinity rules, here what this version brings:
+- Debian 13 "Trixie"
+- Snapshots for thick-provisioned LVM shared storage
+- Fabrics feature for the SDN stack
+- Better mobile interface
+- Affinity rules in HA cluster
+
+In this article, I will walk you through the upgrade steps for my Proxmox VE HA cluster supported by Ceph distributed storage.
+
+---
 ## Prerequisites
 
-- Upgraded to the latest version of Proxmox VE 8.4 on all nodes.
+- All odes upgraded to the latest version of Proxmox VE 8.4.
     
     Ensure your node(s) have correct package repository configuration (web UI, Node -> Repositories) if your pve-manager version isn't at least `8.4.1`.
     
@@ -19,7 +32,6 @@ categories:
     
     Follow the guide [Ceph Quincy to Reef](https://pve.proxmox.com/wiki/Ceph_Quincy_to_Reef "Ceph Quincy to Reef") and [Ceph Reef to Squid](https://pve.proxmox.com/wiki/Ceph_Reef_to_Squid "Ceph Reef to Squid"), respectively.
     
-- Co-installed Proxmox Backup Server: see [the Proxmox Backup Server 3 to 4 upgrade how-to](https://pbs.proxmox.com/wiki/index.php/Upgrade_from_3_to_4)
 - Reliable access to the node. It's recommended to have access over a host independent channel like IKVM/IPMI or physical access.
     
     If only SSH is available we recommend testing the upgrade on an identical, but non-production machine first.
@@ -59,3 +71,16 @@ A small checklist program named **`pve8to9`** is included in the latest Proxmox 
 ### Upgrade the system to Debian Trixie and Proxmox VE 9.0
 
 ### Check Result & Reboot Into Updated Kernel
+
+
+### Post-Upgrade Validation
+
+- Checking cluster communication (`pvecm status`)
+    
+- Verifying storage mounts and access
+    
+- Testing Ceph cluster health (`ceph -s`)
+    
+- Confirming VM operations, backups, and HA groups
+    
+- Re-enabling HA and migrating workloads back
