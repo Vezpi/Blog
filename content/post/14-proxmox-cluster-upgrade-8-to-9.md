@@ -24,7 +24,9 @@ In this article, I will walk you through the upgrade steps for my Proxmox VE HA 
 ---
 ## Prerequisites
 
-- All odes upgraded to the latest version of Proxmox VE 8.4.
+Before jumping into the upgrade, let's review the prerequisites:
+
+- All nodes upgraded to the latest version of Proxmox VE 8.4.
     
     Ensure your node(s) have correct package repository configuration (web UI, Node -> Repositories) if your pve-manager version isn't at least `8.4.1`.
     
