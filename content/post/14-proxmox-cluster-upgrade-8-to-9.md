@@ -26,9 +26,14 @@ In this article, I will walk you through the upgrade steps for my Proxmox VE HA 
 
 Before jumping into the upgrade, let's review the prerequisites:
 
-- All nodes upgraded to the latest version of Proxmox VE 8.4.
-    
-    Ensure your node(s) have correct package repository configuration (web UI, Node -> Repositories) if your pve-manager version isn't at least `8.4.1`.
+1. All nodes upgraded to the latest version of Proxmox VE 8.4.
+
+The latest version for Proxmox VE 8 is `8.4.1`. My nodes are currently in version 8.3.2, hence a first update is necessary before the major upgrade.
+
+2. 
+
+
+nsure your node(s) have correct package repository configuration (web UI, Node -> Repositories) if your pve-manager version isn't at least `8.4.1`.
     
 - Hyper-converged Ceph: upgrade any Ceph Quincy or Ceph Reef cluster to Ceph 19.2 Squid **before** you start the Proxmox VE upgrade to 9.0.
     
