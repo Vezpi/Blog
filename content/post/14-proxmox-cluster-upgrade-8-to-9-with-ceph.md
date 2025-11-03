@@ -208,7 +208,6 @@ WARN: The matching CPU microcode package 'amd64-microcode' could not be found! C
 
 It is recommended to install processor microcode for updates which can fix hardware bugs, improve performance, and enhance security features of the processor.
 
-<<<<<<< HEAD
 Add the `non-free-firmware` source to the current ones:
 ```bash
 sed -i '/^deb /{/non-free-firmware/!s/$/ non-free-firmware/}' /etc/apt/sources.list
@@ -221,90 +220,6 @@ apt install amd64-microcode -y
 ```
 
 After these small adjustments, am I ready yet? Let's find out by relaunching the `pve8to9` script.
-=======
-Some time ago, in order to use Terraform with my Proxmox cluster, I created a dedicated role. This was detailed in that [post]({{< ref "post/3-terraform-create-vm-proxmox" >}}).
-
-This role is using the `VM.Monitor` privilege, which is removed in Proxmox VE 9. Instead, new privileges  under `VM.GuestAgent.*` exist. So I remove this one and I'll add those once the cluster have been upgraded.
-
-### Meta-package `systemd-boot`
-
- Proxmox VE usually use `systemd-boot` for booting only in some configurations (ZFS on root and UEFI booted without secure boot), which are managed by `proxmox-boot-tool`, the meta-package `systemd-boot` should be removed. The package was automatically shipped for systems installed from the PVE 8.1 to PVE 8.4 ISOs, as it contained `bootctl` in bookworm.
-
-If the `pve8to9` checklist script suggests it, the `systemd-boot` meta-package is safe to remove unless you manually installed it and are using `systemd-boot` as a bootloader. Should `systemd-boot-efi` and `systemd-boot-tools` be required, `pve8to9` will warn you accordingly. The `pve8to9` checklist script will change its output depending on the state of the upgrade, and should be [run continuously before and after the upgrade](https://pve.proxmox.com/wiki/Upgrade_from_8_to_9#Continuously_use_the_pve8to9_checklist_script "Upgrade from 8 to 9"). It will print which packages should be removed or added at the appropriate time.
-
-
-
-NOTICE: Proxmox VE 9 replaced the ambiguously named 'VM.Monitor' privilege with 'Sys.Audit' for QEMU HMP monitor access and new dedicated '*' privileges for access to a VM's guest agent.
-        The guest agent sub-privileges are 'Audit' for all informational commands, 'FileRead' and 'FileWrite' for file-read and file-write, 'FileSystemMgmt' for filesystem freeze, thaw and trim, and 'Unrestricted' for everything, including command execution. Operations that affect the VM runstate require 'VM.PowerMgmt' or 'VM.GuestAgent.Unrestricted'
-#### New
-
-- VM.PowerMgmt
-- Sys.Console
-- Sys.Audit
-- VM.Config.Cloudinit
-- Pool.Allocate
-- SDN.Use
-- VM.Config.Memory
-- VM.Allocate
-- VM.Console
-- VM.Clone
-- VM.Config.Network
-- Sys.Modify
-- VM.Config.Disk
-- Datastore.Allocate
-- VM.Config.CPU
-- VM.Config.CDROM
-- Datastore.Audit
-- VM.Migrate
-- Datastore.AllocateSpace
-- VM.Config.Options
-- VM.Config.HWType
-- VM.Audit
-
-
-To add
-- VM.GuestAgent.Audit
-- VM.GuestAgent.FileRead
-- VM.GuestAgent.FileWrite
-- VM.GuestAgent.FileSystemMgmt
-- VM.GuestAgent.Unrestricted
-- SDN.Audit
-- Mapping.Audit
-- Mapping.Use
-- Sys.Syslog
-- Pool.Audit
-
-Dropped
-- Permissions.Modify"
-- SDN.Allocate
-- Realm.Allocate
-- VM.Replicate
-- Realm.AllocateUser
-- Sys.AccessNetwork
-- Datastore.AllocateTemplate
-- Sys.PowerMgmt
-- User.Modify
-- Mapping.Modify
-- Group.Allocate
-- Sys.Incoming
-- VM.Backup
-- VM.Snapshot
-- VM.Snapshot.Rollback
-
-#### Old
-VM.Monitor
-
-NOTICE: Proxmox VE 9 replaced the ambiguously named 'VM.Monitor' privilege with 'Sys.Audit' for QEMU HMP monitor access and new dedicated 'VM.GuestAgent.*' privileges for access to a VM's guest agent.
-        The guest agent sub-privileges are 'Audit' for all informational commands, 'FileRead' and 'FileWrite' for file-read and file-write, 'FileSystemMgmt' for filesystem freeze, thaw and trim, and 'Unrestricted' for everything, including command execution. Operations that affect the VM runstate require 'VM.PowerMgmt' or 'VM.GuestAgent.Unrestricted'
-
-### Continuously use the **pve8to9** checklist script
-
-
-
- pve8to9
-
-### Move important Virtual Machines and Containers
->>>>>>> 2b0ffade4cb64c71f4bd97b52afd0b07987c4c71
 
 ⚠️ Don't forget to run the `pve8to9` on all nodes to make sure everything is good.
 
@@ -408,7 +323,7 @@ Fetched 27.6 MB in 3s (8,912 kB/s)
 Reading package lists... Done
 Building dependency tree... Done
 Reading state information... Done
-681 packages can be upgraded. Run 'apt list --upgradable' to see them.
+666 packages can be upgraded. Run 'apt list --upgradable' to see them.
 ```
 
 ### Upgrade to Debian Trixie and Proxmox VE 9
@@ -418,45 +333,12 @@ Launch the upgrade:
 apt-get dist-upgrade -y
 ```
 
-During the process , you will be prompted to confirm some changes, don't 
-
-During the above step, you will be asked to approve changes to configuration files and some service restarts, where the default config has been updated by their respective package.
-
-You may also be shown the output of apt-listchanges, you can simply exit there by pressing "q". If you get prompted for your default keyboard selection, simply use the arrow keys to navigate to the one applicable in your case and hit enter.
-
-For questions about service restarts (like Restart services during package upgrades without asking?) use the default if unsure, as the reboot after the upgrade will restart all services cleanly anyway.
-
-It's suggested to check the difference for each file in question and choose the answer accordingly to what's most appropriate for your setup.
-
-Common configuration files with changes, and the recommended choices are:
-
-- `/etc/issue` -> Proxmox VE will auto-generate this file on boot, and it has only cosmetic effects on the login console.
-    
-    Using the default "No" (keep your currently-installed version) is safe here.
-    
-
-- `/etc/lvm/lvm.conf` -> Changes relevant for Proxmox VE will be updated, and a newer config version might be useful.
-    
-    If you did not make extra changes yourself and are unsure it's suggested to choose "Yes" (install the package maintainer's version) here.
-    
-
-- `/etc/ssh/sshd_config` -> If you have not changed this file manually, the only differences should be a replacement of `ChallengeResponseAuthentication no` with `KbdInteractiveAuthentication no` and some irrelevant changes in comments (lines starting with `#`).
-    
-    If this is the case, both options are safe, though we would recommend installing the package maintainer's version in order to move away from the deprecated `ChallengeResponseAuthentication` option. If there are other changes, we suggest to inspect them closely and decide accordingly.
-    
-
-- `/etc/default/grub` -> Here you may want to take special care, as this is normally only asked for if you changed it manually, e.g., for adding some kernel command line option.
-    
-    It's recommended to check the difference for any relevant change, note that changes in comments (lines starting with `#`) are not relevant.
-    
-    If unsure, we suggested to selected "No" (keep your currently-installed version)
-    
-
-- `/etc/chrony/chrony.conf` -> If you made local changes you might want to move them out of the global config into the `conf.d` or, for custom time sources, the `sources.d` folder.
-    
-    See the `/etc/chrony/conf.d/README` and `/etc/chrony/sources.d/README` files on your system for detaily.
-    
-    If you did not make extra changes yourself and are unsure it's suggested to choose "Yes" (install the package maintainer's version) here.
+During the process , you will be prompted to approve changes to configuration files and some service restarts. You may also be shown the output of changes, you can simply exit there by pressing `q`:
+- `/etc/issue`: Proxmox VE will auto-generate this file on boot -> `No`
+- `/etc/lvm/lvm.conf`: Changes relevant for Proxmox VE will be updated -> 
+- `/etc/ssh/sshd_config`: Depending your setup -> `Inspect`
+- `/etc/default/grub`: Only if you changed it manually -> `Inspect`
+- `/etc/chrony/chrony.conf`: If you did not make extra changes yourself -> `Yes`
 
 The upgrade took about 5 minutes, depending of the hardware.
 
@@ -464,59 +346,58 @@ At the end of the upgrade, restart the machine:
 ```bash
 reboot
 ```
-
-
-
 ### Remove Maintenance Mode
 
-Finally you can disable the maintenance mode, the workload which was located on that machine will come back:
+Finally when the node (hopefully) comes back, you can disable the maintenance mode. The workload which was located on that machine will come back:
 ```bash
 ha-manager crm-command node-maintenance disable $(hostname)
 ```
 
-
-
-
-
-#### 
-
-#### Add the Proxmox VE 9 Package Repository
-
-#### Update the Ceph Package Repository
-
-#### Refresh Package Index
-
-
-
-### Check Result & Reboot Into Updated Kernel
-
-
 ### Post-Upgrade Validation
 
-- Checking cluster communication (`pvecm status`)
-    
-- Verifying storage mounts and access
-    
-- Testing Ceph cluster health (`ceph -s`)
-    
-- Confirming VM operations, backups, and HA groups
-    
-- Re-enabling HA and migrating workloads back
+- Check cluster communication:
+```bash
+pvecm status
+```
 
+- Verify storage mounts points
 
-Finally, I can remove the noout flag:
+- Check Ceph cluster health 
+```bash
+ceph status
+```
+
+- Confirm VM operations, backups, and HA groups
+
+HA groups have been removed at the profit of HA affinity rules. HA groups will be automatically migrated to HA rules.
+
+- Disable PVE Enterprise repository
+
+If you don't use the `pve-enterprise` repo, you can disable it:
+```bash
+sed -i 's/^/#/' /etc/apt/sources.list.d/pve-enterprise.sources
+```
+
+🔁 This node is now upgraded to Proxmox VE 9. You can proceed to other nodes. If all nodes have been upgraded, conclude
+
+## Post Actions
+
+- Remove the Ceph cluster `noout` flag:
 ```bash
 ceph osd unset noout
 ```
 
-<<<<<<< HEAD
-Add role to terraform user
+- Recreate PCI mapping
+
+- Add role to terraform user
 
 
 
 
 
-#### New
+
+
+New
 
 - VM.PowerMgmt
 - Sys.Console
@@ -570,6 +451,6 @@ Dropped
 - VM.Backup
 - VM.Snapshot
 - VM.Snapshot.Rollback
-=======
-Add role to terraform user
->>>>>>> 2b0ffade4cb64c71f4bd97b52afd0b07987c4c71
+
+
+
