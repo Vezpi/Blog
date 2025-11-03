@@ -186,42 +186,47 @@ WARN: The matching CPU microcode package 'amd64-microcode' could not be found! C
 
 ### Custom Role using `VM.Monitor`
 
-Some times ago, to use Terraform with my Proxmox cluster, I created a dedicated role, I detailed this in that [post]({{< ref "post/3-terraform-create-vm-proxmox" >}}).
+Some time ago, in order to use Terraform with my Proxmox cluster, I created a dedicated role. This was detailed in that [post]({{< ref "post/3-terraform-create-vm-proxmox" >}}).
 
-This role is using the `VM.Monitor` privilege, which is removed in Proxmox VE 9. 
+This role is using the `VM.Monitor` privilege, which is removed in Proxmox VE 9. Instead, new privileges  under `VM.GuestAgent.*` exist. So I remove this one and I'll add those once the cluster have been upgraded.
 
-NOTICE: Proxmox VE 9 replaced the ambiguously named 'VM.Monitor' privilege with 'Sys.Audit' for QEMU HMP monitor access and new dedicated 'VM.GuestAgent.*' privileges for access to a VM's guest agent.
+### Meta-package `systemd-boot`
+
+ Proxmox VE usually use `systemd-boot` for booting only in some configurations (ZFS on root and UEFI booted without secure boot), which are managed by `proxmox-boot-tool`, the meta-package `systemd-boot` should be removed. The package was automatically shipped for systems installed from the PVE 8.1 to PVE 8.4 ISOs, as it contained `bootctl` in bookworm.
+
+If the `pve8to9` checklist script suggests it, the `systemd-boot` meta-package is safe to remove unless you manually installed it and are using `systemd-boot` as a bootloader. Should `systemd-boot-efi` and `systemd-boot-tools` be required, `pve8to9` will warn you accordingly. The `pve8to9` checklist script will change its output depending on the state of the upgrade, and should be [run continuously before and after the upgrade](https://pve.proxmox.com/wiki/Upgrade_from_8_to_9#Continuously_use_the_pve8to9_checklist_script "Upgrade from 8 to 9"). It will print which packages should be removed or added at the appropriate time.
+
+
+
+NOTICE: Proxmox VE 9 replaced the ambiguously named 'VM.Monitor' privilege with 'Sys.Audit' for QEMU HMP monitor access and new dedicated '*' privileges for access to a VM's guest agent.
         The guest agent sub-privileges are 'Audit' for all informational commands, 'FileRead' and 'FileWrite' for file-read and file-write, 'FileSystemMgmt' for filesystem freeze, thaw and trim, and 'Unrestricted' for everything, including command execution. Operations that affect the VM runstate require 'VM.PowerMgmt' or 'VM.GuestAgent.Unrestricted'
 #### New
 
-- 
-	- VM.PowerMgmt
-	- Sys.Console
-	- Sys.Audit
-	- VM.Config.Cloudinit
-	- Pool.Allocate
-	- SDN.Use
-	- VM.Config.Memory
-	- VM.Allocate
-	- VM.Console
-	- VM.Clone
-	- VM.Config.Network
-	- Sys.Modify
-	- VM.Config.Disk
-	- Datastore.Allocate
-	- VM.Config.CPU
-	- VM.Config.CDROM
-	- Datastore.Audit
-	- VM.Migrate
-	- Datastore.AllocateSpace
-
-	- VM.Config.Options
-- Pool.Audit
-	- VM.Config.HWType
-	- VM.Audit
+- VM.PowerMgmt
+- Sys.Console
+- Sys.Audit
+- VM.Config.Cloudinit
+- Pool.Allocate
+- SDN.Use
+- VM.Config.Memory
+- VM.Allocate
+- VM.Console
+- VM.Clone
+- VM.Config.Network
+- Sys.Modify
+- VM.Config.Disk
+- Datastore.Allocate
+- VM.Config.CPU
+- VM.Config.CDROM
+- Datastore.Audit
+- VM.Migrate
+- Datastore.AllocateSpace
+- VM.Config.Options
+- VM.Config.HWType
+- VM.Audit
 
 
-New
+To add
 - VM.GuestAgent.Audit
 - VM.GuestAgent.FileRead
 - VM.GuestAgent.FileWrite
@@ -231,6 +236,7 @@ New
 - Mapping.Audit
 - Mapping.Use
 - Sys.Syslog
+- Pool.Audit
 
 Dropped
 - Permissions.Modify"
@@ -297,3 +303,5 @@ Finally, I can remove the noout flag:
 ```bash
 ceph osd unset noout
 ```
+
+Add role to terraform user
