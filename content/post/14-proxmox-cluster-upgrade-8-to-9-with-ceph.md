@@ -143,8 +143,6 @@ ceph osd require-osd-release squid
 
 The prerequisites to upgrade the cluster to Proxmox VE 9 are now complete. Am I ready to upgrade? Not yet.
 
-### Script `pve8to9`
-
 A small checklist program named **`pve8to9`** is included in the latest Proxmox VE 8.4 packages. The program will provide hints and warnings about potential issues before, during and after the upgrade process. Pretty handy isn't it?
 
 Running the tool the first time give me some insights on what I need to do. The script checks a number of parameters, grouped by theme. Here the VM guest section:
@@ -174,18 +172,56 @@ WARNINGS: 2
 FAILURES: 2
 ```
 
-These are the `FAILURES` and `WARNINGS` on my system:
+Let's review what's wrong with the current configuration:
+
 ```
 FAIL: 1 custom role(s) use the to-be-dropped 'VM.Monitor' privilege and need to be adapted after the upgrade
+```
+
+Some time ago, in order to use Terraform with my Proxmox cluster, I created a dedicated role. This was detailed in that [post]({{< ref "post/3-terraform-create-vm-proxmox" >}}).
+
+This role is using the `VM.Monitor` privilege, which is removed in Proxmox VE 9. Instead, new privileges  under `VM.GuestAgent.*` exist. So I remove this one and I'll add those once the cluster have been upgraded.
+
+```
 FAIL: systemd-boot meta-package installed. This will cause problems on upgrades of other boot-related packages. Remove 'systemd-boot' See https://pve.proxmox.com/wiki/Upgrade_from_8_to_9#sd-boot-warning for more information.
+```
+
+ Proxmox VE usually use `systemd-boot` for booting only in some configurations which are managed by `proxmox-boot-tool`, the meta-package `systemd-boot` should be removed. The package was automatically shipped for systems installed from the PVE 8.1 to PVE 8.4, as it contained `bootctl` in bookworm.
+
+If the `pve8to9` checklist script suggests it, the `systemd-boot` meta-package is safe to remove unless you manually installed it and are using `systemd-boot` as a bootloader:
+```bash
+apt remove systemd-boot -y
+```
+
+
+```
 WARN: 1 running guest(s) detected - consider migrating or stopping them.
+```
+
+In HA setup, before updating a node, I put it in maintenance mode. This automatically moves the workload elsewhere. When this mode is disabled, the workload move back to its previous location.
+
+```
 WARN: The matching CPU microcode package 'amd64-microcode' could not be found! Consider installing it to receive the latest security and bug fixes for your CPU.
         Ensure you enable the 'non-free-firmware' component in the apt sources and run:
         apt install amd64-microcode
 ```
 
-### Custom Role using `VM.Monitor`
+It is recommended to install processor microcode for updates which can fix hardware bugs, improve performance, and enhance security features of the processor.
 
+<<<<<<< HEAD
+Add the `non-free-firmware` source to the current ones:
+```bash
+sed -i '/^deb /{/non-free-firmware/!s/$/ non-free-firmware/}' /etc/apt/sources.list
+```
+
+Then install the `amd64-microcode` package:
+```bash
+apt update
+apt install amd64-microcode -y
+```
+
+After these small adjustments, am I ready yet? Let's find out by relaunching the `pve8to9` script.
+=======
 Some time ago, in order to use Terraform with my Proxmox cluster, I created a dedicated role. This was detailed in that [post]({{< ref "post/3-terraform-create-vm-proxmox" >}}).
 
 This role is using the `VM.Monitor` privilege, which is removed in Proxmox VE 9. Instead, new privileges  under `VM.GuestAgent.*` exist. So I remove this one and I'll add those once the cluster have been upgraded.
@@ -268,12 +304,181 @@ NOTICE: Proxmox VE 9 replaced the ambiguously named 'VM.Monitor' privilege with 
  pve8to9
 
 ### Move important Virtual Machines and Containers
+>>>>>>> 2b0ffade4cb64c71f4bd97b52afd0b07987c4c71
 
+⚠️ Don't forget to run the `pve8to9` on all nodes to make sure everything is good.
 
+---
 ## Upgrade
-### Update the configured APT repositories
 
-#### Update Debian Base Repositories to Trixie
+🚀 Now everything is ready for the big move! Like I did for the minor update, I'll proceed one node at a time.
+
+### Set Maintenance Mode
+
+First, I enter the node into maintenance mode. This will move existing workload on other nodes:
+```bash
+ha-manager crm-command node-maintenance enable $(hostname)
+```
+
+After issuing the command, I wait about one minute to give the resources the time to migrate.
+
+### Change Source Repositories to Trixie
+
+Since Debian Trixie, the `deb822` format is now available and recommended for sources. It is structured around key/value format. This offers better readability and security.
+
+#### Debian Sources
+```bash
+cat > /etc/apt/sources.list.d/debian.sources << EOF
+Types: deb deb-src
+URIs: http://deb.debian.org/debian/
+Suites: trixie trixie-updates
+Components: main contrib non-free-firmware
+Signed-By: /usr/share/keyrings/debian-archive-keyring.gpg
+
+Types: deb deb-src
+URIs: http://security.debian.org/debian-security/
+Suites: trixie-security
+Components: main contrib non-free-firmware
+Signed-By: /usr/share/keyrings/debian-archive-keyring.gpg
+EOF
+```
+
+#### Proxmox Sources (without subscription)
+```bash
+cat > /etc/apt/sources.list.d/proxmox.sources << EOF
+Types: deb 
+URIs: http://download.proxmox.com/debian/pve
+Suites: trixie
+Components: pve-no-subscription
+Signed-By: /usr/share/keyrings/proxmox-archive-keyring.gpg
+EOF
+```
+
+#### Ceph Squid Sources (without subscription)
+```bash
+cat > /etc/apt/sources.list.d/ceph.sources << EOF
+Types: deb
+URIs: http://download.proxmox.com/debian/ceph-squid
+Suites: trixie
+Components: no-subscription
+Signed-By: /usr/share/keyrings/proxmox-archive-keyring.gpg
+EOF
+```
+
+#### Remove Old `bookworm` Source Lists
+
+The list for `bookworm` in the old format must be removed:
+```bash
+rm -f /etc/apt/sources.list{,.d/*.list}
+```
+
+### Update the Configured `apt` Repositories
+
+Refresh the repositories:
+```bash
+apt update
+```
+```plaintext
+Get:1 http://security.debian.org/debian-security trixie-security InRelease [43.4 kB]
+Get:2 http://deb.debian.org/debian trixie InRelease [140 kB]                                                                       
+Get:3 http://download.proxmox.com/debian/ceph-squid trixie InRelease [2,736 B]        
+Get:4 http://download.proxmox.com/debian/pve trixie InRelease [2,771 B]               
+Get:5 http://deb.debian.org/debian trixie-updates InRelease [47.3 kB]
+Get:6 http://security.debian.org/debian-security trixie-security/main Sources [91.1 kB]
+Get:7 http://security.debian.org/debian-security trixie-security/non-free-firmware Sources [696 B]
+Get:8 http://security.debian.org/debian-security trixie-security/main amd64 Packages [69.0 kB]
+Get:9 http://security.debian.org/debian-security trixie-security/main Translation-en [45.1 kB]
+Get:10 http://security.debian.org/debian-security trixie-security/non-free-firmware amd64 Packages [544 B]
+Get:11 http://security.debian.org/debian-security trixie-security/non-free-firmware Translation-en [352 B]
+Get:12 http://download.proxmox.com/debian/ceph-squid trixie/no-subscription amd64 Packages [33.2 kB]
+Get:13 http://deb.debian.org/debian trixie/main Sources [10.5 MB] 
+Get:14 http://download.proxmox.com/debian/pve trixie/pve-no-subscription amd64 Packages [241 kB]
+Get:15 http://deb.debian.org/debian trixie/non-free-firmware Sources [6,536 B]
+Get:16 http://deb.debian.org/debian trixie/contrib Sources [52.3 kB]
+Get:17 http://deb.debian.org/debian trixie/main amd64 Packages [9,669 kB]
+Get:18 http://deb.debian.org/debian trixie/main Translation-en [6,484 kB]
+Get:19 http://deb.debian.org/debian trixie/contrib amd64 Packages [53.8 kB]
+Get:20 http://deb.debian.org/debian trixie/contrib Translation-en [49.6 kB]
+Get:21 http://deb.debian.org/debian trixie/non-free-firmware amd64 Packages [6,868 B]
+Get:22 http://deb.debian.org/debian trixie/non-free-firmware Translation-en [4,704 B]
+Get:23 http://deb.debian.org/debian trixie-updates/main Sources [2,788 B]
+Get:24 http://deb.debian.org/debian trixie-updates/main amd64 Packages [5,412 B]
+Get:25 http://deb.debian.org/debian trixie-updates/main Translation-en [4,096 B]
+Fetched 27.6 MB in 3s (8,912 kB/s)              
+Reading package lists... Done
+Building dependency tree... Done
+Reading state information... Done
+681 packages can be upgraded. Run 'apt list --upgradable' to see them.
+```
+
+### Upgrade to Debian Trixie and Proxmox VE 9
+
+Launch the upgrade:
+```bash
+apt-get dist-upgrade -y
+```
+
+During the process , you will be prompted to confirm some changes, don't 
+
+During the above step, you will be asked to approve changes to configuration files and some service restarts, where the default config has been updated by their respective package.
+
+You may also be shown the output of apt-listchanges, you can simply exit there by pressing "q". If you get prompted for your default keyboard selection, simply use the arrow keys to navigate to the one applicable in your case and hit enter.
+
+For questions about service restarts (like Restart services during package upgrades without asking?) use the default if unsure, as the reboot after the upgrade will restart all services cleanly anyway.
+
+It's suggested to check the difference for each file in question and choose the answer accordingly to what's most appropriate for your setup.
+
+Common configuration files with changes, and the recommended choices are:
+
+- `/etc/issue` -> Proxmox VE will auto-generate this file on boot, and it has only cosmetic effects on the login console.
+    
+    Using the default "No" (keep your currently-installed version) is safe here.
+    
+
+- `/etc/lvm/lvm.conf` -> Changes relevant for Proxmox VE will be updated, and a newer config version might be useful.
+    
+    If you did not make extra changes yourself and are unsure it's suggested to choose "Yes" (install the package maintainer's version) here.
+    
+
+- `/etc/ssh/sshd_config` -> If you have not changed this file manually, the only differences should be a replacement of `ChallengeResponseAuthentication no` with `KbdInteractiveAuthentication no` and some irrelevant changes in comments (lines starting with `#`).
+    
+    If this is the case, both options are safe, though we would recommend installing the package maintainer's version in order to move away from the deprecated `ChallengeResponseAuthentication` option. If there are other changes, we suggest to inspect them closely and decide accordingly.
+    
+
+- `/etc/default/grub` -> Here you may want to take special care, as this is normally only asked for if you changed it manually, e.g., for adding some kernel command line option.
+    
+    It's recommended to check the difference for any relevant change, note that changes in comments (lines starting with `#`) are not relevant.
+    
+    If unsure, we suggested to selected "No" (keep your currently-installed version)
+    
+
+- `/etc/chrony/chrony.conf` -> If you made local changes you might want to move them out of the global config into the `conf.d` or, for custom time sources, the `sources.d` folder.
+    
+    See the `/etc/chrony/conf.d/README` and `/etc/chrony/sources.d/README` files on your system for detaily.
+    
+    If you did not make extra changes yourself and are unsure it's suggested to choose "Yes" (install the package maintainer's version) here.
+
+The upgrade took about 5 minutes, depending of the hardware.
+
+At the end of the upgrade, restart the machine:
+```bash
+reboot
+```
+
+
+
+### Remove Maintenance Mode
+
+Finally you can disable the maintenance mode, the workload which was located on that machine will come back:
+```bash
+ha-manager crm-command node-maintenance disable $(hostname)
+```
+
+
+
+
+
+#### 
 
 #### Add the Proxmox VE 9 Package Repository
 
@@ -281,7 +486,7 @@ NOTICE: Proxmox VE 9 replaced the ambiguously named 'VM.Monitor' privilege with 
 
 #### Refresh Package Index
 
-### Upgrade the system to Debian Trixie and Proxmox VE 9.0
+
 
 ### Check Result & Reboot Into Updated Kernel
 
@@ -304,4 +509,67 @@ Finally, I can remove the noout flag:
 ceph osd unset noout
 ```
 
+<<<<<<< HEAD
 Add role to terraform user
+
+
+
+
+
+#### New
+
+- VM.PowerMgmt
+- Sys.Console
+- Sys.Audit
+- VM.Config.Cloudinit
+- Pool.Allocate
+- SDN.Use
+- VM.Config.Memory
+- VM.Allocate
+- VM.Console
+- VM.Clone
+- VM.Config.Network
+- Sys.Modify
+- VM.Config.Disk
+- Datastore.Allocate
+- VM.Config.CPU
+- VM.Config.CDROM
+- Datastore.Audit
+- VM.Migrate
+- Datastore.AllocateSpace
+- VM.Config.Options
+- VM.Config.HWType
+- VM.Audit
+
+
+To add
+- VM.GuestAgent.Audit
+- VM.GuestAgent.FileRead
+- VM.GuestAgent.FileWrite
+- VM.GuestAgent.FileSystemMgmt
+- VM.GuestAgent.Unrestricted
+- SDN.Audit
+- Mapping.Audit
+- Mapping.Use
+- Sys.Syslog
+- Pool.Audit
+
+Dropped
+- Permissions.Modify"
+- SDN.Allocate
+- Realm.Allocate
+- VM.Replicate
+- Realm.AllocateUser
+- Sys.AccessNetwork
+- Datastore.AllocateTemplate
+- Sys.PowerMgmt
+- User.Modify
+- Mapping.Modify
+- Group.Allocate
+- Sys.Incoming
+- VM.Backup
+- VM.Snapshot
+- VM.Snapshot.Rollback
+=======
+Add role to terraform user
+>>>>>>> 2b0ffade4cb64c71f4bd97b52afd0b07987c4c71
