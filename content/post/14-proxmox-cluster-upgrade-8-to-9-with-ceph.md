@@ -152,7 +152,7 @@ The prerequisites to upgrade the cluster to Proxmox VE 9 are now complete. Am I 
 
 A small checklist program named **`pve8to9`** is included in the latest Proxmox VE 8.4 packages. The program will provide hints and warnings about potential issues before, during and after the upgrade process. Pretty handy isn't it?
 
-Running the tool the first time give me some insights on what I need to do. The script checks a number of parameters, grouped by theme. For example, this is the VM guest section:
+Running the tool the first time give me some insights on what I need to do. The script checks a number of parameters, grouped by theme. For example, this is the Virtual Guest section:
 ```plaintext
 = VIRTUAL GUEST CHECKS =
 
@@ -193,7 +193,7 @@ This role is using the `VM.Monitor` privilege, which is removed in Proxmox VE 9.
 FAIL: systemd-boot meta-package installed. This will cause problems on upgrades of other boot-related packages. Remove 'systemd-boot' See https://pve.proxmox.com/wiki/Upgrade_from_8_to_9#sd-boot-warning for more information.
 ```
 
- Proxmox VE usually uses `systemd-boot` for booting only in some configurations which are managed by `proxmox-boot-tool`, the meta-package `systemd-boot` should be removed. The package was automatically shipped for systems installed from the PVE 8.1 to PVE 8.4, as it contained `bootctl` in bookworm.
+ Proxmox VE usually uses `systemd-boot` for booting only in some configurations which are managed by `proxmox-boot-tool`, the meta-package `systemd-boot` should be removed. The package was automatically shipped for systems installed from the PVE 8.1 to PVE 8.4, as it contained `bootctl` in Bookworm.
 
 If the `pve8to9` checklist script suggests it, the `systemd-boot` meta-package is safe to remove unless you manually installed it and are using `systemd-boot` as a bootloader:
 ```bash
@@ -287,9 +287,9 @@ Signed-By: /usr/share/keyrings/proxmox-archive-keyring.gpg
 EOF
 ```
 
-#### Remove Old `bookworm` Source Lists
+#### Remove Old Bookworm Source Lists
 
-The lists for Debian `bookworm` in the old format must be removed:
+The lists for Debian Bookworm in the old format must be removed:
 ```bash
 rm -f /etc/apt/sources.list{,.d/*.list}
 ```
@@ -344,7 +344,7 @@ apt-get dist-upgrade -y
 
 During the process , you will be prompted to approve changes to configuration files and some service restarts. You may also be shown the output of changes, you can simply exit there by pressing `q`:
 - `/etc/issue`: Proxmox VE will auto-generate this file on boot -> `No`
-- `/etc/lvm/lvm.conf`: Changes relevant for Proxmox VE will be updated -> 
+- `/etc/lvm/lvm.conf`: Changes relevant for Proxmox VE will be updated -> `Yes`
 - `/etc/ssh/sshd_config`: Depending your setup -> `Inspect`
 - `/etc/default/grub`: Only if you changed it manually -> `Inspect`
 - `/etc/chrony/chrony.conf`: If you did not make extra changes yourself -> `Yes`
@@ -364,21 +364,21 @@ ha-manager crm-command node-maintenance disable $(hostname)
 
 ### Post-Upgrade Validation
 
-- Check cluster communications:
+- Check cluster communication:
 ```bash
 pvecm status
 ```
 
 - Verify storage mounts points
 
-- Check Ceph cluster health 
+- Check Ceph cluster health :
 ```bash
 ceph status
 ```
 
 - Confirm VM operations, backups, and HA groups
 
-HA groups have been removed at the profit of HA affinity rules. HA groups will be automatically migrated to HA rules.
+HA groups have been removed at the profit of HA affinity rules. HA groups are automatically migrated to HA rules.
 
 - Disable PVE Enterprise repository
 
@@ -392,12 +392,13 @@ sed -i 's/^/#/' /etc/apt/sources.list.d/pve-enterprise.sources
 ## Post Actions
 
 Once the whole cluster has been upgraded, proceed to post actions:
+
 - Remove the Ceph cluster `noout` flag:
 ```bash
 ceph osd unset noout
 ```
 
-- Recreate PCI mapping
+- Recreate PCI passthrough mapping 
 
 For the VM which I removed the host mapping at the beginning of the procedure, I can now recreate the mapping.
 

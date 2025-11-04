@@ -148,11 +148,11 @@ ceph osd require-osd-release squid
 ---
 ## Vérifications
 
-The prerequisites to upgrade the cluster to Proxmox VE 9 are now complete. Am I ready to upgrade? Not yet.
+Les prérequis pour mettre à niveau le cluster vers Proxmox VE 9 sont maintenant complets. Suis‑je prêt à mettre à niveau ? Pas encore.
 
-A small checklist program named **`pve8to9`** is included in the latest Proxmox VE 8.4 packages. The program will provide hints and warnings about potential issues before, during and after the upgrade process. Pretty handy isn't it?
+Un petit programme de checklist nommé **`pve8to9`** est inclus dans les derniers paquets Proxmox VE 8.4. Le programme fournit des indices et des alertes sur les problèmes potentiels avant, pendant et après la mise à niveau. Pratique non ?
 
-Running the tool the first time give me some insights on what I need to do. The script checks a number of parameters, grouped by theme. For example, this is the VM guest section:
+Lancer l’outil la première fois me donne des indications sur ce que je dois faire. Le script vérifie un certain nombre de paramètres, regroupés par thème. Par exemple, voici la section sur les Virtual Guest :
 ```plaintext
 = VIRTUAL GUEST CHECKS =
 
@@ -168,7 +168,7 @@ INFO: Checking VM configurations for outdated machine versions
 PASS: All VM machine versions are recent enough
 ```
 
-At the end, you have the summary. The goal is to address as many `FAILURES` and `WARNINGS` as possible:
+À la fin, vous avez le résumé. L’objectif est de corriger autant de `FAILURES` et `WARNINGS` que possible :
 ```plaintext
 = SUMMARY =
 
@@ -179,23 +179,23 @@ WARNINGS: 2
 FAILURES: 2
 ```
 
-Let's review the problems it found:
+Passons en revue les problèmes qu’il a trouvés :
 
 ```
 FAIL: 1 custom role(s) use the to-be-dropped 'VM.Monitor' privilege and need to be adapted after the upgrade
 ```
 
-Some time ago, in order to use Terraform with my Proxmox cluster, I created a dedicated role. This was detailed in that [post]({{< ref "post/3-terraform-create-vm-proxmox" >}}).
+Il y a quelque temps, pour utiliser Terraform avec mon cluster Proxmox, j'ai créé un rôle dédié. C'était détaillé dans cet [article]({{< ref "post/3-terraform-create-vm-proxmox" >}}).
 
-This role is using the `VM.Monitor` privilege, which is removed in Proxmox VE 9. Instead, new privileges  under `VM.GuestAgent.*` exist. So I remove this one and I'll add those once the cluster have been upgraded.
+Ce rôle utilise le privilège `VM.Monitor`, qui a été supprimé dans Proxmox VE 9. De nouveaux privilèges, sous `VM.GuestAgent.*`, existent à la place. Je supprime donc celui-ci et j'ajouterai les nouveaux une fois le cluster mis à niveau.
 
 ```
 FAIL: systemd-boot meta-package installed. This will cause problems on upgrades of other boot-related packages. Remove 'systemd-boot' See https://pve.proxmox.com/wiki/Upgrade_from_8_to_9#sd-boot-warning for more information.
 ```
 
- Proxmox VE usually uses `systemd-boot` for booting only in some configurations which are managed by `proxmox-boot-tool`, the meta-package `systemd-boot` should be removed. The package was automatically shipped for systems installed from the PVE 8.1 to PVE 8.4, as it contained `bootctl` in bookworm.
+ Proxmox VE utilise généralement `systemd-boot` pour le démarrage uniquement dans certaines configurations gérées par proxmox-boot-tool. Le méta-paquet `systemd-boot` doit être supprimé. Ce paquet était automatiquement installé sur les systèmes de PVE 8.1 à 8.4, car il contenait `bootctl` dans Bookworm.
 
-If the `pve8to9` checklist script suggests it, the `systemd-boot` meta-package is safe to remove unless you manually installed it and are using `systemd-boot` as a bootloader:
+Si le script de la checklist pve8to9 le suggère, vous pouvez supprimer le méta-paquet `systemd-boot` sans risque, sauf si vous l'avez installé manuellement et que vous utilisez `systemd-boot` comme bootloader :
 ```bash
 apt remove systemd-boot -y
 ```
@@ -205,7 +205,7 @@ apt remove systemd-boot -y
 WARN: 1 running guest(s) detected - consider migrating or stopping them.
 ```
 
-In HA setup, before updating a node, I put it in maintenance mode. This automatically moves the workload elsewhere. When this mode is disabled, the workload moves back to its previous location.
+Dans une configuration HA, avant de mettre à jour un nœud, je le mets en mode maintenance. Cela déplace automatiquement les ressources ailleurs. Quand ce mode est désactivé, la machine revient à son emplacement précédent.
 
 ```
 WARN: The matching CPU microcode package 'amd64-microcode' could not be found! Consider installing it to receive the latest security and bug fixes for your CPU.
@@ -213,42 +213,42 @@ WARN: The matching CPU microcode package 'amd64-microcode' could not be found! C
         apt install amd64-microcode
 ```
 
-It is recommended to install processor microcode for updates which can fix hardware bugs, improve performance, and enhance security features of the processor.
+Il est recommandé d’installer le microcode processeur pour les mises à jour qui peuvent corriger des bogues matériels, améliorer les performances et renforcer la sécurité du processeur.
 
-I add the `non-free-firmware` source to the current ones:
+J’ajoute la source `non-free-firmware` aux sources actuelles :
 ```bash
 sed -i '/^deb /{/non-free-firmware/!s/$/ non-free-firmware/}' /etc/apt/sources.list
 ```
 
-Then install the `amd64-microcode` package:
+Puis installe le paquet `amd64-microcode` :
 ```bash
 apt update
 apt install amd64-microcode -y
 ```
 
-After these small adjustments, am I ready yet? Let's find out by relaunching the `pve8to9` script.
+Après ces petits ajustements, suis‑je prêt ? Vérifions en relançant le script `pve8to9`.
 
-⚠️ Don't forget to run the `pve8to9` on all nodes to make sure everything is good.
+⚠️ N’oubliez pas de lancer `pve8to9` sur tous les nœuds pour vous assurer que tout est OK.
 
 ---
-## Upgrade
+## Mise à Niveau
 
-🚀 Now everything is ready for the big move! Like I did for the minor update, I'll proceed one node at a time, keeping my VMs and CTs up and running.
+🚀 Maintenant tout est prêt pour le grand saut ! Comme pour la mise à jour mineure, je procéderai nœud par nœud, en gardant mes VM et CT actives.
 
-### Set Maintenance Mode
+### Mettre le Mode Maintenance
 
-First, I enter the node into maintenance mode. This will move existing workload on other nodes:
+D’abord, j’entre le nœud en mode maintenance. Cela déplacera la charge existante sur les autres nœuds :
 ```bash
 ha-manager crm-command node-maintenance enable $(hostname)
 ```
 
-After issuing the command, I wait about one minute to give the resources the time to migrate.
+Après avoir exécuté la commande, j’attends environ une minute pour laisser le temps aux ressources de migrer.
 
-### Change Source Repositories to Trixie
+### Changer les Dépôts Sources vers Trixie
 
-Since Debian Trixie, the `deb822` format is now available and recommended for sources. It is structured around key/value format. This offers better readability and security.
+Depuis Debian Trixie, le format `deb822` est désormais disponible et recommandé pour les sources. Il est structuré autour d’un format clé/valeur. Cela offre une meilleure lisibilité et sécurité.
 
-#### Debian Sources
+#### Sources Debian
 ```bash
 cat > /etc/apt/sources.list.d/debian.sources << EOF
 Types: deb deb-src
@@ -265,7 +265,7 @@ Signed-By: /usr/share/keyrings/debian-archive-keyring.gpg
 EOF
 ```
 
-#### Proxmox Sources (without subscription)
+#### Sources Proxmox (sans subscription)
 ```bash
 cat > /etc/apt/sources.list.d/proxmox.sources << EOF
 Types: deb 
@@ -276,7 +276,7 @@ Signed-By: /usr/share/keyrings/proxmox-archive-keyring.gpg
 EOF
 ```
 
-#### Ceph Squid Sources (without subscription)
+#### Sources Ceph Squid (sans subscription)
 ```bash
 cat > /etc/apt/sources.list.d/ceph.sources << EOF
 Types: deb
@@ -287,16 +287,16 @@ Signed-By: /usr/share/keyrings/proxmox-archive-keyring.gpg
 EOF
 ```
 
-#### Remove Old `bookworm` Source Lists
+#### Supprimer les Anciennes Listes Bookworm
 
-The lists for Debian `bookworm` in the old format must be removed:
+Les listes pour Debian Bookworm au format ancien doivent être supprimées :
 ```bash
 rm -f /etc/apt/sources.list{,.d/*.list}
 ```
 
-### Update the Configured `apt` Repositories
+### Mettre à Jour les Dépôts `apt` Configurés
 
-Refresh the repositories:
+Rafraîchir les dépôts :  
 ```bash
 apt update
 ```
@@ -333,77 +333,78 @@ Reading state information... Done
 666 packages can be upgraded. Run 'apt list --upgradable' to see them.
 ```
 
-😈 666 packages, I'm doomed!
+😈 666 paquets, je suis condamné !
 
-### Upgrade to Debian Trixie and Proxmox VE 9
+### Mise à Niveau vers Debian Trixie et Proxmox VE 9
 
-Launch the upgrade:
+Lancer la mise à niveau :
 ```bash
 apt-get dist-upgrade -y
 ```
 
-During the process , you will be prompted to approve changes to configuration files and some service restarts. You may also be shown the output of changes, you can simply exit there by pressing `q`:
-- `/etc/issue`: Proxmox VE will auto-generate this file on boot -> `No`
-- `/etc/lvm/lvm.conf`: Changes relevant for Proxmox VE will be updated -> 
-- `/etc/ssh/sshd_config`: Depending your setup -> `Inspect`
-- `/etc/default/grub`: Only if you changed it manually -> `Inspect`
-- `/etc/chrony/chrony.conf`: If you did not make extra changes yourself -> `Yes`
+Pendant le processus, vous serez invité à approuver des changements de fichiers de configuration et certains redémarrages de services. Il se peut aussi que vous voyiez la sortie de certains changements, vous pouvez simplement en sortir en appuyant sur `q` :
+- `/etc/issue` : Proxmox VE régénérera automatiquement ce fichier au démarrage -> `No`
+- `/etc/lvm/lvm.conf` : Changements pertinents pour Proxmox VE seront mis à jour -> `Yes`
+- `/etc/ssh/sshd_config` : Selon votre configuration -> `Inspect`
+- `/etc/default/grub` : Seulement si vous l’avez modifié manuellement -> `Inspect`
+- `/etc/chrony/chrony.conf` : Si vous n’avez pas fait de modifications supplémentaires -> `Yes`
 
-The upgrade took about 5 minutes, depending of the hardware.
+La mise à niveau a pris environ 5 minutes, selon le matériel.
 
-At the end of the upgrade, restart the machine:
+À la fin de la mise à niveau, redémarrez la machine :
 ```bash
 reboot
 ```
-### Remove Maintenance Mode
+### Sortir du Mode Maintenance
 
-Finally when the node (hopefully) comes back, you can disable the maintenance mode. The workload which was located on that machine will come back:
+Enfin, quand le nœud (espérons‑le) est revenu, vous pouvez désactiver le mode maintenance. La charge qui était localisée sur cette machine reviendra :
 ```bash
 ha-manager crm-command node-maintenance disable $(hostname)
 ```
 
-### Post-Upgrade Validation
+### Validation Après Mise à Niveau
 
-- Check cluster communications:
+- Vérifier la communication du cluster :
 ```bash
 pvecm status
 ```
 
-- Verify storage mounts points
+- Vérifier les points de montage des stockages
 
-- Check Ceph cluster health 
+- Vérifier la santé du cluster Ceph :
 ```bash
 ceph status
 ```
 
-- Confirm VM operations, backups, and HA groups
+- Confirmer les opérations VM, les sauvegardes et les groupes HA
 
-HA groups have been removed at the profit of HA affinity rules. HA groups will be automatically migrated to HA rules.
+Les groupes HA ont été retirés au profit des règles d’affinité HA. Les groupes HA sont automatiquement migrés en règles HA.  
 
-- Disable PVE Enterprise repository
+- Désactiver le dépôt PVE Enterprise
 
-If you don't use the `pve-enterprise` repo, you can disable it:
+Si vous n’utilisez pas le dépôt `pve-enterprise`, vous pouvez le désactiver :   `` ```
 ```bash
 sed -i 's/^/#/' /etc/apt/sources.list.d/pve-enterprise.sources
 ```
 
-🔁 This node is now upgraded to Proxmox VE 9. Proceed to other nodes.
+🔁 Ce nœud est maintenant mis à niveau vers Proxmox VE 9. Procédez aux autres nœuds.
 
-## Post Actions
+## Actions Postérieures
 
-Once the whole cluster has been upgraded, proceed to post actions:
-- Remove the Ceph cluster `noout` flag:
+Une fois que tout le cluster a été mis à niveau, procédez aux actions postérieures :
+
+- Supprimer le flag `noout` du cluster Ceph :
 ```bash
 ceph osd unset noout
 ```
 
-- Recreate PCI mapping
+- Recréer les mappings PCI passthrough
 
-For the VM which I removed the host mapping at the beginning of the procedure, I can now recreate the mapping.
+Pour la VM pour laquelle j’ai retiré le mapping hôte au début de la procédure, je peux maintenant recréer le mapping.
 
--  Add privileges for the Terraform role
+- Ajouter les privilèges pour le rôle Terraform
 
-During the check phase, I was advised to remove the privilege `VM.Monitor` from my custom role for Terraform. Now that new privileges have been added with Proxmox VE 9, I can assign them to that role:
+Pendant la phase de vérification, il m’a été conseillé de supprimer le privilège `VM.Monitor` de mon rôle personnalisé pour Terraform. Maintenant que de nouveaux privilèges ont été ajoutés avec Proxmox VE 9, je peux les attribuer à ce rôle :
 - VM.GuestAgent.Audit
 - VM.GuestAgent.FileRead
 - VM.GuestAgent.FileWrite
@@ -412,13 +413,12 @@ During the check phase, I was advised to remove the privilege `VM.Monitor` from 
 
 ## Conclusion
 
-🎉My Proxmox VE cluster is now is version 9!
+🎉 Mon cluster Proxmox VE est maintenant en version 9 !
 
-The upgrade process was pretty smooth, without any downtime for my resources.
+Le processus de mise à niveau s’est déroulé assez tranquillement, sans aucune interruption pour mes ressources.
 
-Now I have access to HA affinity rules, which I was needing for my OPNsense cluster.
+J’ai maintenant accès aux règles d’affinité HA, dont j’avais besoin pour mon cluster OPNsense.
 
-As you could observe, I'm not maintaining my node up to date quite often. I might automate this next time, to keep them updated without any effort.
-
+Comme vous avez pu le constater, je ne maintiens pas mes nœuds à jour très souvent. Je pourrais automatiser cela la prochaine fois, pour les garder à jour sans effort.
 
 
