@@ -1,7 +1,7 @@
 ---
-slug: proxmox-cluster-upgrade-8-to-9-with-ceph
-title: Upgrading my 3-node Proxmox VE HA Cluster from 8 to 9 with Ceph
-description: Step-by-step upgrade of my 3-node Proxmox VE highly available cluster from 8 to 9, based on Ceph distributed storage, without any downtime.
+slug: proxmox-cluster-upgrade-8-to-9-ceph
+title: Mise à niveau de mon cluster Proxmox VE HA 3 nœuds de 8 à 9 basé sur Ceph
+description: Mise à niveau pas à pas de mon cluster Proxmox VE 3 nœuds en haute disponibilité, de 8 à 9, basé sur Ceph, sans aucune interruption.
 date: 2025-11-04
 draft: false
 tags:
