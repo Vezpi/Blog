@@ -19,7 +19,7 @@ I'm mainly interested in the new HA affinity rules, here what this version bring
 - Better mobile interface
 - Affinity rules in HA cluster
 
-In this article, I will walk you through the upgrade steps for my Proxmox VE highly available cluster supported by **Ceph** distributed storage. The official documentation can be found [here](https://pve.proxmox.com/wiki/Upgrade_from_8_to_9).
+In this article, I will walk you through the upgrade steps for my Proxmox VE highly available cluster supported by **Ceph** distributed storage. The goal is to upgrade the cluster while keeping the resources up and running. The official documentation can be found [here](https://pve.proxmox.com/wiki/Upgrade_from_8_to_9).
 
 ---
 ## Prerequisites
@@ -36,13 +36,13 @@ Before jumping into the upgrade, let's review the prerequisites:
 
 Well, I have some homework to do before the major upgrade to Proxmox VE 9. My nodes are currently in version `8.3.2`, hence a first update is necessary.
 
-Then my Ceph cluster, for my distributed storage, is using Ceph Reef (`18.2.4`). After the update to Proxmox VE 8.4, I'll move from Ceph Reef to Squid.
+Then my Ceph cluster, for the distributed storage, is using Ceph Reef (`18.2.4`). After the update to Proxmox VE 8.4, I'll move from Ceph Reef to Squid.
 
-I don't use Proxmox Backup Server in my homelab for now, I can skip that point. For the access to the nodes, it is better to reach the console (not from the WebGUI). I don't have direct access, In only have SSH.
+I don't use Proxmox Backup Server in my homelab for now, I can skip that point. For the access to the nodes, it is better if I could reach the console (not from theProxmox WebGUI). I don't have direct access, In only have SSH.
 
 The last points are checked, all my nodes have more than 10GB on the `/` mount point.
 
-ℹ️ One of my VM is using the host's processing unit of the APU via PCI pass-through. As this prevents the VM for hot migration, I remove the device at the beginning of this procedure to avoid having to restart the VM each time.
+ℹ️ One of my VM is using the host's processing unit of the APU via PCI pass-through. As this prevents the VM from hot migration, I remove the device at the beginning of this procedure to avoid having to restart the VM each time.
 
 Also, until the end of the upgrade to Proxmox VE 9, I set the Ceph OSDs as "no out", to avoid the CRUSH algorithm to try to rebalance the Ceph cluster during the upgrade:
 ```bash
@@ -73,7 +73,7 @@ echo 'grub-efi-amd64 grub2/force_efi_extra_removable boolean true' | debconf-set
 Then reinstall GRUB with 'apt install --reinstall grub-efi-amd64'
 ```
 
-- Restart it
+- Restart the machine
 ```bash
 reboot
 ```
@@ -89,7 +89,7 @@ Between each node, I wait for the Ceph status to be clean, without warnings.
 
 ### Upgrade Ceph from Reef to Squid
 
-I can now move on into the Ceph upgrade, the Proxmox documentation for that topics is [here](https://pve.proxmox.com/wiki/Ceph_Reef_to_Squid).
+I can now move on into the Ceph upgrade, the Proxmox documentation for that procedure is [here](https://pve.proxmox.com/wiki/Ceph_Reef_to_Squid).
 
 On all nodes, I update the source of the Ceph packages for Proxmox:
 ```bash
@@ -126,7 +126,7 @@ Now I can restart the OSD, still one node at a time. I have one OSD per node:
 systemctl restart ceph-osd.target
 ```
 
-I monitor the Ceph status with the Proxmox WebGUI. At start, it is showing some fancy colors. I'm just waiting to be back to full green, it takes less than a minute:
+I monitor the Ceph status with the Proxmox WebGUI. After the restart, it is showing some fancy colors. I'm just waiting to be back to green, it takes less than a minute:
 ![Pasted_image_20251102230907.png](img/Pasted_image_20251102230907.png)
 
 A warning now shows up: `HEALTH_WARN: all OSDs are running squid or later but require_osd_release < squid`. Now all my OSDs are running Squid, I can set the minimum version to it:
@@ -145,7 +145,7 @@ The prerequisites to upgrade the cluster to Proxmox VE 9 are now complete. Am I 
 
 A small checklist program named **`pve8to9`** is included in the latest Proxmox VE 8.4 packages. The program will provide hints and warnings about potential issues before, during and after the upgrade process. Pretty handy isn't it?
 
-Running the tool the first time give me some insights on what I need to do. The script checks a number of parameters, grouped by theme. Here the VM guest section:
+Running the tool the first time give me some insights on what I need to do. The script checks a number of parameters, grouped by theme. For example, this is the VM guest section:
 ```plaintext
 = VIRTUAL GUEST CHECKS =
 
@@ -186,7 +186,7 @@ This role is using the `VM.Monitor` privilege, which is removed in Proxmox VE 9.
 FAIL: systemd-boot meta-package installed. This will cause problems on upgrades of other boot-related packages. Remove 'systemd-boot' See https://pve.proxmox.com/wiki/Upgrade_from_8_to_9#sd-boot-warning for more information.
 ```
 
- Proxmox VE usually use `systemd-boot` for booting only in some configurations which are managed by `proxmox-boot-tool`, the meta-package `systemd-boot` should be removed. The package was automatically shipped for systems installed from the PVE 8.1 to PVE 8.4, as it contained `bootctl` in bookworm.
+ Proxmox VE usually uses `systemd-boot` for booting only in some configurations which are managed by `proxmox-boot-tool`, the meta-package `systemd-boot` should be removed. The package was automatically shipped for systems installed from the PVE 8.1 to PVE 8.4, as it contained `bootctl` in bookworm.
 
 If the `pve8to9` checklist script suggests it, the `systemd-boot` meta-package is safe to remove unless you manually installed it and are using `systemd-boot` as a bootloader:
 ```bash
@@ -198,7 +198,7 @@ apt remove systemd-boot -y
 WARN: 1 running guest(s) detected - consider migrating or stopping them.
 ```
 
-In HA setup, before updating a node, I put it in maintenance mode. This automatically moves the workload elsewhere. When this mode is disabled, the workload move back to its previous location.
+In HA setup, before updating a node, I put it in maintenance mode. This automatically moves the workload elsewhere. When this mode is disabled, the workload moves back to its previous location.
 
 ```
 WARN: The matching CPU microcode package 'amd64-microcode' could not be found! Consider installing it to receive the latest security and bug fixes for your CPU.
@@ -208,7 +208,7 @@ WARN: The matching CPU microcode package 'amd64-microcode' could not be found! C
 
 It is recommended to install processor microcode for updates which can fix hardware bugs, improve performance, and enhance security features of the processor.
 
-Add the `non-free-firmware` source to the current ones:
+I add the `non-free-firmware` source to the current ones:
 ```bash
 sed -i '/^deb /{/non-free-firmware/!s/$/ non-free-firmware/}' /etc/apt/sources.list
 ```
@@ -226,7 +226,7 @@ After these small adjustments, am I ready yet? Let's find out by relaunching the
 ---
 ## Upgrade
 
-🚀 Now everything is ready for the big move! Like I did for the minor update, I'll proceed one node at a time.
+🚀 Now everything is ready for the big move! Like I did for the minor update, I'll proceed one node at a time, keeping my VMs and CTs up and running.
 
 ### Set Maintenance Mode
 
@@ -282,7 +282,7 @@ EOF
 
 #### Remove Old `bookworm` Source Lists
 
-The list for `bookworm` in the old format must be removed:
+The lists for Debian `bookworm` in the old format must be removed:
 ```bash
 rm -f /etc/apt/sources.list{,.d/*.list}
 ```
@@ -326,6 +326,8 @@ Reading state information... Done
 666 packages can be upgraded. Run 'apt list --upgradable' to see them.
 ```
 
+😈 666 packages, I'm doomed!
+
 ### Upgrade to Debian Trixie and Proxmox VE 9
 
 Launch the upgrade:
@@ -355,7 +357,7 @@ ha-manager crm-command node-maintenance disable $(hostname)
 
 ### Post-Upgrade Validation
 
-- Check cluster communication:
+- Check cluster communications:
 ```bash
 pvecm status
 ```
@@ -378,10 +380,11 @@ If you don't use the `pve-enterprise` repo, you can disable it:
 sed -i 's/^/#/' /etc/apt/sources.list.d/pve-enterprise.sources
 ```
 
-🔁 This node is now upgraded to Proxmox VE 9. You can proceed to other nodes. If all nodes have been upgraded, conclude
+🔁 This node is now upgraded to Proxmox VE 9. Proceed to other nodes.
 
 ## Post Actions
 
+Once the whole cluster has been upgraded, proceed to post actions:
 - Remove the Ceph cluster `noout` flag:
 ```bash
 ceph osd unset noout
