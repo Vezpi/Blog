@@ -5,7 +5,11 @@ description:
 date: 2025-11-04
 draft: true
 tags:
+  - proxmox
+  - high-availability
+  - ceph
 categories:
+  - homelab
 ---
 
 ## Intro
