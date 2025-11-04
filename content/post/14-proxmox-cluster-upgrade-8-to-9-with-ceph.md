@@ -2,7 +2,7 @@
 slug: proxmox-cluster-upgrade-8-to-9-with-ceph
 title: Template
 description:
-date:
+date: 2025-11-04
 draft: true
 tags:
 categories:
@@ -392,8 +392,26 @@ ceph osd unset noout
 
 - Recreate PCI mapping
 
-- Add role to terraform user
+For the VM which I removed the host mapping at the beginning of the procedure, I can now recreate the mapping.
 
+-  Add privileges for the Terraform role
+
+During the check phase, I was advised to remove the privilege `VM.Monitor` from my custom role for Terraform. Now that new prileges have been added with Proxmox VE 9, I can assign them to that role:
+- VM.GuestAgent.Audit
+- VM.GuestAgent.FileRead
+- VM.GuestAgent.FileWrite
+- VM.GuestAgent.FileSystemMgmt
+- VM.GuestAgent.Unrestricted
+
+## Conclusion
+
+🎉My Proxmox VE cluster is now is version 9!
+
+The upgrade process was pretty smooth, without any downtime for my resources.
+
+Now I have access to HA affinity rules, which I was needing for my OPNsense cluster.
+
+As you could observe, I'm not maintaining my node up to date quite often. I might automate this next time, to keep them updated without any effort.
 
 
 
