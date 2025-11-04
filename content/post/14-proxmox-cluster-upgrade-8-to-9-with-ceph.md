@@ -14,25 +14,27 @@ categories:
 
 ## Intro
 
-My **Proxmox VE** cluster is almost one year old now, and it's been a while since I didn't update my nodes. Now is the time to move forward and bump it to Proxmox VE **9**.
+My **Proxmox VE** cluster is almost one year old now, and I haven’t kept the nodes fully up to date. Time to address this and bump it to Proxmox VE **9**.
 
-I'm mainly interested in the new HA affinity rules, here what this version brings:
-- Debian 13 "Trixie"
-- Snapshots for thick-provisioned LVM shared storage
-- Fabrics feature for the SDN stack
-- Better mobile interface
-- Affinity rules in HA cluster
+I'm mainly after the new HA affinity rules, but here the useful changes that this version brings:
+- Debian 13 "Trixie".
+- Snapshots for thick-provisioned LVM shared storage.
+- SDN fabrics feature.
+- Improved mobile UI.
+- Affinity rules in HA cluster.
 
-In this article, I will walk you through the upgrade steps for my Proxmox VE highly available cluster supported by **Ceph** distributed storage. The goal is to upgrade the cluster while keeping the resources up and running. The official documentation can be found [here](https://pve.proxmox.com/wiki/Upgrade_from_8_to_9).
+The cluster is a three‑node, highly available, hyper‑converged setup using Ceph for distributed storage.
+
+In this article, I'll walk through the upgrade steps for my Proxmox VE cluster, from 8 to 9, while keeping the resources up and running. [Official docs](https://pve.proxmox.com/wiki/Upgrade_from_8_to_9).
 
 ---
 ## Prerequisites
 
 Before jumping into the upgrade, let's review the prerequisites:
 
-1. All nodes upgraded to the latest version of Proxmox VE 8.4.
-2. Ceph: upgrade cluster to Ceph 19.2 Squid before.
-3. Proxmox Backup Server: upgrade to Proxmox BS 4.
+1. All nodes upgraded to the latest Proxmox VE `8.4`.
+2. Ceph cluster upgraded to  Squid (`19.2`).
+3. Proxmox Backup Server upgraded to Proxmox BS 4.
 4. Reliable access to the node.
 5. A healthy cluster.
 6. backup of all VMs and CTs.
@@ -42,11 +44,11 @@ Well, I have some homework to do before the major upgrade to Proxmox VE 9. My no
 
 Then my Ceph cluster, for the distributed storage, is using Ceph Reef (`18.2.4`). After the update to Proxmox VE 8.4, I'll move from Ceph Reef to Squid.
 
-I don't use Proxmox Backup Server in my homelab for now, I can skip that point. For the access to the nodes, it is better if I could reach the console (not from theProxmox WebGUI). I don't have direct access, In only have SSH.
+I don't use Proxmox Backup Server in my homelab for now, I can skip that point. For the access to the nodes, it would be better if I could reach the console (not from the Proxmox WebGUI). I don't have direct access, I only have SSH. If a node fails, I'd have to take it off the rack.
 
 The last points are checked, all my nodes have more than 10GB on the `/` mount point.
 
-ℹ️ One of my VM is using the host's processing unit of the APU via PCI pass-through. As this prevents the VM from hot migration, I remove the device at the beginning of this procedure to avoid having to restart the VM each time.
+ℹ️ One of my VM is using the host's processing unit of the APU via PCI passthrough. As this prevents the VM from hot migration, I remove the device at the beginning of this procedure to avoid having to restart the VM each time.
 
 Also, until the end of the upgrade to Proxmox VE 9, I set the Ceph OSDs as "no out", to avoid the CRUSH algorithm to try to rebalance the Ceph cluster during the upgrade:
 ```bash
@@ -67,7 +69,7 @@ apt-get update
 apt-get dist-upgrade -y
 ```
 
-At the end of the update, I'm aksed to remove a bootloader, which I execute:
+At the end of the update, I'm asked to remove a bootloader, which I execute:
 ```plaintext
 Removable bootloader found at '/boot/efi/EFI/BOOT/BOOTX64.efi', but GRUB packages not set up to update it!
 Run the following command:
@@ -125,7 +127,7 @@ Once all monitors are restarted, they report the latest version, with `ceph mon 
 - Before: `min_mon_release 18 (reef)`
 - After: `min_mon_release 19 (squid)`
 
-Now I can restart the OSD, still one node at a time. I have one OSD per node:
+Now I can restart the OSDs, still one node at a time. I have one OSD per node:
 ```bash
 systemctl restart ceph-osd.target
 ```
@@ -400,7 +402,7 @@ For the VM which I removed the host mapping at the beginning of the procedure, I
 
 -  Add privileges for the Terraform role
 
-During the check phase, I was advised to remove the privilege `VM.Monitor` from my custom role for Terraform. Now that new prileges have been added with Proxmox VE 9, I can assign them to that role:
+During the check phase, I was advised to remove the privilege `VM.Monitor` from my custom role for Terraform. Now that new privileges have been added with Proxmox VE 9, I can assign them to that role:
 - VM.GuestAgent.Audit
 - VM.GuestAgent.FileRead
 - VM.GuestAgent.FileWrite
