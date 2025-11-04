@@ -1,7 +1,7 @@
 ---
 slug: proxmox-cluster-upgrade-8-to-9-ceph
-title: Mise à niveau de mon cluster Proxmox VE HA 3 nœuds de 8 à 9 basé sur Ceph
-description: Mise à niveau pas à pas de mon cluster Proxmox VE 3 nœuds en haute disponibilité, de 8 à 9, basé sur Ceph, sans aucune interruption.
+title: Mise à niveau de mon cluster Proxmox VE HA 3 nœuds de 8 vers 9 basé sur Ceph
+description: Mise à niveau pas à pas de mon cluster Proxmox VE 3 nœuds en haute disponibilité, de 8 vers 9, basé sur Ceph, sans aucune interruption.
 date: 2025-11-04
 draft: false
 tags:
@@ -25,7 +25,7 @@ Je recherche principalement les nouvelles règles d’affinité HA, mais voici l
 
 Le cluster est composée de 3 nœuds, hautement disponible, avec une configuration hyper‑convergée, utilisant Ceph pour le stockage distribué.
 
-Dans cet article, je décris les étapes de mise à niveau de mon cluster Proxmox VE, de la version 8 à 9, tout en gardant les ressources actives. [Documentation officielle](https://pve.proxmox.com/wiki/Upgrade_from_8_to_9).
+Dans cet article, je décris les étapes de mise à niveau de mon cluster Proxmox VE, de la version 8 vers 9, tout en gardant les ressources actives. [Documentation officielle](https://pve.proxmox.com/wiki/Upgrade_from_8_to_9).
 
 ---
 ## Prérequis
@@ -92,7 +92,7 @@ Entre chaque nœud, j’attends que le statut Ceph soit clean, sans alertes.
 
 ✅ À la fin, le cluster Proxmox VE est mis à jour vers `8.4.14`
 
-### Mettre à Niveau Ceph de Reef à Squid
+### Mettre à Niveau Ceph de Reef vers Squid
 
 Je peux maintenant passer à la mise à niveau de Ceph, la documentation Proxmox pour cette procédure est [ici](https://pve.proxmox.com/wiki/Ceph_Reef_to_Squid).
 
