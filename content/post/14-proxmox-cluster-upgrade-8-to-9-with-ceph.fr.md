@@ -14,61 +14,61 @@ categories:
 
 ## Intro
 
-My **Proxmox VE** cluster is almost one year old now, and I haven’t kept the nodes fully up to date. Time to address this and bump it to Proxmox VE **9**.
+Mon **cluster Proxmox VE** a presque un an maintenant, et je n’ai pas tenu les nœuds complètement à jour. Il est temps de m’en occuper et de le passer en Proxmox VE **9**.
 
-I'm mainly after the new HA affinity rules, but here the useful changes that this version brings:
+Je recherche principalement les nouvelles règles d’affinité HA, mais voici les changements utiles apportés par cette version :
 - Debian 13 "Trixie".
-- Snapshots for thick-provisioned LVM shared storage.
-- SDN fabrics feature.
-- Improved mobile UI.
-- Affinity rules in HA cluster.
+- Snapshots pour le stockage LVM partagé thick-provisioned.
+- Fonctionnalité SDN fabrics.
+- Interface mobile améliorée.
+- Règles d’affinité dans le cluster HA.
 
-The cluster is a three‑node, highly available, hyper‑converged setup using Ceph for distributed storage.
+Le cluster est composée de 3 nœuds, hautement disponible, avec une configuration hyper‑convergée, utilisant Ceph pour le stockage distribué.
 
-In this article, I'll walk through the upgrade steps for my Proxmox VE cluster, from 8 to 9, while keeping the resources up and running. [Official docs](https://pve.proxmox.com/wiki/Upgrade_from_8_to_9).
+Dans cet article, je décris les étapes de mise à niveau de mon cluster Proxmox VE, de la version 8 à 9, tout en gardant les ressources actives. [Documentation officielle](https://pve.proxmox.com/wiki/Upgrade_from_8_to_9).
 
 ---
-## Prerequisites
+## Prérequis
 
-Before jumping into the upgrade, let's review the prerequisites:
+Avant de se lancer dans la mise à niveau, passons en revue les prérequis :
 
-1. All nodes upgraded to the latest Proxmox VE `8.4`.
-2. Ceph cluster upgraded to  Squid (`19.2`).
-3. Proxmox Backup Server upgraded to version 4.
-4. Reliable access to the node.
-5. Healthy cluster.
-6. Backup of all VMs and CTs.
-7. At least 5 GB free on `/`.
+1. Tous les nœuds mis à jour vers la dernière version Proxmox VE `8.4`.
+2. Cluster Ceph mis à niveau vers Squid (`19.2`).
+3. Proxmox Backup Server mis à jour vers la version 4.
+4. Accès fiable au nœud.
+5. Cluster en bonne santé.
+6. Sauvegarde de toutes les VM et CT.
+7. Au moins 5 Go libres sur `/`.
 
-Notes about my environment:
+Remarques sur mon environnement :
 
-- PVE nodes are on `8.3.2`, so a minor upgrade to 8.4 is required first.
-- Ceph is Reef (`18.2.4`) and will be upgraded to Squid after PVE 8.4.
-- I don’t use PBS in my homelab, so I can skip that step.
-- I have more than 10GB available on `/` on my nodes, this is fine.
-- I only have SSH console access, if a node becomes unresponsive I may need physical access.
-- One VM has a CPU passthrough (APU). Passthrough prevents live‑migration, so I remove that mapping prior to the upgrade.
-- Set Ceph OSDs to `noout` during the upgrade to avoid automatic rebalancing:  
+- Les nœuds PVE sont en `8.3.2`, donc une mise à jour mineure vers 8.4 est d’abord requise.
+- Ceph tourne sous Reef (`18.2.4`) et sera mis à niveau vers Squid après PVE 8.4.
+- Je n’utilise pas PBS dans mon homelab, donc je peux sauter cette étape.
+- J’ai plus de 10 Go disponibles sur `/` sur mes nœuds, c’est suffisant.
+- Je n’ai qu’un accès console SSH, si un nœud ne répond plus je pourrais avoir besoin d’un accès physique.
+- Une VM a un passthrough CPU (APU). Le passthrough empêche la migration à chaud, donc je supprime ce mapping avant la mise à niveau.
+- Mettre les OSD Ceph en `noout` pendant la mise à niveau pour éviter le rebalancing automatique :
 ```bash
 ceph osd set noout
 ```
 
-### Update Proxmox VE to 8.4.14
+### Mettre à Jour Proxmox VE vers 8.4.14
 
-The plan is simple, for all nodes, one at a time:
+Le plan est simple, pour tous les nœuds, un par un :
 
-1. Enable the maintenance mode
+1. Activer le mode maintenance
 ```bash
 ha-manager crm-command node-maintenance enable $(hostname)
 ```
 
-2. Update the node
+2. Mettre à jour le nœud
 ```bash
 apt-get update
 apt-get dist-upgrade -y
 ```
 
-At the end of the update, I'm invited to remove a bootloader, which I execute:
+À la fin de la mise à jour, on me propose de retirer booloader, ce que j’exécute :
 ```plaintext
 Removable bootloader found at '/boot/efi/EFI/BOOT/BOOTX64.efi', but GRUB packages not set up to update it!
 Run the following command:
@@ -78,75 +78,75 @@ echo 'grub-efi-amd64 grub2/force_efi_extra_removable boolean true' | debconf-set
 Then reinstall GRUB with 'apt install --reinstall grub-efi-amd64'
 ```
 
-3. Restart the machine
+3. Redémarrer la machine
 ```bash
 reboot
 ```
 
-4. Disable the maintenance node
+4. Désactiver le mode maintenance
 ```bash
 ha-manager crm-command node-maintenance disable $(hostname)
 ```
 
-Between each node, I wait for the Ceph status to be clean, without warnings.
+Entre chaque nœud, j’attends que le statut Ceph soit clean, sans alertes.
 
-✅ At the end, the Proxmox VE cluster is updated to `8.4.14`
+✅ À la fin, le cluster Proxmox VE est mis à jour vers `8.4.14`
 
-### Upgrade Ceph from Reef to Squid
+### Mettre à Niveau Ceph de Reef à Squid
 
-I can now move on into the Ceph upgrade, the Proxmox documentation for that procedure is [here](https://pve.proxmox.com/wiki/Ceph_Reef_to_Squid).
+Je peux maintenant passer à la mise à niveau de Ceph, la documentation Proxmox pour cette procédure est [ici](https://pve.proxmox.com/wiki/Ceph_Reef_to_Squid).
 
-Update Ceph package sources on every node:
+Mettre à jour les sources de paquets Ceph sur chaque nœud :
 ```bash
 sed -i 's/reef/squid/' /etc/apt/sources.list.d/ceph.list
 ```
 
-Upgrade the Ceph packages:
+Mettre à niveau les paquets Ceph :
 ```
 apt update
 apt full-upgrade -y
 ```
 
-After the upgrade on the first node, the Ceph version now shows `19.2.3`, I can see my OSDs appear as outdated, the monitors need either an upgrade or a restart:
+Après la mise à niveau sur le premier nœud, la version Ceph affiche maintenant `19.2.3`, je peux voir mes OSD apparaître comme obsolètes, les moniteurs nécessitent soit une mise à niveau soit un redémarrage :
 ![Ceph storage status in Proxmox after first node Ceph package udpate](img/proxmox-ceph-version-upgrade.png)
 
-I carry on and upgrade the packages on the 2 other nodes. 
+Je poursuis et mets à niveau les paquets sur les 2 autres nœuds.
 
-I have a monitor on each node, so I have to restart each monitor, one node at a time:
+J’ai un moniteur sur chaque nœud, donc je dois redémarrer chaque moniteur, un nœud à la fois :
 ```bash
 systemctl restart ceph-mon.target
 ```
 
-I verify the Ceph status between each restart:
+Je vérifie le statut Ceph entre chaque redémarrage :
 ```bash
 ceph status
 ```
 
-Once all monitors are restarted, they report the latest version, with `ceph mon dump`:
-- Before: `min_mon_release 18 (reef)`
-- After: `min_mon_release 19 (squid)`
+Une fois tous les moniteurs redémarrés, ils rapportent la dernière version, avec `ceph mon dump` :
+- Avant : `min_mon_release 18 (reef)`
+- Après : `min_mon_release 19 (squid)`
 
-Now I can restart the OSDs, still one node at a time. In my setup, I have one OSD per node:
+Je peux maintenant redémarrer les OSD, toujours un nœud à la fois. Dans ma configuration, j’ai un OSD par nœud :
 ```bash
 systemctl restart ceph-osd.target
 ```
 
-I monitor the Ceph status with the Proxmox WebGUI. After the restart, it is showing some fancy colors. I'm just waiting for the PGs to be back to green, it takes less than a minute:
+Je surveille le statut Ceph avec la WebGUI Proxmox. Après le redémarrage, elle affiche quelques couleurs fancy. J’attends juste que les PG redeviennent verts, cela prend moins d’une minute :
 ![Ceph storage status in Proxmox during the first OSD restart](img/proxmox-ceph-status-osd-restart.png)
 
-A warning shows up: `HEALTH_WARN: all OSDs are running squid or later but require_osd_release < squid`
+Un avertissement apparaît : `HEALTH_WARN: all OSDs are running squid or later but require_osd_release < squid`
 
-Now all my OSDs are running Squid, I can set the minimum version to it:
+Maintenant tous mes OSD tournent sous Squid, je peux fixer la version minimum à celle‑ci :
 ```bash
 ceph osd require-osd-release squid
 ```
 
-ℹ️ I'm not currently using CephFS so I don't have to care about the MDS (MetaData Server) daemon.
+ℹ️ Je n’utilise pas actuellement CephFS donc je n’ai pas à me soucier du daemon MDS (MetaData Server).
 
-✅ The Ceph cluster has been successfully upgraded to Squid (`19.2.3`).
+✅ Le cluster Ceph a été mis à niveau avec succès vers Squid (`19.2.3`).
 
 ---
-## Checks
+## Vérifications
 
 The prerequisites to upgrade the cluster to Proxmox VE 9 are now complete. Am I ready to upgrade? Not yet.
 
