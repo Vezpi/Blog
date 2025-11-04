@@ -102,6 +102,43 @@ pveum role add TerraformUser -privs "\
   SDN.Use"
 ```
 
+⚠️ The list of available privileges has been changed in PVE 9.0, use this command:
+```bash
+pveum role add TerraformUser -privs "\
+  Datastore.Allocate \
+  Datastore.AllocateSpace \
+  Datastore.Audit \
+  Pool.Allocate \
+  Pool.Audit \
+  Sys.Audit \
+  Sys.Console \
+  Sys.Modify \
+  Sys.Syslog \
+  VM.Allocate \
+  VM.Audit \
+  VM.Clone \
+  VM.Config.CDROM \
+  VM.Config.Cloudinit \
+  VM.Config.CPU \
+  VM.Config.Disk \
+  VM.Config.HWType \
+  VM.Config.Memory \
+  VM.Config.Network \
+  VM.Config.Options \
+  VM.Console \
+  VM.Migrate \
+  VM.GuestAgent.Audit \
+  VM.GuestAgent.FileRead \
+  VM.GuestAgent.FileWrite \
+  VM.GuestAgent.FileSystemMgmt \
+  VM.GuestAgent.Unrestricted \
+  VM.PowerMgmt \
+  Mapping.Audit \
+  Mapping.Use \
+  SDN.Audit \
+  SDN.Use"
+```
+
 2. **Create the User `terraformer`**
 ```bash
 pveum user add terraformer@pve --password <password>
