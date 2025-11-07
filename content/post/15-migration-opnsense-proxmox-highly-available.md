@@ -1,14 +1,15 @@
 ---
-slug:
-title: Template
-description:
-date:
+slug: migration-opnsense-proxmox-highly-available
+title: migration-opnsense-proxmox-highly-available
+description: migration-opnsense-proxmox-highly-available
+date: 2025-11-07
 draft: true
 tags:
   - opnsense
   - high-availability
   - proxmox
 categories:
+  - homelab
 ---
 
 ## Intro
@@ -103,57 +104,93 @@ First, your Proxmox cluster must allow it. There are some requirements:
 
 A fencing mechanism must be enabled. Fencing is the process of isolating a failed cluster node to ensure it no longer accesses shared resources. This prevents split-brain situations and allows Proxmox HA to safely restart affected VMs on healthy nodes. By default, it is using Linux software watchdog, *softdog*, good enough for me.
 
-In Proxmox VE 8, It was possible to create HA groups, depending of their resources, locations, etc. This has been replaced, in Proxmox VE 9, by HA affinity rules. This is actually the main reason behind my Proxmox VE cluster upgrade, which I've detailed in that [post]({{< ref "post/proxmox-cluster-upgrade-8-to-9-ceph" >}}).
+In Proxmox VE 8, It was possible to create HA groups, depending of their resources, locations, etc. This has been replaced, in Proxmox VE 9, by HA affinity rules. This is actually the main reason behind my Proxmox VE cluster upgrade, which I've detailed in that [post]({{< ref "post/14-proxmox-cluster-upgrade-8-to-9-ceph" >}}).
 
 ### Configure VM HA
 
 The Proxmox cluster is able to provide HA for the resources, but you need to define the rules.
 
-In `Datacenter` > `HA`, you can see the status and manage the resources. In the `Resources` panel I click on `Add`. I need to pick the resource to configure as HA. Then in the tooltip I can define the maximum of restart and relocate, pick a group if needed, then select `started`:
-
+In `Datacenter` > `HA`, you can see the status and manage the resources. In the `Resources` panel I click on `Add`. I need to pick the resource to configure as HA in the list, here `cerbere-head1` with ID 122. Then in the tooltip I can define the maximum of restart and relocate, I keep `Failback` enabled and the requested state to `started`:
 ![proxmox-add-vm-ha.png](img/proxmox-add-vm-ha.png)
 
-My Proxmox cluster will now make sure my VMs are started, but I don't want them on the same node. If this one fails, I will be sad.
+The Proxmox cluster will now make sure this VM is started. I do the same for the other OPNsense VM, `cerbere-head2`.  
 
-Proxmox allows to create node affinity rules and resource affinity as well. I don't mind on which node they run, but not together. I need a resource affinity rule.
+### HA Affinity Rules
 
-In my current Proxmox VE version (8.3.2), I can't create affinity rules from the WebGUI. I have to use the CLI to achieve that. From any node of the cluster, I create the resource affinity rule in `/etc/pve/ha/rules.cfg`:
-```bash
- ha-manager rules add resource-affinity opnsense-cluster \
- --affinity negative \
- --resources vm:122,vm:123       
-```
+Great, but I don't want them on the same node. This is when the new feature HA affinity rules, of Proxmox VE 9, come in. Proxmox allows to create node affinity and resource affinity rules. I don't mind on which node they run, but I don't want them together. I need a resource affinity rule.
+
+In `Datacenter` > `HA` > `Affinity Rules`, I add a new HA resource affinity rule. I select both VMs and pick the option `Keep Separate`:
+![proxmox-ha-resource-affinity-rule.png](img/proxmox-ha-resource-affinity-rule.png)
+
+✅ My OPNsense VMs are now fully ready!
+
 ## TODO
 
-HA in proxmox
-Make sure VM start at proxmox boot
-Check conso Watt average
-Check temp average
+
+Check conso Watt average: moyenne 85W
+Check temp average (midnight): ~33°
 ## Switch
 
-Backup OPNsense box
-Disable DHCP on OPNsene box
-Change OPNsense box IPs
 
-Remove GW on VM
-Configure DHCP on both instance
-Enable DHCP on VM
-Change VIP on VM
-Replicate configuration on VM
+
+#### Backup OPNsense box
+
+On my physical OPNsense instance, in `System` > `Configuration` > `Backups`
+
+#### Disable DHCP on OPNsene box
+
+In Services > ISC DHCPv4, and for all my interfaces, I disable the DHCP server.
+
+
+
+#### Change OPNsense box IPs
+
+In Interfaces, I the IP of each interfaces from .1 to .253
+As soon as I click on Apply, I lost the communication, which is expected
+
+
+#### Change VIP on VM
+
+On my Master VM, In Interfaces > Virtual IPs > Settings, I change the VIP address for all interface
+Then I click Apply
+
+
+#### Remove GW on VM
+
+In - # System: Gateways: Configuration, I disable the LAN_GW which is not needed anymore
+
+#### Configure DHCP on both instance
+
+In both VM, in - # Services: Dnsmasq DNS & DHCP, I enable the service
+#### Enable DHCP on VM
+
+Enable mdns repeate
+In - # Services: mDNS Repeater, I enable and enable CARP Failover
+#### Replicate configuration on VM
+
+In - # System: High Availability: Status, Synchronize and reconfigure all
+
+In my rack, I
 Unplug OPNsense box WAN
+
 Plug WAN on port 15
 
+![Pasted_image_20251107104749.png](img/Pasted_image_20251107104749.png)
 
  
 ## Verify
 
-Ping VIP
-Vérifier interface
-tests locaux (ssh, ping)
+Ping VIP OK
+Vérifier interface OK
+tests locaux (ssh, ping) OK
 
 Basic (dhcp, dns, internet)
-Firewall
-All sites
+DHCP OK -> Restart Unbound service
+DNS NOK
+Internet OK
+
+Firewall -> Need some not critical opening
+All sites 
 mDNS (chromecast)
 VPN
 TV
