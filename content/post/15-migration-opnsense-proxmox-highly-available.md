@@ -190,19 +190,24 @@ DNS NOK
 Internet OK
 
 Firewall -> Need some not critical opening
-All sites 
-mDNS (chromecast)
-VPN
-TV
+All sites -> OK
+mDNS (chromecast) -> OK
+VPN -> OK
+TV -> OK
 
-Vérifier tous les devices
+Vérifier tous les devices -> OK
 
 DNS blocklist
 
-Check load (ram, cpu)
-Failover
+Check load (ram, cpu) -> OK
+#### Failover
+In - # System: High Availability: Status, Synchronize and reconfigure all
+In 
+Every domains (reverse proxy/layer 4 proxy) give this error:
+SSL_ERROR_INTERNAL_ERROR_ALERT
+Anything else works apparently fine (to confirm)
 
-Test proxmox full shutdown
+#### Test proxmox full shutdown
 
 ## Clean Up
 
