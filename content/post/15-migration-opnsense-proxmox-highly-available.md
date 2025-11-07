@@ -194,7 +194,7 @@ All sites -> OK
 mDNS (chromecast) -> OK
 VPN -> OK
 TV -> OK
-
+speedtest -> -15% bandwidth  (to confirm another time)
 Vérifier tous les devices -> OK
 
 DNS blocklist
