@@ -58,8 +58,9 @@ The first VM is named `cerbere-head1` (I didn't tell you? My current firewall is
 - OS type: Linux
 - Machine type: `q35`
 - BIOS: `OVMF (UEFI)`
-- Disk: 20 GiB on Ceph storage
-- CPU/RAM: 2 vCPU, 4 GiB RAM
+- Disk: 20 GiB on Ceph distributed storage
+- RAM: 4 GiB RAM, ballooning disabled
+- CPU: 2 vCPU
 - NICs:
 	1. `vmbr0` (*Mgmt*)
 	2. `vlan20` (*WAN*)
@@ -102,13 +103,14 @@ First, your Proxmox cluster must allow it. There are some requirements:
 
 A fencing mechanism must be enabled. Fencing is the process of isolating a failed cluster node to ensure it no longer accesses shared resources. This prevents split-brain situations and allows Proxmox HA to safely restart affected VMs on healthy nodes. By default, it is using Linux software watchdog, *softdog*, good enough for me.
 
-It is possible to create HA groups, depending of their resources, locations, etc. In my case I don't create any group. Any nodes of my cluster will manage the highly available resources.
+In Proxmox VE 8, It was possible to create HA groups, depending of their resources, locations, etc. This has been replaced, in Proxmox VE 9, by HA affinity rules. This is actually the main reason behind my Proxmox VE cluster upgrade, which I've detailed in that [post]({{< ref "post/proxmox-cluster-upgrade-8-to-9-ceph" >}}).
 
 ### Configure VM HA
 
 The Proxmox cluster is able to provide HA for the resources, but you need to define the rules.
 
-For each of the VM, at the top, on the `More` button, select `Manage HA`. Define the maximum of restart and relocate, pick a group if needed, then select `started`:
+In `Datacenter` > `HA`, you can see the status and manage the resources. In the `Resources` panel I click on `Add`. I need to pick the resource to configure as HA. Then in the tooltip I can define the maximum of restart and relocate, pick a group if needed, then select `started`:
+
 ![proxmox-add-vm-ha.png](img/proxmox-add-vm-ha.png)
 
 My Proxmox cluster will now make sure my VMs are started, but I don't want them on the same node. If this one fails, I will be sad.
