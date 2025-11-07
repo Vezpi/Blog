@@ -166,6 +166,7 @@ In both VM, in - # Services: Dnsmasq DNS & DHCP, I enable the service
 
 Enable mdns repeate
 In - # Services: mDNS Repeater, I enable and enable CARP Failover
+reboot needed for CARP
 #### Replicate configuration on VM
 
 In - # System: High Availability: Status, Synchronize and reconfigure all
@@ -197,7 +198,7 @@ TV -> OK
 speedtest -> -15% bandwidth  (to confirm another time)
 Vérifier tous les devices -> OK
 
-DNS blocklist
+DNS blocklist OK
 
 Check load (ram, cpu) -> OK
 #### Failover
@@ -209,6 +210,8 @@ After checking the services synchronized thought XMLRPC Sync, Caddy and mDNS-rep
 
 Anything else works apparently fine (to confirm)
 While failover, the internet connection is really slow
+
+![Pasted_image_20251107214056.png](img/Pasted_image_20251107214056.png)
 
 #### Test proxmox full shutdown
 
