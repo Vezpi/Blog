@@ -205,7 +205,10 @@ In - # System: High Availability: Status, Synchronize and reconfigure all
 In 
 Every domains (reverse proxy/layer 4 proxy) give this error:
 SSL_ERROR_INTERNAL_ERROR_ALERT
+After checking the services synchronized thought XMLRPC Sync, Caddy and mDNS-repeater were not checked. It is because these services were installed after the initial configuration of the HA. 
+
 Anything else works apparently fine (to confirm)
+While failover, the internet connection is really slow
 
 #### Test proxmox full shutdown
 
