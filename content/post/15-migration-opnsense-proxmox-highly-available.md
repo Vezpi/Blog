@@ -223,6 +223,9 @@ no problem towards IoT vlan
 problem from mgmt to any other network
 not even a single ping to dockerVM
 
+ping problem -> disable Proxmox firewall on vmbr0 (and all interfaces) for the OPNsense VM
+
+
 Warning rtsold <interface_up> vtnet1 is disabled. in the logs (OPNsense)
 
 no gateway for backup node -> rework script
