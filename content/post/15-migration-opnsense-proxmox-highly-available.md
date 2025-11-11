@@ -213,6 +213,12 @@ While failover, the internet connection is really slow
 
 ![Pasted_image_20251107214056.png](img/Pasted_image_20251107214056.png)
 
+##  Problems
+Problem while pinging bastion from user vlan, some pings are lost (9%)
+same while pinging the main switch
+no problem pinging dockerVM (vlan Lab)
+Warning rtsold <interface_up> vtnet1 is disabled. in the logs (OPNsense)
+
 #### Test proxmox full shutdown
 
 ## Clean Up
