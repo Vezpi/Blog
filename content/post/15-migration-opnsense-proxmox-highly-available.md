@@ -56,13 +56,13 @@ I also create the `vlan44` for the *pfSync* VLAN, then I apply this configuratio
 Now that the VLAN configuration is done, I can start buiding the virtual machines on Proxmox.
 
 The first VM is named `cerbere-head1` (I didn't tell you? My current firewall is named `cerbere`, it makes even more sense now!) Here are the settings:
-- OS type: Linux
+- OS type: Linux (even if OPNsense is  based on FreeBSD)
 - Machine type: `q35`
 - BIOS: `OVMF (UEFI)`
 - Disk: 20 GiB on Ceph distributed storage
 - RAM: 4 GiB RAM, ballooning disabled
 - CPU: 2 vCPU
-- NICs:
+- NICs, firewall disabled:
 	1. `vmbr0` (*Mgmt*)
 	2. `vlan20` (*WAN*)
 	3. `vlan13` *(User)*
@@ -186,8 +186,8 @@ Vérifier interface OK
 tests locaux (ssh, ping) OK
 
 Basic (dhcp, dns, internet)
-DHCP OK -> Restart Unbound service
-DNS NOK
+DHCP OK 
+DNS NOK -> Restart Unbound service
 Internet OK
 
 Firewall -> Need some not critical opening
@@ -204,16 +204,26 @@ Check load (ram, cpu) -> OK
 #### Failover
 In - # System: High Availability: Status, Synchronize and reconfigure all
 In 
-Every domains (reverse proxy/layer 4 proxy) give this error:
-SSL_ERROR_INTERNAL_ERROR_ALERT
-After checking the services synchronized thought XMLRPC Sync, Caddy and mDNS-repeater were not checked. It is because these services were installed after the initial configuration of the HA. 
 
-Anything else works apparently fine (to confirm)
-While failover, the internet connection is really slow
 
 ![Pasted_image_20251107214056.png](img/Pasted_image_20251107214056.png)
 #### Test proxmox full shutdown
 ##  Problems
+
+### Reverse Proxy
+Every domains (reverse proxy/layer 4 proxy) give this error:
+SSL_ERROR_INTERNAL_ERROR_ALERT
+After checking the services synchronized thought XMLRPC Sync, Caddy and mDNS-repeater were not checked. It is because these services were installed after the initial configuration of the HA. 
+
+Solution: Add Caddy to XMLRPC Sync
+### DNS
+While failover, the internet connection is clunky, really slow
+No DNS, it is always DNS
+
+no gateway for backup node -> rework script
+Solution: Enable master node as gateway when backup
+### Packets Drop
+
 Problem while pinging bastion from user vlan, some pings are lost (9%)
 same while pinging the main switch
 
@@ -223,12 +233,16 @@ no problem towards IoT vlan
 problem from mgmt to any other network
 not even a single ping to dockerVM
 
-ping problem -> disable Proxmox firewall on vmbr0 (and all interfaces) for the OPNsense VM
+ping problem ->
 
+Solution: disable Proxmox firewall on vmbr0 (and all interfaces) for the OPNsense VM
+
+
+### Other
 
 Warning rtsold <interface_up> vtnet1 is disabled. in the logs (OPNsense)
 
-no gateway for backup node -> rework script
+
 
 ## Clean Up
 
