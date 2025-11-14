@@ -242,6 +242,7 @@ Solution: disable Proxmox firewall on vmbr0 (and all interfaces) for the OPNsens
 
 Warning rtsold <interface_up> vtnet1 is disabled. in the logs (OPNsense)
 
+Error dhcp6c transmit failed: Can't assign requested address
 
 
 ## Clean Up
