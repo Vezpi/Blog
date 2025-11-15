@@ -222,6 +222,67 @@ No DNS, it is always DNS
 
 no gateway for backup node -> rework script
 Solution: Enable master node as gateway when backup
+New script
+```php
+#!/usr/local/bin/php
+<?php
+/**
+ * OPNsense CARP event script
+ * - Enables/disables the WAN interface only when needed
+ * - Avoids reapplying config when CARP triggers multiple times
+ */
+
+require_once("config.inc");
+require_once("interfaces.inc");
+require_once("util.inc");
+require_once("system.inc");
+
+// Read CARP event arguments
+$subsystem = !empty($argv[1]) ? $argv[1] : '';
+$type = !empty($argv[2]) ? $argv[2] : '';
+
+// Accept only MASTER/BACKUP events
+if (!in_array($type, ['MASTER', 'BACKUP'])) {
+    // Ignore CARP INIT, DEMOTED, etc.
+    exit(0);
+}
+
+// Validate subsystem name format, expected pattern: <ifname>@<vhid>
+if (!preg_match('/^[a-z0-9_]+@\S+$/i', $subsystem)) {
+    log_error("Malformed subsystem argument: '{$subsystem}'.");
+    exit(0);
+}
+
+// Interface key to manage
+$ifkey = 'wan';
+// Determine whether WAN interface is currently enabled
+$ifkey_enabled = !empty($config['interfaces'][$ifkey]['enable']) ? true : false;
+
+// MASTER event
+if ($type === "MASTER") {
+    // Enable WAN only if it's currently disabled
+    if (!$ifkey_enabled) {
+        log_msg("CARP event: switching to '$type', enabling interface '$ifkey'.", LOG_WARNING);
+        $config['interfaces'][$ifkey]['enable'] = '1';
+        write_config("enable interface '$ifkey' due CARP event '$type'", false);
+        interface_configure(false, $ifkey, false, false);
+    } else {
+        log_msg("CARP event: already '$type' for interface '$ifkey', nothing to do.");
+    }
+
+// BACKUP event
+} else {
+    // Disable WAN only if it's currently enabled
+    if ($ifkey_enabled) {
+        log_msg("CARP event: switching to '$type', disabling interface '$ifkey'.", LOG_WARNING);
+        unset($config['interfaces'][$ifkey]['enable']);
+        write_config("disable interface '$ifkey' due CARP event '$type'", false);
+        interface_configure(false, $ifkey, false, false);
+    } else {
+        log_msg("CARP event: already '$type' for interface '$ifkey', nothing to do.");
+    }
+}
+```
 ### Packets Drop
 
 Problem while pinging bastion from user vlan, some pings are lost (9%)
@@ -243,6 +304,15 @@ Solution: disable Proxmox firewall on vmbr0 (and all interfaces) for the OPNsens
 Warning rtsold <interface_up> vtnet1 is disabled. in the logs (OPNsense)
 
 Error dhcp6c transmit failed: Can't assign requested address
+
+## Last Failover
+
+Everything is fine.
+When entering CARP maintenance mode, no packet drop is observed.
+For a failover, only one packet is dropped
+
+![Pasted_image_20251115225054.png](img/Pasted_image_20251115225054.png)
+
 
 
 ## Clean Up
