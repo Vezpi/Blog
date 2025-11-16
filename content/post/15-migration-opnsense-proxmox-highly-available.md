@@ -320,6 +320,7 @@ backup node:
 master node:
 ![Pasted_image_20251116203049.png](img/Pasted_image_20251116203049.png)
 
+ragequit, disable ipv6
 ## Clean Up
 
 Shutdown OPNsense
