@@ -314,6 +314,11 @@ For a failover, only one packet is dropped
 ![Pasted_image_20251115225054.png](img/Pasted_image_20251115225054.png)
 
 
+backup node:
+![Pasted_image_20251116202728.png](img/Pasted_image_20251116202728.png)
+
+master node:
+![Pasted_image_20251116203049.png](img/Pasted_image_20251116203049.png)
 
 ## Clean Up
 
