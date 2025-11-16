@@ -318,6 +318,8 @@ For a failover, only one packet is dropped
 ## Clean Up
 
 Shutdown OPNsense
+done: 16/11/2025 : 12h40
+
 Check watt
 Check temp
 
