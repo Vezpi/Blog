@@ -124,29 +124,60 @@ In `Datacenter` > `HA` > `Affinity Rules`, I add a new HA resource affinity rule
 
 ✅ My OPNsense VMs are now fully ready!
 
-## TODO
+---
+## Migration
+
+🚀 Time to make it real!
+
+I'm not gonna lie, I'm quite excited. I'm working for this moment for days. 
+
+### The Migration Plan
+
+I have my physical OPNsense box directly connected to my ISP box. I want to swap it for the VM cluster. To avoid writing the word OPNsense on each line, I'll simply name it the box and the VM.
+
+Here is the plan:
+1. Backup of the box configuration.
+2. Disable DHCP server on the box.
+3. Change IP addresses of the box.
+4. Change VIP on the VM.
+5. Disable gateway on VM.
+6. Configure DHCP on both VMs.
+7. Enable mDNS repeater on VM.
+8. Replicate services on VM.
+9. Ethernet cable swap.
+### Rollback Strategy
+
+None. 😎
+
+I'm kidding, the rollback consists of restoring the box configuration, shutdown the OPNsense VMs and plug back the Ethernet cable into the box.
+
+Will it work? Let's find out! 
+
+### Migration Steps
+
+1. **Backup of the box configuration.
+
+On my physical OPNsense instance, in `System` > `Configuration` > `Backups`, I click the `Download configuration` button which give me the precious XML file. The one that saved my ass the [last time]({{< ref "post/10-opnsense-crash-disk-panic" >}}).
+
+2. **Disable DHCP server on the box.**
+
+In `Services` > `ISC DHCPv4`, and for all my interfaces, I disable the DHCP server. I only serve DHCPv4 in my network.
+
+3. **Change IP addresses of the box.**
+
+In `Interfaces`, and for all my interfaces, I modify the IP of the firewall, from `.1` to `.253`. I want to reuse the same IP address, and have this instance still reachable if needed.
+
+As soon as I click on `Apply`, I lost the communication, which is expected
+
+4. **Change VIP on the VM.**
+5. **Disable gateway on VM.**
+6. **Configure DHCP on both VMs.**
+7. **Enable mDNS repeater on VM.**
+8. **Replicate services on VM.**
+9. **Ethernet cable swap.**
 
 
-Check conso Watt average: moyenne 85W
-Check temp average (midnight): ~33°
-## Switch
 
-
-
-#### Backup OPNsense box
-
-On my physical OPNsense instance, in `System` > `Configuration` > `Backups`
-
-#### Disable DHCP on OPNsene box
-
-In Services > ISC DHCPv4, and for all my interfaces, I disable the DHCP server.
-
-
-
-#### Change OPNsense box IPs
-
-In Interfaces, I the IP of each interfaces from .1 to .253
-As soon as I click on Apply, I lost the communication, which is expected
 
 
 #### Change VIP on VM
