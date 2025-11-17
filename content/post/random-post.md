@@ -23,6 +23,6 @@ List:
 - Three
 
 Checklist:
-- [ ] Not Checked
-- [x] Checked
+[ ] Not Checked
+[x] Checked
 
