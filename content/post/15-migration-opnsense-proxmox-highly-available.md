@@ -151,6 +151,31 @@ None. 😎
 
 I'm kidding, the rollback consists of restoring the box configuration, shutdown the OPNsense VMs and plug back the Ethernet cable into the box.
 
+### Verification Plan
+
+To validate the migration, I'm drawing up a checklist:
+1. WAN DHCP lease in the VM.
+2. Ping from my PC to the VIP of the User VLAN.
+3. Ping cross VLAN.
+4. SSH into my machines.
+5. Renew DHCP lease.
+6. Check `ipconfig`
+7. Test internet website.
+8. Check firewall logs.
+9. Check my webservices.
+10. Verify if my internal webservices are not accessible from outside.
+11. Test VPN.
+12. Check all IoT devices.
+13. Check Home Assistant features.
+14. Check if the TV works.
+15. Test the Chromecast.
+16. Print something.
+17. Verify DNS blocklist.
+18. Speedtest
+19. Failover
+20. Disaster Recovery
+21. Champaign!
+
 Will it work? Let's find out! 
 
 ### Migration Steps
@@ -165,76 +190,50 @@ In `Services` > `ISC DHCPv4`, and for all my interfaces, I disable the DHCP serv
 
 3. **Change IP addresses of the box.**
 
-In `Interfaces`, and for all my interfaces, I modify the IP of the firewall, from `.1` to `.253`. I want to reuse the same IP address, and have this instance still reachable if needed.
+In `Interfaces`, and for all my interfaces, I modify the IP of the firewall, from `.1` to `.253`. I want to reuse the same IP address as VIP, and have this instance still reachable if needed.
 
-As soon as I click on `Apply`, I lost the communication, which is expected
+As soon as I click on `Apply`, I lost the communication, which is expected.
 
 4. **Change VIP on the VM.**
+
+On my master VM, In `Interfaces` > `Virtual IPs` > `Settings`, I change the VIP address for each interface and set it to `.1`.
+
 5. **Disable gateway on VM.**
+
+In `System` > `Gateways` > `Configuration`, I disable the `LAN_GW` which is not needed anymore.
+
 6. **Configure DHCP on both VMs.**
+
+In both VM, in `Services` > `Dnsmasq DNS & DHCP`, I enable the service on my 5 interfaces.
+
 7. **Enable mDNS repeater on VM.**
+
+In `Services` > `mDNS Repeater`, I enable the service and also enable CARP Failover.
+
+The service does not start. I'll see that problem later.
+
 8. **Replicate services on VM.**
+
+In `System` > `High Availability` > `Status`, I click the button to `Synchronize and reconfigure all`.
+
 9. **Ethernet cable swap.**
 
+Physically in my rack, I unplug the Ethernet cable from the WAN port (`igc0`) of my physical OPNsense box and plug it into the port 15 of my UniFi switch.
+
+---
+## Verification
+
+😮‍💨 I take a deep breath and start the checks
 
 
-
-
-#### Change VIP on VM
-
-On my Master VM, In Interfaces > Virtual IPs > Settings, I change the VIP address for all interface
-Then I click Apply
-
-
-#### Remove GW on VM
-
-In - # System: Gateways: Configuration, I disable the LAN_GW which is not needed anymore
-
-#### Configure DHCP on both instance
-
-In both VM, in - # Services: Dnsmasq DNS & DHCP, I enable the service
-#### Enable DHCP on VM
-
-Enable mdns repeate
-In - # Services: mDNS Repeater, I enable and enable CARP Failover
-reboot needed for CARP
-#### Replicate configuration on VM
-
-In - # System: High Availability: Status, Synchronize and reconfigure all
-
-In my rack, I
-Unplug OPNsense box WAN
-
-Plug WAN on port 15
 
 ![Pasted_image_20251107104749.png](img/Pasted_image_20251107104749.png)
 
  
-## Verify
 
-Ping VIP OK
-Vérifier interface OK
-tests locaux (ssh, ping) OK
 
-Basic (dhcp, dns, internet)
-DHCP OK 
-DNS NOK -> Restart Unbound service
-Internet OK
-
-Firewall -> Need some not critical opening
-All sites -> OK
-mDNS (chromecast) -> OK
-VPN -> OK
-TV -> OK
-speedtest -> -15% bandwidth  (to confirm another time)
-Vérifier tous les devices -> OK
-
-DNS blocklist OK
-
-Check load (ram, cpu) -> OK
 #### Failover
-In - # System: High Availability: Status, Synchronize and reconfigure all
-In 
+
 
 
 ![Pasted_image_20251107214056.png](img/Pasted_image_20251107214056.png)

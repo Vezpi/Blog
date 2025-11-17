@@ -16,3 +16,13 @@ I'm ==testing==
 🚀💡🔧🔁⚙️📝📌✅⚠️🍒❌ℹ️⌛🚨🎉📖🔥😈😎
 
 [post]({{< ref "post/0-template" >}})
+
+List:
+- One
+- Two
+- Three
+
+Checklist:
+- [ ] Not Checked
+- [x] Checked
+
