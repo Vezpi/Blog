@@ -171,10 +171,11 @@ To validate the migration, I'm drawing up a checklist:
 15. Test the Chromecast.
 16. Print something.
 17. Verify DNS blocklist.
-18. Speedtest
-19. Failover
-20. Disaster Recovery
-21. Champaign!
+18. Speedtest.
+19. Switchover.
+20. Failover.
+21. Disaster Recovery.
+22. Champaign!
 
 Will it work? Let's find out! 
 
@@ -223,36 +224,71 @@ Physically in my rack, I unplug the Ethernet cable from the WAN port (`igc0`) of
 ---
 ## Verification
 
-😮‍💨 I take a deep breath and start the checks
+😮‍💨 I take a deep breath and start the verification phase.
 
+### Checklist
 
+- ✅ WAN DHCP lease in the VM.
+- ✅ Ping from my PC to the VIP of the User VLAN.
+- ⚠️ Ping cross VLAN.
+Pings are working, but I observe some drops, about 10%.
+- ✅ SSH into my machines.
+- ✅ Renew DHCP lease.
+- ✅ Check `ipconfig`
+- ❌ Test internet website. → ✅
+A few websites are working, everything is incredibly slow... It must be the DNS. I try to lookup a random domain, it is working. But I can't lookup google.com. I restart the Unbound DNS service, everything works now. It is always the DNS.
+- ⚠️ Check firewall logs.
+Few flows are blocks, not mandatory.
+- ✅Check my webservices.
+- ✅Verify if my internal webservices are not accessible from outside.
+- ✅ Test VPN.
+- ✅ Check all IoT devices.
+- ✅ Check Home Assistant features.
+- ✅Check if the TV works.
+- ❌ Test the Chromecast.
+It is related to the mDNS service not able to start. I can start it if I uncheck the `CARP Failover` option. the Chromecast is visible now. → ⚠️
+- ✅Print something.
+- ✅Verify DNS blocklist.
+- ✅Speedtest
+I observe roughly 15% of decrease bandwidth (from 940Mbps to 825Mbps). 
+- ❌ Switchover
+The switchover barely works, a lot of dropped packets during the switch. The service provided is not great: no more internet and my webservices are not reachable.
+- ⌛ Failover
+- ⌛ Disaster Recovery
+To be tested later.
 
-![Pasted_image_20251107104749.png](img/Pasted_image_20251107104749.png)
+📝 Well, the results are pretty good, not perfect, but satisfying!
+###  Problem Solving
 
- 
+I focus on resolving remaining problems experienced during the tests.
 
+1. **DNS**
 
-#### Failover
+During the switchover, the internet connection is not working. No DNS, it is always DNS.
 
+It's because the backup node does not have a gateway while passive. No gateway prevents the DNS to resolve. After the switchover, it still has unresolved domains in its cache. This problem also lead to another issue, while passive, I can't update the system.
 
+**Solution**: Set a gateway in the *Mgmt* interface pointing to the other node, with a higher priority number than the WAN gateway (higher number means lower priority). This way, that gateway is not active while the node is master.
 
-![Pasted_image_20251107214056.png](img/Pasted_image_20251107214056.png)
-#### Test proxmox full shutdown
-##  Problems
+2. **Reverse Proxy**
 
-### Reverse Proxy
-Every domains (reverse proxy/layer 4 proxy) give this error:
-SSL_ERROR_INTERNAL_ERROR_ALERT
-After checking the services synchronized thought XMLRPC Sync, Caddy and mDNS-repeater were not checked. It is because these services were installed after the initial configuration of the HA. 
+During the switchover, every webservices which I host (reverse proxy/layer 4 proxy) give this error: `SSL_ERROR_INTERNAL_ERROR_ALERT`. After checking the services synchronized throught XMLRPC Sync, Caddy and mDNS-repeater were not selected. It is because these services were installed after the initial configuration of the HA. 
 
-Solution: Add Caddy to XMLRPC Sync
-### DNS
-While failover, the internet connection is clunky, really slow
-No DNS, it is always DNS
+**Solution**: Add Caddy to XMLRPC Sync.
 
-no gateway for backup node -> rework script
-Solution: Enable master node as gateway when backup
-New script
+3. **Packet Drops**
+
+I observe about 10% packet drops for pings from any VLAN to the *Mgmt* VLAN. I don't have this problem for the other VLANs.
+
+The *Mgmt* VLAN is the native one in my network, it might be the reason behind this issue. This is the only network not defined in the Proxmox SDN. I don't want to have to tag this VLAN.
+
+**Solution**: Disable the Proxmox firewall of this interface for the VM. I actually disable them all and update the documentation above. I'm not sure why this cause that kind of problem, but disabling it fixed my issue (I could reproduce the behavior while activating the firewall again).
+
+4. **CARP Script**
+
+During a switchover, the CARP event script is triggered as many times as the number of interfaces. I have 5 virtual IPs, the script reconfigure my WAN interface 5 times.
+
+**Solution**: Rework the script to get the WAN interface state and only reconfigure the inteface when needed:
 ```php
 #!/usr/local/bin/php
 <?php
@@ -313,50 +349,68 @@ if ($type === "MASTER") {
     }
 }
 ```
-### Packets Drop
 
-Problem while pinging bastion from user vlan, some pings are lost (9%)
-same while pinging the main switch
+5. **mDNS Repeater**
 
-no problem pinging dockerVM (vlan Lab)
-no problem towards IoT vlan
+The mDNS repeater does not want to start when I select the option for `CARP Failover`.
 
-problem from mgmt to any other network
-not even a single ping to dockerVM
+**Solution**: The machine requires a reboot to start this service CARP aware.
 
-ping problem ->
+6. **IPv6 Address**
 
-Solution: disable Proxmox firewall on vmbr0 (and all interfaces) for the OPNsense VM
-
-
-### Other
-
+My `cerbere-head1` node is crying in the log file while the other does not. Here are the messages spit every seconds while it is master:
+```plaintext
 Warning rtsold <interface_up> vtnet1 is disabled. in the logs (OPNsense)
+```
 
+Another one I'm having several times after a switchback:
+```plaintext
 Error dhcp6c transmit failed: Can't assign requested address
+```
 
-## Last Failover
+This is related to IPv6. I observe that my main node does not have a global IPv6 address, only a link-local. Also, it does not have a IPv6 gateway. My secondary node, in the other hand, has both addresses and the gateway.
 
-Everything is fine.
-When entering CARP maintenance mode, no packet drop is observed.
-For a failover, only one packet is dropped
+I'm no IPv6 expert, after searching for a couple of hours, I give up the IPv6. If someone out here can help, it would be really appreciated!
 
-![Pasted_image_20251115225054.png](img/Pasted_image_20251115225054.png)
+**Workaround**: Remove DHCPv6 for my WAN interface. 
 
+### Confirmation
 
-backup node:
-![Pasted_image_20251116202728.png](img/Pasted_image_20251116202728.png)
+Now that everything is fixed, I can evaluate the failover performance.
 
-master node:
-![Pasted_image_20251116203049.png](img/Pasted_image_20251116203049.png)
+1. **Switchover**
 
-ragequit, disable ipv6
-## Clean Up
+When manually entering CARP maintenance mode from the WebGUI interface, no packet drop is observed. Impressive.
 
-Shutdown OPNsense
-done: 16/11/2025 : 12h40
+2. Failover
 
-Check watt
-Check temp
+To simulate a failover, I kill the active OPNsense VM. Here I observe only one packet dropped. Awesome.
 
-## Rollback
+![opnsense-ping-failover.png](img/opnsense-ping-failover.png)
+
+3. Disaster Recovery
+
+A disaster recovery is what would happen after a full Proxmox cluster stop, after an electrical outage for example. I didn't have the time (or the courage) to do that, I'd prefer to prepare a bit better to avoid collateral damages. But surely, this kind of scenario must be evaluated.
+
+### Extras
+
+Leaving aside the fact that this new setup is more resilient, I have few more bonuses.
+
+My rack is tiny and the space is tight. The whole thing is heating quite much, exceeding 40°C on top of the rack in summer. Reducing the number of machines powered up lower the temperature. I've gained **1,5°C** after shutting down the old OPNsense box, cool!
+
+Power consumption is also a concern, my tiny datacenter was drawing 85W on average. Here again I could observe a small decrease, about 8W lower, I take that.
+
+Finally I also removed the box itself and the power cable. Slots are very limited, another good point.
+
+---
+## Conclusion
+
+🎉 I did it guys! I'm very proud of the results, proud of myself.
+
+From my [first OPNsense box crash]({{< ref "post/10-opnsense-crash-disk-panic" >}}), the thinking about a solution, the HA [proof of concept]({{< ref "post/12-opnsense-virtualization-highly-available" >}}), to this migration. This has been a quite long project, but extremly interesting.
+
+🎯 This is great to set objectives, but this is even better when you reach them.
+
+Now I'm going to leave OPNsense aside for a bit, to be able to re-focus on my Kubernetes journey!
+
+As always, if you have questions, remarks or a solution for my IPv6 problem, I'll be really happy to share with you
