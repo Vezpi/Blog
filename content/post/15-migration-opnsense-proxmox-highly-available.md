@@ -17,7 +17,7 @@ Final stage of my **OPNsense** virtualization journey!
 
 Some months ago, my physical [OPNsense box crashed]({{< ref "post/10-opnsense-crash-disk-panic" >}}) because of a hardware failure. This leads my home in the dark, literally. No network, no lights.
 
-To avoid being in that situation again, I imagine a way to virtualize my OPNsense firewall into my **Proxmox VE** cluster. The last time, I've set up a [proof of concept]({{< ref "post/12-opnsense-virtualization-highly-available" >}}) to validate this solution: create a cluster of two **OPNsense** VMs in Proxmox and make the firewall highly available.
+💡 To avoid being in that situation again, I imagine a way to virtualize my OPNsense firewall into my **Proxmox VE** cluster. The last time, I've set up a [proof of concept]({{< ref "post/12-opnsense-virtualization-highly-available" >}}) to validate this solution: create a cluster of two **OPNsense** VMs in Proxmox and make the firewall highly available.
 
 This time, I will cover the creation of my future OPNsense cluster from scratch, plan the cut over and finally migrate from my current physical box. Let's go!
 
@@ -184,7 +184,7 @@ Will it work? Let's find out!
 
 ### Migration Steps
 
-1. **Backup of the box configuration.
+1. **Backup of the box configuration.**
 
 On my physical OPNsense instance, in `System` > `Configuration` > `Backups`, I click the `Download configuration` button which give me the precious XML file. The one that saved my ass the [last time]({{< ref "post/10-opnsense-crash-disk-panic" >}}).
 
@@ -239,8 +239,10 @@ Pings are working, but I observe some drops, about 10%.
 - ✅ Renew DHCP lease.
 - ✅ Check `ipconfig`
 - ❌ Test internet website. → ✅
+
 A few websites are working, everything is incredibly slow... It must be the DNS. I try to lookup a random domain, it is working. But I can't lookup google.com. I restart the Unbound DNS service, everything works now. It is always the DNS.
 - ⚠️ Check firewall logs.
+
 Few flows are blocks, not mandatory.
 - ✅Check my webservices.
 - ✅Verify if my internal webservices are not accessible from outside.
@@ -249,15 +251,19 @@ Few flows are blocks, not mandatory.
 - ✅ Check Home Assistant features.
 - ✅Check if the TV works.
 - ❌ Test the Chromecast.
+
 It is related to the mDNS service not able to start. I can start it if I uncheck the `CARP Failover` option. the Chromecast is visible now. → ⚠️
 - ✅Print something.
 - ✅Verify DNS blocklist.
 - ✅Speedtest
+
 I observe roughly 15% of decrease bandwidth (from 940Mbps to 825Mbps). 
 - ❌ Switchover
+
 The switchover barely works, a lot of dropped packets during the switch. The service provided is not great: no more internet and my webservices are not reachable.
 - ⌛ Failover
 - ⌛ Disaster Recovery
+
 To be tested later.
 
 📝 Well, the results are pretty good, not perfect, but satisfying!
