@@ -13,7 +13,7 @@ categories:
 ---
 ## Intro
 
-C'est la dernière étape de l'aventure de la virtualisation d'**OPNsense**.
+C'est la dernière étape de mon aventure de virtualisation d'**OPNsense**.
 
 Il y a quelques mois, ma [box OPNsense physique a crash]({{< ref "post/10-opnsense-crash-disk-panic" >}}) à cause d'une défaillance matérielle. Cela a plongé ma maison dans le noir, littéralement. Pas de réseau, pas de lumières.
 
