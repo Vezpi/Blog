@@ -1,7 +1,7 @@
 ---
 slug: migration-opnsense-proxmox-highly-available
-title: migration-opnsense-proxmox-highly-available
-description: migration-opnsense-proxmox-highly-available
+title: Migration to my OPNsense Highly Available Cluster in Proxmox VE
+description: The detailed steps of the migration from my OPNsense physical box to a highly available cluster of VM in Proxmox VE.
 date: 2025-11-20
 draft: true
 tags:
@@ -13,9 +13,9 @@ categories:
 ---
 ## Intro
 
-Final stage of my **OPNsense** virtualization journey!
+This is the final stage of my **OPNsense** virtualization journey.
 
-Some months ago, my physical [OPNsense box crashed]({{< ref "post/10-opnsense-crash-disk-panic" >}}) because of a hardware failure. This leads my home in the dark, literally. No network, no lights.
+A few months ago, my physical [OPNsense box crashed]({{< ref "post/10-opnsense-crash-disk-panic" >}}) because of a hardware failure. This leads my home in the dark, literally. No network, no lights.
 
 💡 To avoid being in that situation again, I imagine a way to virtualize my OPNsense firewall into my **Proxmox VE** cluster. The last time, I've set up a [proof of concept]({{< ref "post/12-opnsense-virtualization-highly-available" >}}) to validate this solution: create a cluster of two **OPNsense** VMs in Proxmox and make the firewall highly available.
 
@@ -28,17 +28,17 @@ For my plans, I'll have to connect the WAN, coming from my ISP box, to my main s
 
 ### UniFi
 
-The first thing I do is to configure my layer 2 network which is managed by UniFi. There I need to create two VLANs:
+First, I configure my layer 2 network which is managed by UniFi. There I need to create two VLANs:
 - *WAN* (20): transport the WAN between my ISP box and my Proxmox nodes.
 - *pfSync* (44), communication between my OPNsense nodes.
 
 In the UniFi controller, in `Settings` > `Networks`, I add a `New Virtual Network`. I name it `WAN` and give it the VLAN ID 20:
-![unifi-add-vlan-for-wan.png](img/unifi-add-vlan-for-wan.png)
+![Creation of the WAN VLAN in the UniFi Controller](img/unifi-add-vlan-for-wan.png)
 
 I do the same thing again for the `pfSync` VLAN with the VLAN ID 44.
 
 I plan to plug my ISP box on the port 15 of my switch, which is disabled for now. I set it as active, set the native VLAN on the newly created one `WAN (20)` and disable trunking:
-![unifi-enable-port-wan-vlan.png](img/unifi-enable-port-wan-vlan.png)
+![Configuration of the UniFi switch port for the WAN uplink](img/unifi-enable-port-wan-vlan.png)
 
 Once this setting applied, I make sure that only the ports where are connected my Proxmox nodes propagate these VLAN on their trunk. 
 
@@ -49,7 +49,7 @@ I'm done with UniFi configuration.
 Now that the VLAN can reach my nodes, I want to handle it in the Proxmox SDN. I've configured the SDN in [that article]({{< ref "post/11-proxmox-cluster-networking-sdn" >}}).
 
 In `Datacenter` > `SDN` > `VNets`, I create a new VNet, call it `vlan20` to follow my own naming convention, give it the *WAN* alias and use the tag (VLAN ID) 20:
-![proxmox-sdn-new-vnet-wan.png](img/proxmox-sdn-new-vnet-wan.png)
+![Creation of the VNet for the WAN in the Proxmox SDN](img/proxmox-sdn-new-vnet-wan.png)
 
 I also create the `vlan44` for the *pfSync* VLAN, then I apply this configuration and we are done with the SDN.
 
@@ -73,7 +73,7 @@ The first VM is named `cerbere-head1` (I didn't tell you? My current firewall is
 	5. `vlan44` *(pfSync)*
 	6. `vlan55` *(DMZ)*
 	7. `vlan66` *(Lab)*
-![proxmox-cerbere-vm-settings.png](img/proxmox-cerbere-vm-settings.png)
+![Hardware settings of the OPNsense VM in Proxmox](img/proxmox-cerbere-vm-settings.png)
 
 ℹ️ Now I clone that VM to create `cerbere-head2`, then I proceed with OPNsense installation. I don't want to go into much details about OPNsense installation, I already documented it in the [proof of concept]({{< ref "post/12-opnsense-virtualization-highly-available" >}}).
 
@@ -86,7 +86,7 @@ While these routers are not managing the networks, I give them my current OPNsen
 ---
 ## Configure OPNsense
 
-Initially, I thought about restoring my current OPNsense configuration and adapt it to the setup.
+Initially, I considered restoring my existing OPNsense configuration and adapt it to the setup.
 
 Then I decided to start over to document and share it. This part was getting so long that I prefered create a dedicated post instead.
 
@@ -114,7 +114,7 @@ In Proxmox VE 8, It was possible to create HA groups, depending of their resourc
 The Proxmox cluster is able to provide HA for the resources, but you need to define the rules.
 
 In `Datacenter` > `HA`, you can see the status and manage the resources. In the `Resources` panel I click on `Add`. I need to pick the resource to configure as HA in the list, here `cerbere-head1` with ID 122. Then in the tooltip I can define the maximum of restart and relocate, I keep `Failback` enabled and the requested state to `started`:
-![proxmox-add-vm-ha.png](img/proxmox-add-vm-ha.png)
+![Create HA resource in Proxmox](img/proxmox-add-vm-ha.png)
 
 The Proxmox cluster will now make sure this VM is started. I do the same for the other OPNsense VM, `cerbere-head2`.  
 
@@ -123,7 +123,7 @@ The Proxmox cluster will now make sure this VM is started. I do the same for the
 Great, but I don't want them on the same node. This is when the new feature HA affinity rules, of Proxmox VE 9, come in. Proxmox allows to create node affinity and resource affinity rules. I don't mind on which node they run, but I don't want them together. I need a resource affinity rule.
 
 In `Datacenter` > `HA` > `Affinity Rules`, I add a new HA resource affinity rule. I select both VMs and pick the option `Keep Separate`:
-![proxmox-ha-resource-affinity-rule.png](img/proxmox-ha-resource-affinity-rule.png)
+![Create HA resource affinity in Proxmox](img/proxmox-ha-resource-affinity-rule.png)
 
 ✅ My OPNsense VMs are now fully ready!
 
@@ -233,16 +233,14 @@ Physically in my rack, I unplug the Ethernet cable from the WAN port (`igc0`) of
 
 - ✅ WAN DHCP lease in the VM.
 - ✅ Ping from my PC to the VIP of the User VLAN.
-- ⚠️ Ping cross VLAN.
+- ⚠️ Ping cross VLAN.  
 Pings are working, but I observe some drops, about 10%.
 - ✅ SSH into my machines.
 - ✅ Renew DHCP lease.
 - ✅ Check `ipconfig`
-- ❌ Test internet website. → ✅
-
+- ❌ Test internet website. → ✅  
 A few websites are working, everything is incredibly slow... It must be the DNS. I try to lookup a random domain, it is working. But I can't lookup google.com. I restart the Unbound DNS service, everything works now. It is always the DNS.
-- ⚠️ Check firewall logs.
-
+- ⚠️ Check firewall logs.  
 Few flows are blocks, not mandatory.
 - ✅Check my webservices.
 - ✅Verify if my internal webservices are not accessible from outside.
@@ -250,20 +248,16 @@ Few flows are blocks, not mandatory.
 - ✅ Check all IoT devices.
 - ✅ Check Home Assistant features.
 - ✅Check if the TV works.
-- ❌ Test the Chromecast.
-
+- ❌ Test the Chromecast.  
 It is related to the mDNS service not able to start. I can start it if I uncheck the `CARP Failover` option. the Chromecast is visible now. → ⚠️
 - ✅Print something.
 - ✅Verify DNS blocklist.
-- ✅Speedtest
-
+- ✅Speedtest.  
 I observe roughly 15% of decrease bandwidth (from 940Mbps to 825Mbps). 
-- ❌ Switchover
-
+- ❌ Switchover.  
 The switchover barely works, a lot of dropped packets during the switch. The service provided is not great: no more internet and my webservices are not reachable.
-- ⌛ Failover
-- ⌛ Disaster Recovery
-
+- ⌛ Failover.
+- ⌛ Disaster Recovery.  
 To be tested later.
 
 📝 Well, the results are pretty good, not perfect, but satisfying!
@@ -422,4 +416,4 @@ From my [first OPNsense box crash]({{< ref "post/10-opnsense-crash-disk-panic" >
 
 Now I'm going to leave OPNsense aside for a bit, to be able to re-focus on my Kubernetes journey!
 
-As always, if you have questions, remarks or a solution for my IPv6 problem, I'll be really happy to share with you
+As always, if you have questions, remarks or a solution for my IPv6 problem, I'll be really happy to share with you.
