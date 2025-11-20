@@ -1,6 +1,6 @@
 ---
 slug: migration-opnsense-proxmox-highly-available
-title: Migration to my OPNsense Highly Available Cluster in Proxmox VE
+title: Migration to my OPNsense HA Cluster in Proxmox VE
 description: The detailed steps of the migration from my OPNsense physical box to a highly available cluster of VM in Proxmox VE.
 date: 2025-11-20
 draft: false
