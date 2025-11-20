@@ -3,7 +3,7 @@ slug: migration-opnsense-proxmox-highly-available
 title: Migration to my OPNsense Highly Available Cluster in Proxmox VE
 description: The detailed steps of the migration from my OPNsense physical box to a highly available cluster of VM in Proxmox VE.
 date: 2025-11-20
-draft: true
+draft: false
 tags:
   - opnsense
   - high-availability
@@ -73,6 +73,7 @@ The first VM is named `cerbere-head1` (I didn't tell you? My current firewall is
 	5. `vlan44` *(pfSync)*
 	6. `vlan55` *(DMZ)*
 	7. `vlan66` *(Lab)*
+
 ![Hardware settings of the OPNsense VM in Proxmox](img/proxmox-cerbere-vm-settings.png)
 
 ℹ️ Now I clone that VM to create `cerbere-head2`, then I proceed with OPNsense installation. I don't want to go into much details about OPNsense installation, I already documented it in the [proof of concept]({{< ref "post/12-opnsense-virtualization-highly-available" >}}).

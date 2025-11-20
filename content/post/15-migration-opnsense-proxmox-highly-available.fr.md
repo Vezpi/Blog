@@ -3,7 +3,7 @@ slug: migration-opnsense-proxmox-highly-available
 title: Migration vers mon cluster OPNsense hautement disponible dans Proxmox VE
 description: La démarche détaillée de la migration de ma box OPNsense physique vers un cluster de VM hautement disponible dans Proxmox VE.
 date: 2025-11-20
-draft: true
+draft: false
 tags:
   - opnsense
   - high-availability
@@ -74,6 +74,7 @@ La première VM s'appelle `cerbere-head1` (je ne vous l'ai pas dit ? Mon firew
     5. `vlan44` _(pfSync)_
     6. `vlan55` _(DMZ)_
     7. `vlan66` _(Lab)_
+
 ![Hardware settings of the OPNsense VM in Proxmox](img/proxmox-cerbere-vm-settings.png)
 
 ℹ️ Maintenant je clone cette VM pour créer `cerbere-head2`, puis je procède à l'installation d'OPNsense. Je ne veux pas entrer trop dans les détails de l'installation d'OPNsense, je l'ai déjà documentée dans le [proof of concept]({{< ref "post/12-opnsense-virtualization-highly-available" >}}).
@@ -120,7 +121,7 @@ Dans `Datacenter` > `HA`, vous pouvez voir le statut et gérer les ressources
 
 Le cluster Proxmox s'assurera maintenant que cette VM est démarrée. Je fais de même pour l'autre VM OPNsense, `cerbere-head2`.
 
-### Règles d'affinité HA
+### Règles d'Affinité HA
 
 Super, mais je ne veux pas qu'elles tournent sur le même nœud. C'est là qu'intervient la nouvelle fonctionnalité des règles d'affinité HA de Proxmox VE 9. Proxmox permet de créer des règles d'affinité de nœud et de ressource. Peu m'importe sur quel nœud elles tournent, mais je ne veux pas qu'elles soient ensemble. J'ai besoin d'une règle d'affinité de ressource.
 
