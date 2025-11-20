@@ -2,7 +2,7 @@
 slug: migration-opnsense-proxmox-highly-available
 title: migration-opnsense-proxmox-highly-available
 description: migration-opnsense-proxmox-highly-available
-date: 2025-11-07
+date: 2025-11-20
 draft: true
 tags:
   - opnsense
@@ -11,17 +11,20 @@ tags:
 categories:
   - homelab
 ---
-
 ## Intro
 
-In my previous [post]({{< ref "post/12-opnsense-virtualization-highly-available" >}}), I've set up a PoC to validate the possibility to create a cluster of 2 **OPNsense** VMs in **Proxmox VE** and make the firewall highly available.
+Final stage of my **OPNsense** virtualization journey!
 
-This time, I will cover the creation of my future OPNsense cluster from scratch, plan the cut over and finally migrate from my current physical box.
+Some months ago, my physical [OPNsense box crashed]({{< ref "post/10-opnsense-crash-disk-panic" >}}) because of a hardware failure. This leads my home in the dark, literally. No network, no lights.
+
+To avoid being in that situation again, I imagine a way to virtualize my OPNsense firewall into my **Proxmox VE** cluster. The last time, I've set up a [proof of concept]({{< ref "post/12-opnsense-virtualization-highly-available" >}}) to validate this solution: create a cluster of two **OPNsense** VMs in Proxmox and make the firewall highly available.
+
+This time, I will cover the creation of my future OPNsense cluster from scratch, plan the cut over and finally migrate from my current physical box. Let's go!
 
 ---
-## Build the Foundation
+## The VLAN Configuration
 
-For the real thing, I'll have to connect the WAN, coming from my ISP box, to my main switch. For that I have to add a VLAN to transport this flow to my Proxmox nodes.
+For my plans, I'll have to connect the WAN, coming from my ISP box, to my main switch. For that I create a dedicated VLAN to transport this flow to my Proxmox nodes.
 
 ### UniFi
 
@@ -34,18 +37,18 @@ In the UniFi controller, in `Settings` > `Networks`, I add a `New Virtual Networ
 
 I do the same thing again for the `pfSync` VLAN with the VLAN ID 44.
 
-I will plug my ISP box on the port 15 of my switch, which is disabled for now. I set it as active, set the native VLAN on the newly created one `WAN (20)` and disable trunking:
+I plan to plug my ISP box on the port 15 of my switch, which is disabled for now. I set it as active, set the native VLAN on the newly created one `WAN (20)` and disable trunking:
 ![unifi-enable-port-wan-vlan.png](img/unifi-enable-port-wan-vlan.png)
 
 Once this setting applied, I make sure that only the ports where are connected my Proxmox nodes propagate these VLAN on their trunk. 
 
-We are done with UniFi configuration.
+I'm done with UniFi configuration.
 
 ### Proxmox SDN
 
-Now that the VLAN can reach my nodes, I want to handle it in the Proxmox SDN.
+Now that the VLAN can reach my nodes, I want to handle it in the Proxmox SDN. I've configured the SDN in [that article]({{< ref "post/11-proxmox-cluster-networking-sdn" >}}).
 
-In `Datacenter` > `SDN` > `VNets`, I create a new VNet, name it `vlan20` to follow my own naming convention, give it the *WAN* alias and use the tag (ID) 20:
+In `Datacenter` > `SDN` > `VNets`, I create a new VNet, call it `vlan20` to follow my own naming convention, give it the *WAN* alias and use the tag (VLAN ID) 20:
 ![proxmox-sdn-new-vnet-wan.png](img/proxmox-sdn-new-vnet-wan.png)
 
 I also create the `vlan44` for the *pfSync* VLAN, then I apply this configuration and we are done with the SDN.
@@ -55,14 +58,14 @@ I also create the `vlan44` for the *pfSync* VLAN, then I apply this configuratio
 
 Now that the VLAN configuration is done, I can start buiding the virtual machines on Proxmox.
 
-The first VM is named `cerbere-head1` (I didn't tell you? My current firewall is named `cerbere`, it makes even more sense now!) Here are the settings:
-- OS type: Linux (even if OPNsense is  based on FreeBSD)
-- Machine type: `q35`
-- BIOS: `OVMF (UEFI)`
-- Disk: 20 GiB on Ceph distributed storage
-- RAM: 4 GiB RAM, ballooning disabled
-- CPU: 2 vCPU
-- NICs, firewall disabled:
+The first VM is named `cerbere-head1` (I didn't tell you? My current firewall is named `cerbere`, it makes even more sense now!). Here are the settings:
+- **OS type**: Linux (even if OPNsense is  based on FreeBSD)
+- **Machine type**: `q35`
+- **BIOS**: `OVMF (UEFI)`
+- **Disk**: 20 GiB on Ceph distributed storage
+- **RAM**: 4 GiB RAM, ballooning disabled
+- **CPU**: 2 vCPU
+- **NICs**, firewall disabled:
 	1. `vmbr0` (*Mgmt*)
 	2. `vlan20` (*WAN*)
 	3. `vlan13` *(User)*
@@ -72,7 +75,7 @@ The first VM is named `cerbere-head1` (I didn't tell you? My current firewall is
 	7. `vlan66` *(Lab)*
 ![proxmox-cerbere-vm-settings.png](img/proxmox-cerbere-vm-settings.png)
 
-ℹ️ Now I clone that VM to create `cerbere-head2`, then I proceed with OPNsense installation. I don't want to go into much details about OPNsense installation, I already documented it in a previous [post]({{< ref "post/12-opnsense-virtualization-highly-available" >}}).
+ℹ️ Now I clone that VM to create `cerbere-head2`, then I proceed with OPNsense installation. I don't want to go into much details about OPNsense installation, I already documented it in the [proof of concept]({{< ref "post/12-opnsense-virtualization-highly-available" >}}).
 
 After the installation of both OPNsense instances, I give to each of them their IP in the *Mgmt* network:
 - `cerbere-head1`: `192.168.88.2/24`
@@ -398,7 +401,7 @@ Leaving aside the fact that this new setup is more resilient, I have few more bo
 
 My rack is tiny and the space is tight. The whole thing is heating quite much, exceeding 40°C on top of the rack in summer. Reducing the number of machines powered up lower the temperature. I've gained **1,5°C** after shutting down the old OPNsense box, cool!
 
-Power consumption is also a concern, my tiny datacenter was drawing 85W on average. Here again I could observe a small decrease, about 8W lower, I take that.
+Power consumption is also a concern, my tiny datacenter was drawing 85W on average. Here again I could observe a small decrease, about 8W lower. Considering that this run 24/7, not negligible.
 
 Finally I also removed the box itself and the power cable. Slots are very limited, another good point.
 
