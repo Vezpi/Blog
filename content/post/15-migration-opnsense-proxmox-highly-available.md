@@ -17,7 +17,7 @@ This is the final stage of my **OPNsense** virtualization journey.
 
 A few months ago, my physical [OPNsense box crashed]({{< ref "post/10-opnsense-crash-disk-panic" >}}) because of a hardware failure. This leads my home in the dark, literally. No network, no lights.
 
-💡 To avoid being in that situation again, I imagined a way to virtualize my OPNsense firewall into my **Proxmox VE** cluster. The last time, I've set up a [proof of concept]({{< ref "post/12-opnsense-virtualization-highly-available" >}}) to validate this solution: create a cluster of two **OPNsense** VMs in Proxmox and make the firewall highly available.
+💡 To avoid being in that situation again, I imagined a plan to virtualize my OPNsense firewall into my **Proxmox VE** cluster. The last time, I've set up a [proof of concept]({{< ref "post/12-opnsense-virtualization-highly-available" >}}) to validate this solution: create a cluster of two **OPNsense** VMs in Proxmox and make the firewall highly available.
 
 This time, I will cover the creation of my future OPNsense cluster from scratch, plan the cut over and finally migrate from my current physical box. Let's go!
 
@@ -38,7 +38,7 @@ In the UniFi controller, in `Settings` > `Networks`, I add a `New Virtual Networ
 I do the same thing again for the `pfSync` VLAN with the VLAN ID 44.
 
 I plan to plug my ISP box on the port 15 of my switch, which is disabled for now. I set it as active, set the native VLAN on the newly created one `WAN (20)` and disable trunking:
-![Configuration of the UniFi switch port for the WAN uplink](img/unifi-enable-port-wan-vlan.png)
+![Configuration du port du switch UniFi pour la liaison WAN](img/unifi-enable-port-wan-vlan.png)
 
 Once this setting applied, I make sure that only the ports where are connected my Proxmox nodes propagate these VLAN on their trunk. 
 
@@ -62,8 +62,8 @@ The first VM is named `cerbere-head1` (I didn't tell you? My current firewall is
 - **OS type**: Linux (even if OPNsense is  based on FreeBSD)
 - **Machine type**: `q35`
 - **BIOS**: `OVMF (UEFI)`
-- **Disk**: 20 GiB on Ceph distributed storage
-- **RAM**: 4 GiB RAM, ballooning disabled
+- **Disk**: 20 GB on Ceph distributed storage
+- **RAM**: 4 GB RAM, ballooning disabled
 - **CPU**: 2 vCPU
 - **NICs**, firewall disabled:
 	1. `vmbr0` (*Mgmt*)
@@ -81,7 +81,7 @@ After the installation of both OPNsense instances, I give to each of them their 
 - `cerbere-head1`: `192.168.88.2/24`
 - `cerbere-head2`: `192.168.88.3/24`
 
-While these routers are not managing the networks, I give them my current OPNsense routeur as gateway (`192.168.88.1`) to allow me to reach them from my laptop in another VLAN.
+I give them the other OPNsense node as gateway (`192.168.88.1`) to allow me to reach them from my laptop in another VLAN.
 
 ---
 ## Configure OPNsense
@@ -136,7 +136,7 @@ I'm not gonna lie, I'm quite excited. I'm working for this moment for days.
 
 ### The Migration Plan
 
-I have my physical OPNsense box directly connected to my ISP box. I want to swap it for the VM cluster. To avoid writing the word OPNsense on each line, I'll simply name it the box and the VM.
+I have my physical OPNsense box directly connected to my ISP box. I want to swap it for the VM cluster. (To avoid writing the word OPNsense on each line, I'll simply name it "the box" and "the VM")
 
 Here is the plan:
 1. Backup of the box configuration.
@@ -147,7 +147,7 @@ Here is the plan:
 6. Configure DHCP on both VMs.
 7. Enable mDNS repeater on VM.
 8. Replicate services on VM.
-9. Ethernet cable swap.
+9. Move of the Ethernet cable.
 ### Rollback Strategy
 
 None. 😎
@@ -220,7 +220,7 @@ The service does not start. I'll see that problem later.
 
 In `System` > `High Availability` > `Status`, I click the button to `Synchronize and reconfigure all`.
 
-9. **Ethernet cable swap.**
+9. **Move of the Ethernet cable.**
 
 Physically in my rack, I unplug the Ethernet cable from the WAN port (`igc0`) of my physical OPNsense box and plug it into the port 15 of my UniFi switch.
 
@@ -239,7 +239,7 @@ Pings are working, but I observe some drops, about 10%.
 - ✅ Renew DHCP lease.
 - ✅ Check `ipconfig`
 - ❌ Test internet website. → ✅  
-A few websites are working, everything is incredibly slow... It must be the DNS. I try to lookup a random domain, it is working. But I can't lookup google.com. I restart the Unbound DNS service, everything works now. It is always the DNS.
+A few websites are working, everything is incredibly slow... It must be the DNS. I try to lookup a random domain, it is working. But I can't lookup `google.com`. I restart the Unbound DNS service, everything works now. It is always the DNS...
 - ⚠️ Check firewall logs.  
 Few flows are blocks, not mandatory.
 - ✅Check my webservices.
@@ -275,7 +275,7 @@ It's because the backup node does not have a gateway while passive. No gateway p
 
 2. **Reverse Proxy**
 
-During the switchover, every webservices which I host (reverse proxy/layer 4 proxy) give this error: `SSL_ERROR_INTERNAL_ERROR_ALERT`. After checking the services synchronized throught XMLRPC Sync, Caddy and mDNS-repeater were not selected. It is because these services were installed after the initial configuration of the HA. 
+During the switchover, every webservices which I host (reverse proxy/layer 4 proxy) give this error: `SSL_ERROR_INTERNAL_ERROR_ALERT`. After checking the services synchronized throught XMLRPC Sync, Caddy and mDNS repeater were not selected. It is because these services were installed after the initial configuration of the HA. 
 
 **Solution**: Add Caddy to XMLRPC Sync.
 
@@ -385,17 +385,17 @@ Now that everything is fixed, I can evaluate the failover performance.
 
 When manually entering CARP maintenance mode from the WebGUI interface, no packet drop is observed. Impressive.
 
-2. Failover
+2. **Failover**
 
 To simulate a failover, I kill the active OPNsense VM. Here I observe only one packet dropped. Awesome.
 
 ![Ping test during OPNsense CARP failover](img/opnsense-ping-failover.png)
 
-3. Disaster Recovery
+3. **Disaster Recovery**
 
 A disaster recovery is what would happen after a full Proxmox cluster stop, after an electrical outage for example. I didn't have the time (or the courage) to do that, I'd prefer to prepare a bit better to avoid collateral damages. But surely, this kind of scenario must be evaluated.
 
-### Extras
+### Extras Benefits
 
 Leaving aside the fact that this new setup is more resilient, I have few more bonuses.
 
