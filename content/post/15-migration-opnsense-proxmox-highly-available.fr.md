@@ -17,7 +17,7 @@ This is the final stage of my **OPNsense** virtualization journey.
 
 A few months ago, my physical [OPNsense box crashed]({{< ref "post/10-opnsense-crash-disk-panic" >}}) because of a hardware failure. This leads my home in the dark, literally. No network, no lights.
 
-💡 To avoid being in that situation again, I imagined a way to virtualize my OPNsense firewall into my **Proxmox VE** cluster. The last time, I've set up a [proof of concept]({{< ref "post/12-opnsense-virtualization-highly-available" >}}) to validate this solution: create a cluster of two **OPNsense** VMs in Proxmox and make the firewall highly available.
+💡 To avoid being in that situation again, I imagine a way to virtualize my OPNsense firewall into my **Proxmox VE** cluster. The last time, I've set up a [proof of concept]({{< ref "post/12-opnsense-virtualization-highly-available" >}}) to validate this solution: create a cluster of two **OPNsense** VMs in Proxmox and make the firewall highly available.
 
 This time, I will cover the creation of my future OPNsense cluster from scratch, plan the cut over and finally migrate from my current physical box. Let's go!
 
