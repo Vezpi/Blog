@@ -275,7 +275,7 @@ Lors de la bascule, la connexion internet ne fonctionne pas. Pas de DNS, c'est t
 
 C'est parce que le nœud de secours n'a pas de passerelle lorsqu'il est en mode passif. L'absence de passerelle empêche le DNS de résoudre. Après la bascule, il conserve des domaines non résolus dans son cache. Ce problème conduit aussi à un autre souci : quand il est passif, je ne peux pas mettre à jour le système.
 
-**Solution** : Définir une passerelle sur l'interface _Mgmt_ pointant vers l'autre nœud, avec un numéro de priorité plus élevé que la passerelle WAN (un numéro plus élevé signifie une priorité plus basse). Ainsi, cette passerelle n'est pas active tant que le nœud est maître.
+**Solution** : Définir une passerelle pointant vers l'autre nœud, avec un numéro de priorité plus élevé que la passerelle WAN (un numéro plus élevé signifie une priorité plus basse). Ainsi, cette passerelle n'est pas active tant que le nœud est maître.
 
 2. **Reverse Proxy**
 
@@ -399,7 +399,7 @@ Pour simuler un failover, je tue la VM OPNsense active. Ici j'observe une seule 
 
 Une reprise après sinistre est ce qui se produirait après un arrêt complet d'un cluster Proxmox, suite à une coupure de courant par exemple. Je n'ai pas eu le temps (ni le courage) de m'en occuper, je préfère mieux me préparer pour éviter les dommages collatéraux. Mais il est certain que ce genre de scénario doit être évalué.
 
-#### Avantages Supplémentaires
+### Avantages Supplémentaires
 
 Outre le fait que cette nouvelle configuration est plus résiliente, j'ai constaté quelques autres avantages.
 

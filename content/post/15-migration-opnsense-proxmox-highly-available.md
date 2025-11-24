@@ -272,7 +272,7 @@ During the switchover, the internet connection is not working. No DNS, it is alw
 
 It's because the backup node does not have a gateway while passive. No gateway prevents the DNS to resolve. After the switchover, it still has unresolved domains in its cache. This problem also lead to another issue, while passive, I can't update the system.
 
-**Solution**: Set a gateway in the *Mgmt* interface pointing to the other node, with a higher priority number than the WAN gateway (higher number means lower priority). This way, that gateway is not active while the node is master.
+**Solution**: Create a gateway pointing to the other node, with a higher priority number than the WAN gateway (higher number means lower priority). This way, that gateway is not active while the node is master.
 
 2. **Reverse Proxy**
 
