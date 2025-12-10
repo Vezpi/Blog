@@ -149,7 +149,7 @@ pveum user add terraformer@pve --password <password>
 pveum aclmod / -user terraformer@pve -role TerraformUser
 ```
 
-4. Créer le Jeton API pour l'Utilisateur `terraformer`**
+4. **Créer le Jeton API pour l'Utilisateur `terraformer`**
 ```bash
 pveum user token add terraformer@pve terraform -expire 0 -privsep 0 -comment "Terraform token"
 ```
