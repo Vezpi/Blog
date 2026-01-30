@@ -73,14 +73,17 @@ From OPNsense
 	- Depending if the application should be exposed on the internet or not, I have an Internal or External route. I add the URL given to Traefik in one of these.
 	- I also add this URL in another route to redirect the HTTP challenge to Traefik
 
-Fiinally I test the URL and it should work!
+Finally I test the URL and it should work!
 Once everything work as expected, I commit the new folder on the repo
 ## Update Application
 
 Updating my applications is done manually. I don't use tools like Watchtower for now. Every month or so, I check for new versions. It could be on the Docker hub, GitHub or on the application documentation.
 
-For each of the application, I look for new features and try to bump them to the latest version.
+For each of the application, I look for new features, breaking changes and try to bump them to the latest version.
 
-Most of the time, updating an application is straighforward. I only update the image tag and restart the docker compose stack 
+Most of the time, updating an application is straightforward. I update the image tag and restart the docker compose stack. Then I verify if the application restart properly, check the docker logs and test the application to detect any regression.
+
+If the tests are successful I continue to update until I reach the latest. Once reached, I commit the update in the repository.
+
 
 ## Conclusion
