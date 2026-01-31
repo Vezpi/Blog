@@ -9,9 +9,9 @@ categories:
 ---
 ## Intro
 
-In this post, I'm not gonna tell you what are the good practices. I just want to point out how, currently, I'm deploying new application in my homelab.
+In this post, I'm not gonna tell you what are the good practices to deploy applications. Instead, I just want to point out how, currently, I'm deploying new application in my homelab.
 
-The idea is to make a kind of testimony, that at this point in time, I was doing that way.
+The idea is to make a kind of statement, that at this point in time, I was doing that way. Because ideally, in a near future, I'd adopt GitOps
 
 This is method is quite simple but involve quite a lot of manual operations
 
