@@ -9,30 +9,45 @@ categories:
 ---
 ## Intro
 
-In this post, I'm not gonna tell you what are the good practices. I just want to point out how I'm deploying new application in my homelab.
+In this post, I'm not gonna tell you what are the good practices. I just want to point out how, currently, I'm deploying new application in my homelab.
 
 The idea is to make a kind of testimony, that at this point in time, I was doing that way.
 
 This is method is quite simple but involve quite a lot of manual operations
+
 ## Current Platform
 
-
+Let me break down the principal components involved:
 ### Docker
-I deploy using Docker whenever it is possible
-I use a VM in my Proxmox cluster
+(Explain briefly Docker)
+
+I deploy using Docker whenever it is possible.
+
+I'm using Docker compose for years now. At this time I only had a single server. Now I'm using VMs and I could migrate to a Docker Swarm, but I didn't. It might be a good idea, but this is not what I plan to do for the future.
+For the moment, I still use a single VM to host my Docker applications, which is more or less a clone of my old physical server.
 
 ### Proxmox
+(Explain briefly Proxmox)
+
+My VM is hosted on my Proxmox cluster
 Proxmox cluster composed of 3 nodes, highly available with a Ceph distributed storage
 
 ### Traefik
+(Explain briefly Traefik)
+
 Traefik is installed on the docker host to manage the HTTPS connections
 
 ### OPNsense
+(Explain briefly OPNsense)
+
 On the fronted, there is an HA OPNsense cluster which redirect the HTTPS connections to Traefik using a Caddy plugin. TLS is not terminated by Caddy but only passed through to Traefik which manages the TLS certificates automatically.
 
-## Deploy New Application
+### Gitea
+(Explain briefly Gitea)
 
 In my homelab, I host a Gitea server. Inside I have a private repository where I host the docker compose configurations for my applications
+
+## Deploy New Application
 
 I have a template docker-compose.yml which looks like this:
 ```yml
@@ -87,3 +102,5 @@ If the tests are successful I continue to update until I reach the latest. Once 
 
 
 ## Conclusion
+
+Using Docker 
