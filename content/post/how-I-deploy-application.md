@@ -41,13 +41,13 @@ It is responsible for routing HTTP and HTTPS traffic to the correct containers a
 
 ### OPNsense
 
-
+OPNsense is my router, firewall and also acts as reverse proxy.
 
 Incoming HTTPS traffic is forwarded to Traefik using the Caddy plugin with Layer 4 rules. TLS is not terminated at the firewall level. It is passed through to Traefik, which handles certificate issuance and renewal.
 
 ### Gitea
 
-I host a Gitea server in my homelab.
+Gitea is a self-hosted Git repository, I have one instance running in my homelab.
 
 Inside Gitea, I have a private repository that contains all my Docker Compose configurations. Each application has its own folder, making the repository easy to navigate and maintain.
 
@@ -128,6 +128,24 @@ Most of the time, updates are straightforward:
 
 If everything works, I continue upgrading step by step until I reach the latest available version. Once done, I commit the changes to the repository.
 
+---
+## Pros and Cons
+
+### Pros
+
+- Simple model, one VM, one compose file per application.
+- Traefik automates TLS and routing with minimal boilerplate.
+- Everything declarative enough to rebuild quickly from the repo.
+- Easy to debug: logs and Compose files are local and transparent.
+
+### Cons
+
+- Manual updates don’t scale as the app count grows.
+- Single Docker VM is a single point of failure.
+- Secrets in .env are convenient but basic; rotation and audit are manual.
+- No built‑in rollbacks beyond “change the tag back and redeploy.”
+
+---
 ## Conclusion
 
 This setup works, and it has served me well so far. It is simple and intuitive. However, it is also very manual, especially when it comes to updates and long-term maintenance.
