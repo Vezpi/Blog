@@ -1,11 +1,17 @@
 ---
-slug: 
-title: Template
-description: 
-date: 
+slug: how-I-deploy-application
+title: How Do I Deploy Application Today
+description: The method I use today to deploy new application in my homelab. Simple workflow taking advantage of Docker Compose in a VM on Proxmox VE
+date: 2026-01-31
 draft: true
-tags: 
+tags:
+  - docker
+  - proxmox
+  - opnsense
+  - treafik
+  - gitea
 categories:
+  - homelab
 ---
 ## Intro
 
@@ -27,17 +33,17 @@ I have been using Docker Compose for years. At the time, everything was running 
 
 For now, I still rely on a single VM to host all Docker applications. This VM is more or less a clone of my old physical server, just virtualized.
 
-### Proxmox
+### Proxmox VE
 
-All my VMs are hosted on a Proxmox cluster.
+This VM is hosted on a Proxmox VE cluster, composed of three nodes and uses Ceph as a distributed storage backend.
 
-The cluster is composed of three nodes and uses Ceph as a distributed storage backend. This gives me high availability and makes VM management much easier, even though the Docker workloads themselves are not highly distributed.
+This gives me high availability and makes VM management much easier, even though the Docker workloads themselves are not highly distributed.
 
 ### Traefik
 
 Traefik runs directly on the Docker host and acts as the reverse proxy.
 
-It is responsible for routing HTTP and HTTPS traffic to the correct containers and for managing TLS certificates automatically using Let’s Encrypt. This keeps application-level configuration simple and centralized.
+It is responsible for routing the HTTPS traffic to the correct containers and for managing TLS certificates automatically using Let’s Encrypt. This keeps application-level configuration simple and centralized.
 
 ### OPNsense
 
@@ -126,24 +132,32 @@ Most of the time, updates are straightforward:
 - Check Docker logs
 - Test the application to detect regressions
 
-If everything works, I continue upgrading step by step until I reach the latest available version. Once done, I commit the changes to the repository.
+If it works, I continue upgrading step by step until I reach the latest available version. 
+
+If not, I debug until I fix the problem. Rollbacks are painful.
+
+Once the latest version is reached, I commit the changes to the repository.
 
 ---
 ## Pros and Cons
 
+What works well and what doesn't?
+
 ### Pros
 
 - Simple model, one VM, one compose file per application.
-- Traefik automates TLS and routing with minimal boilerplate.
-- Everything declarative enough to rebuild quickly from the repo.
-- Easy to debug: logs and Compose files are local and transparent.
+- Easy to deploy, great to test an application.
+- Central location for the configurations.
 
 ### Cons
 
-- Manual updates don’t scale as the app count grows.
 - Single Docker VM is a single point of failure.
-- Secrets in .env are convenient but basic; rotation and audit are manual.
-- No built‑in rollbacks beyond “change the tag back and redeploy.”
+- Manual updates don’t scale as the app count grows.
+- Having to declare the URL on Caddy is boring.
+- Hard to follow what is up, and what is not.
+- Secrets in .env are convenient but basic.
+- No fast way to rollback.
+- Operations on the VM are critical.
 
 ---
 ## Conclusion
