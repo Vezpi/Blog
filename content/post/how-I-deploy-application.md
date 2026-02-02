@@ -13,9 +13,9 @@ In this post, I'm not gonna tell you what are the good practices to deploy appli
 
 The idea is to make a kind of statement, that at this point in time, I was doing that way. Because ideally, in a near future, I'd adopt GitOps
 
-This is method is quite simple but involve quite a lot of manual operations
+This method is quite simple, I've tried to industraliaze it but still require quite a lot of manual operations. Also I'll show you how I update them, which is to me the biggest flaw. As my application pool keeps growing, it requires me more time to keep up.
 
-## Current Platform
+## Platform Overview
 
 Let me break down the principal components involved:
 ### Docker
@@ -92,13 +92,13 @@ Finally I test the URL and it should work!
 Once everything work as expected, I commit the new folder on the repo
 ## Update Application
 
-Updating my applications is done manually. I don't use tools like Watchtower for now. Every month or so, I check for new versions. It could be on the Docker hub, GitHub or on the application documentation.
+Updating my applications is still manual to me. I don't use tools like Watchtower for now. Every month or so, I check for new versions. I check on the Docker hub, GitHub or on the application documentation.
 
-For each of the application, I look for new features, breaking changes and try to bump them to the latest version.
+For each of the application I want to uppdate, I look for new features, breaking changes and try to bump them to the latest version.
 
 Most of the time, updating an application is straightforward. I update the image tag and restart the docker compose stack. Then I verify if the application restart properly, check the docker logs and test the application to detect any regression.
 
-If the tests are successful I continue to update until I reach the latest. Once reached, I commit the update in the repository.
+If the tests are successful I continue to update until I reach the latest version available. Once reached, I commit the update in the repository.
 
 
 ## Conclusion
