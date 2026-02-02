@@ -9,47 +9,50 @@ categories:
 ---
 ## Intro
 
-In this post, I'm not gonna tell you what are the good practices to deploy applications. Instead, I just want to point out how, currently, I'm deploying new application in my homelab.
+In this post, I am not going to explain best practices for deploying applications. Instead, I want to document how I am currently deploying new applications in my homelab.
 
-The idea is to make a kind of statement, that at this point in time, I was doing that way. Because ideally, in a near future, I'd adopt GitOps
+Think of this article as a snapshot in time. This is how things really work today, knowing that in the near future I would like to move toward a more GitOps-oriented workflow.
 
-This method is quite simple, I've tried to industraliaze it but still require quite a lot of manual operations. Also I'll show you how I update them, which is to me the biggest flaw. As my application pool keeps growing, it requires me more time to keep up.
+The method I use is fairly simple. I have tried to standardize it as much as possible, but it still involves quite a few manual steps.  I will also explain how I update applications, which is, in my opinion, the biggest weakness of this setup. As the number of applications keeps growing, keeping everything up to date requires more and more time.
 
+---
 ## Platform Overview
 
-Let me break down the principal components involved:
+Before diving into the workflow, here is a quick overview of the main components involved.
 ### Docker
-(Explain briefly Docker)
 
-I deploy using Docker whenever it is possible.
+Docker is the foundation of my application stack. Whenever possible, I deploy applications as containers.
 
-I'm using Docker compose for years now. At this time I only had a single server. Now I'm using VMs and I could migrate to a Docker Swarm, but I didn't. It might be a good idea, but this is not what I plan to do for the future.
-For the moment, I still use a single VM to host my Docker applications, which is more or less a clone of my old physical server.
+I have been using Docker Compose for years. At the time, everything was running on a single physical server. Today, my setup is VM-based, and I could migrate to Docker Swarm, but I have chosen not to. It might make sense in some scenarios, but it is not aligned with where I want to go long term.
+
+For now, I still rely on a single VM to host all Docker applications. This VM is more or less a clone of my old physical server, just virtualized.
 
 ### Proxmox
-(Explain briefly Proxmox)
 
-My VM is hosted on my Proxmox cluster
-Proxmox cluster composed of 3 nodes, highly available with a Ceph distributed storage
+All my VMs are hosted on a Proxmox cluster.
+
+The cluster is composed of three nodes and uses Ceph as a distributed storage backend. This gives me high availability and makes VM management much easier, even though the Docker workloads themselves are not highly distributed.
 
 ### Traefik
-(Explain briefly Traefik)
 
-Traefik is installed on the docker host to manage the HTTPS connections
+Traefik runs directly on the Docker host and acts as the reverse proxy.
+
+It is responsible for routing HTTP and HTTPS traffic to the correct containers and for managing TLS certificates automatically using Let’s Encrypt. This keeps application-level configuration simple and centralized.
 
 ### OPNsense
-(Explain briefly OPNsense)
+@Explain briefly OPNsense
 
-On the fronted, there is an HA OPNsense cluster which redirect the HTTPS connections to Traefik using a Caddy plugin. TLS is not terminated by Caddy but only passed through to Traefik which manages the TLS certificates automatically.
+Incoming HTTPS traffic is forwarded to Traefik using the Caddy plugin with Layer 4 rules. TLS is not terminated at the firewall level. It is passed through to Traefik, which handles certificate issuance and renewal.
 
 ### Gitea
-(Explain briefly Gitea)
 
-In my homelab, I host a Gitea server. Inside I have a private repository where I host the docker compose configurations for my applications
+I host a Gitea server in my homelab.
+
+Inside Gitea, I have a private repository that contains all my Docker Compose configurations. Each application has its own folder, making the repository easy to navigate and maintain.
 
 ## Deploy New Application
 
-I have a template docker-compose.yml which looks like this:
+To standardize deployments, I use a `docker-compose.yml` template that looks like this:
 ```yml
 services:
   NAME:
@@ -73,6 +76,11 @@ networks:
   web:
     external: true
 ```
+
+Let me explain.
+
+For the image, depending on the application, the registry used could differ, but I still the Docker Hub by default. When I try a new application, I might use  the `latest` at start. Then if I choose to keep the application, I prefer to pin the version instead of `latest`.
+
 
 Steps to deploy a new application:
 From VScode:
