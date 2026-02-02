@@ -40,7 +40,8 @@ Traefik runs directly on the Docker host and acts as the reverse proxy.
 It is responsible for routing HTTP and HTTPS traffic to the correct containers and for managing TLS certificates automatically using Let’s Encrypt. This keeps application-level configuration simple and centralized.
 
 ### OPNsense
-@Explain briefly OPNsense
+
+
 
 Incoming HTTPS traffic is forwarded to Traefik using the Caddy plugin with Layer 4 rules. TLS is not terminated at the firewall level. It is passed through to Traefik, which handles certificate issuance and renewal.
 
@@ -50,6 +51,7 @@ I host a Gitea server in my homelab.
 
 Inside Gitea, I have a private repository that contains all my Docker Compose configurations. Each application has its own folder, making the repository easy to navigate and maintain.
 
+---
 ## Deploy New Application
 
 To standardize deployments, I use a `docker-compose.yml` template that looks like this:
@@ -79,36 +81,57 @@ networks:
 
 Let me explain.
 
-For the image, depending on the application, the registry used could differ, but I still the Docker Hub by default. When I try a new application, I might use  the `latest` at start. Then if I choose to keep the application, I prefer to pin the version instead of `latest`.
+For the image, depending on the application, the registry used could differ, but I still the Docker Hub by default. When I try a new application, I might use the `latest` tag at first. Then if I choose to keep the it, I prefer to pin the current version instead of `latest`.
+
+I use volume binds for everything stateful. Every application got its own folder in the `/appli/data` filesystem.
+
+When an application needs to be reachable with HTTPS, I link the container serving the requests in the `web` network, which is managed by Traefik and I associate it labels. The `entrypoint` and `certresolver` is defined in my Traefik configuration. The URL defined in `Host()` is the one which will be used to access the application. This needs to be the same as defined in the Layer4 route in the Caddy plugin of OPNsense. 
+
+If several containers need to talk to each other, I add a `backend` network which will be created when the stack will be deployed, dedicated for the application. This way, no ports need to be opened on the host.
+
+### Steps to Deploy
+
+Most of the work is done from **VScode**:
+- Create a new folder in that repository, with the application name.
+- Copy the template above inside this folder.
+- Adapt the template with the values given by the application documentation.
+- Create a `.env` file for secrets if needed. This file is ignored by `.gitignore`.
+- Start the services directly from VS Code using the Docker extension.
 
 
-Steps to deploy a new application:
-From VScode:
-- I create a new folder in that repository
-- I copy the template file inside this folder
-- I adapt the template with the values given by the application documentation
-- I try to avoid using the latest tag for the images
-- Eventually I create a .env file to store secrets which is ignored by the .gitignore of the repo
-- If volumes are needed, I use bind mounts on a specific FS on the server
-- I run the services directly from VScode using a Docker extension
-From OPNsense
-- In the Caddy plugin, I update 2 Layer4 routes:
-	- Depending if the application should be exposed on the internet or not, I have an Internal or External route. I add the URL given to Traefik in one of these.
-	- I also add this URL in another route to redirect the HTTP challenge to Traefik
+Then in the **OPNsense** WebUI, I update 2 Layer4 routes for the Caddy plugin:
+- Depending if the application should be exposed on the internet or not, I have an *Internal* and *External* route. I add the URL given to Traefik in one of these.
+- I also add this URL in another route to redirect the Letsencrypt HTTP challenge to Traefik.
 
-Finally I test the URL and it should work!
-Once everything work as expected, I commit the new folder on the repo
+Once complete, I test the URL. If everything is configured correctly, the application should be reachable over HTTPS.
+
+When everything works as expected, I commit the new application folder to the repository.
+
+---
 ## Update Application
 
-Updating my applications is still manual to me. I don't use tools like Watchtower for now. Every month or so, I check for new versions. I check on the Docker hub, GitHub or on the application documentation.
+Application updates are still entirely manual.
 
-For each of the application I want to uppdate, I look for new features, breaking changes and try to bump them to the latest version.
+I do not use automated tools like Watchtower for now. About once a month, I check for new versions by looking at Docker Hub, GitHub releases, or the application documentation.
 
-Most of the time, updating an application is straightforward. I update the image tag and restart the docker compose stack. Then I verify if the application restart properly, check the docker logs and test the application to detect any regression.
+For each application I want to update, I review:
+- New features
+- Breaking changes
+- Upgrade paths if required
 
-If the tests are successful I continue to update until I reach the latest version available. Once reached, I commit the update in the repository.
+Most of the time, updates are straightforward:
+- Bump the image tag in the Docker Compose file
+- Restart the stack.
+- Verify that the containers restart properly
+- Check Docker logs
+- Test the application to detect regressions
 
+If everything works, I continue upgrading step by step until I reach the latest available version. Once done, I commit the changes to the repository.
 
 ## Conclusion
 
-Using Docker 
+This setup works, and it has served me well so far. It is simple and intuitive. However, it is also very manual, especially when it comes to updates and long-term maintenance.
+
+As the number of applications grows, this approach clearly does not scale very well. That is one of the main reasons why I am looking toward GitOps and more declarative workflows for the future.
+
+For now, though, this is how I deploy applications in my homelab, and this post serves as a reference point for where I started.
