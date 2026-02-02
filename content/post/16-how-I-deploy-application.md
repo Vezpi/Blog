@@ -3,7 +3,7 @@ slug: how-I-deploy-application
 title: How Do I Deploy Application Today
 description: The method I use today to deploy new application in my homelab. Simple workflow taking advantage of Docker Compose in a VM on Proxmox VE
 date: 2026-01-31
-draft: true
+draft: false
 tags:
   - docker
   - proxmox
@@ -37,7 +37,7 @@ For now, I still rely on a single VM to host all Docker applications. This VM is
 
 This VM is hosted on a Proxmox VE cluster, composed of three nodes and uses Ceph as a distributed storage backend.
 
-This gives me high availability and makes VM management much easier, even though the Docker workloads themselves are not highly distributed.
+This gives me high availability and makes VM management much easier, even though the Docker workloads themselves are not highly available.
 
 ### Traefik
 
@@ -97,7 +97,7 @@ If several containers need to talk to each other, I add a `backend` network whic
 
 ### Steps to Deploy
 
-Most of the work is done from **VScode**:
+Most of the work is done from VScode:
 - Create a new folder in that repository, with the application name.
 - Copy the template above inside this folder.
 - Adapt the template with the values given by the application documentation.
@@ -105,9 +105,9 @@ Most of the work is done from **VScode**:
 - Start the services directly from VS Code using the Docker extension.
 
 
-Then in the **OPNsense** WebUI, I update 2 Layer4 routes for the Caddy plugin:
+Then in the OPNsense WebUI, I update 2 Layer4 routes for the Caddy plugin:
 - Depending if the application should be exposed on the internet or not, I have an *Internal* and *External* route. I add the URL given to Traefik in one of these.
-- I also add this URL in another route to redirect the Letsencrypt HTTP challenge to Traefik.
+- I also add this URL in another route to redirect the Let's Encrypt HTTP challenge to Traefik.
 
 Once complete, I test the URL. If everything is configured correctly, the application should be reachable over HTTPS.
 
