@@ -18,7 +18,7 @@ In my work environment, I'm using the Red Hat Ansible Automation Platform, which
 ---
 ## What is Semaphore UI
 
-
+Semaphore UI is a  sleek interface 
 
 ## Installation
 
