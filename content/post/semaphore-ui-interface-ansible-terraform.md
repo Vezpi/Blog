@@ -18,7 +18,7 @@ In my work environment, I'm using the Red Hat Ansible Automation Platform, which
 ---
 ## What is Semaphore UI
 
-Semaphore UI is a  sleek interface 
+Semaphore UI is a sleek web interface designed to manage and run tasks using tools like Ansible and Terraform, but also Bash, Powershell or even Python scripts.
 
 ## Installation
 
