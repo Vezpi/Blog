@@ -96,7 +96,7 @@ To generate the encrypting access keys, I use this command:
 head -c32 /dev/urandom | base64
 ```
 
-Now I'm able to reach to the login page using the URL configured
+Now I'm able to reach to the login page using the URL configured.
 
 ## Discovery
 
