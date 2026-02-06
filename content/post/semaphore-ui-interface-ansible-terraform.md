@@ -32,7 +32,7 @@ Semaphore UI supports many ways to [install](https://semaphoreui.com/docs/catego
 I'll use Docker for my installation, you can see how I deploy application currently in this [post]({{< ref "post/16-how-I-deploy-application" >}})
 
 Here my `docker-compose.yml` file I've configured using PostgreSQL:
-```yml
+```yaml
 services:
   semaphore:
     image: semaphoreui/semaphore:v2.16.45
@@ -127,7 +127,7 @@ Then I create a new `Inventory`. I'm using the Ansible inventory format (the onl
 ## Launching an Ansible playbook
 
 I want to test something simple, install a web server with a custom page on these 3 VMs, I create the playbook `install_nginx.yml`:
-```
+```yaml
 ---
 - name: Demo Playbook - Install Nginx and Serve Hostname Page
   hosts: all
@@ -189,9 +189,50 @@ There are also a lot of customization available when setting the task template u
 ---
 ## Deploy with Terraform
 
-While running Ansible playbooks was easy out of the box, this was a bit different to deploy with Terraform.
+While running Ansible playbooks was easy out of the box, this was a bit different to deploy with Terraform on Proxmox VE.
 
+Previously from the CLI, I was interacting with the Proxmox cluster using a SSH key. I was not able to put it to work from Semaphore UI. I used a username with a password instead. 
 
+I told myself it would be a good opportunity to use Ansible against my Proxmox nodes to create a dedicated user for this. But this didn't work, here the playbook I used:
+```yaml
+---
+- name: Create Terraform local user for Proxmox
+  hosts: nodes
+  become: true
+  tasks:
+  
+    - name: Create terraform user
+      ansible.builtin.user:
+        name: "{{ terraform_user }}"
+        password: "{{ terraform_password | password_hash('sha512') }}"
+        shell: /bin/bash
+
+    - name: Create sudoers file for terraform user
+      ansible.builtin.copy:
+        dest: /etc/sudoers.d/{{ terraform_user }}
+        mode: '0440'
+        content: |
+          {{ terraform_user }} ALL=(root) NOPASSWD: /sbin/pvesm
+          {{ terraform_user }} ALL=(root) NOPASSWD: /sbin/qm
+          {{ terraform_user }} ALL=(root) NOPASSWD: /usr/bin/tee /var/lib/vz/*
+```
+
+It was failing with the following error:
+```plaintext
+Unable to encrypt nor hash, passlib must be installed. No module named 'passlib'
+```
+
+It is apparently a known problem of Semaphore, to workaround, I installed `passlib` directly on the container
+```bash
+docker exec -it semaphore_ui pip install passlib
+```
+
+Finally I could create my user on the Proxmox nodes.
+
+Next I create a variable group `pve_vm`. In a variable group I can define multiple variables and secrets together:
+![Semaphore UI new variable group](img/semaphore-ui-create-variable-group.png)
+
+Then I create a new task template
 
 
 
