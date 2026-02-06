@@ -166,7 +166,7 @@ I want to test something simple, install a web server with a custom page on thes
 ```
 
 In Semaphore UI, I can now create my first `Task Template` for Ansible playbook. I give it a name, the playbook path (from the root folder of the repo), the repository and the branch:
-![Semaphore UI new task template](img/semaphore-create-new-ansible-task-template.png)
+![Semaphore UI new Ansible task template](img/semaphore-create-new-ansible-task-template.png)
 
 Time to launch the playbook! In the task templates list, I click on the ▶️ button:
 ![Semaphore UI launch Ansible task template](img/semaphore-run-test-playbook.png)
@@ -189,9 +189,9 @@ There are also a lot of customization available when setting the task template u
 ---
 ## Deploy with Terraform
 
-While running Ansible playbooks was easy out of the box, this was a bit different to deploy with Terraform on Proxmox VE.
+While running Ansible playbooks was easy out of the box, this was a bit different to deploy with Terraform on Proxmox VE. Before starting, I destroy the 3 VMs deployed earlier.
 
-Previously from the CLI, I was interacting with the Proxmox cluster using a SSH key. I was not able to put it to work from Semaphore UI. I used a username with a password instead. 
+Previously from the CLI, I was interacting on Terraform with the Proxmox cluster using a SSH key. I was not able to put it to work from Semaphore UI. I used a username with a password instead. 
 
 I told myself it would be a good opportunity to use Ansible against my Proxmox nodes to create a dedicated user for this. But this didn't work, here the playbook I used:
 ```yaml
@@ -232,7 +232,13 @@ Finally I could create my user on the Proxmox nodes.
 Next I create a variable group `pve_vm`. In a variable group I can define multiple variables and secrets together:
 ![Semaphore UI new variable group](img/semaphore-ui-create-variable-group.png)
 
-Then I create a new task template
+Then I create a new task template, this time with the kind Terraform Code. I give it a name, the path of the terraform [project](https://github.com/Vezpi/Homelab/tree/main/terraform/projects/semaphore-vms), a workspace, the repository along with its branch and. the variable group:
+![Semaphore UI new Terraform task template](img/semaphore-task-template-terraform.png)
+
+Running the template gives me some additional options related to Terraform:
+![Semaphore UI run Terraform task](img/semaphore-running-terraform-code-options.png)
+
+After the plan, 
 
 
 
