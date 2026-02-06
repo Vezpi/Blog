@@ -24,6 +24,7 @@ Initially began as Ansible Semaphore, a web interface created to provide a simpl
 
 It is a self-contained Go application with minimal dependencies capable of using different database backend, such as PostgreSQL, MySQL, or BoltDB. 
 
+---
 ## Installation
 
 Semaphore UI supports many ways to [install](https://semaphoreui.com/docs/category/installation) it: Docker, Kubernetes, package manager or simple binary file.
@@ -96,12 +97,37 @@ To generate the encrypting access keys, I use this command:
 head -c32 /dev/urandom | base64
 ```
 
+<<<<<<< HEAD
 Now I'm able to reach to the login page using the URL configured.
 
+=======
+---
+>>>>>>> 84ba140 (Update: 2026-02-05 20:52:50)
 ## Discovery
 
+After starting the stack, I'm able to reach the login page using the URL.
+![Semaphore UI login page](img/semaphore-login-page.png)
+
+To login, I use the credentials defined by `SEMAPHORE_ADMIN_NAME`/`SEMAPHORE_ADMIN_PASSWORD` 
+
+Once logged for the first time, I land into the create project page. I create the Homelab project:
+![Semaphore UI new project page](img/semaphore-create-project.png)
+
+The first thing I want to do is to add a repository. In `Repository`, I click the `New Repository` button, and add my homelab repo URL. I don't specify credentials, the repo is public, you can find its mirror on Github [here](https://github.com/Vezpi/homelab):
+![Semaphore UI new repository page](img/semaphore-add-repository.png)
+
+In the the `Key Store`, I add the first credential, a SSH key for my user:
+![Semaphore UI new key page](img/semaphore-create-new-ssh-key.png)
+
+Before continue, I deploy 3 VMs
+
+---
 ## Launching an Ansible playbook
 
+
+---
 ## Deploy with Terraform
 
+
+---
 ## Conclusion
