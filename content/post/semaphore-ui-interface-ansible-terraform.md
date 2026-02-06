@@ -97,12 +97,7 @@ To generate the encrypting access keys, I use this command:
 head -c32 /dev/urandom | base64
 ```
 
-<<<<<<< HEAD
-Now I'm able to reach to the login page using the URL configured.
-
-=======
 ---
->>>>>>> 84ba140 (Update: 2026-02-05 20:52:50)
 ## Discovery
 
 After starting the stack, I'm able to reach the login page using the URL.
@@ -110,23 +105,94 @@ After starting the stack, I'm able to reach the login page using the URL.
 
 To login, I use the credentials defined by `SEMAPHORE_ADMIN_NAME`/`SEMAPHORE_ADMIN_PASSWORD` 
 
-Once logged for the first time, I land into the create project page. I create the Homelab project:
+Once logged for the first time, I land into the create project page. I create the *Homelab* project:
 ![Semaphore UI new project page](img/semaphore-create-project.png)
 
-The first thing I want to do is to add a repository. In `Repository`, I click the `New Repository` button, and add my homelab repo URL. I don't specify credentials, the repo is public, you can find its mirror on Github [here](https://github.com/Vezpi/homelab):
+The first thing I want to do is to add my *homelab* repository, you can find its mirror on Github [here](https://github.com/Vezpi/homelab). In `Repository`, I click the `New Repository` button, and add the repo URL. I don't specify credentials, the repo is public:
 ![Semaphore UI new repository page](img/semaphore-add-repository.png)
 
-In the the `Key Store`, I add the first credential, a SSH key for my user:
+ℹ️ Before continue, I deploy 3 VMs for testing purpose: `sem01`, `sem02` and `sem03`. I deploy them using Terraform with [this project](https://github.com/Vezpi/Homelab/tree/main/terraform/projects/semaphore-vms).
+
+To interact with these VMs I need to configure credentials. In the the `Key Store`, I add the first credential, a SSH key for my user:
 ![Semaphore UI new key page](img/semaphore-create-new-ssh-key.png)
 
-Before continue, I deploy 3 VMs
+Then I create a new `Inventory`. I'm using the Ansible inventory format (the only one available). I select the SSH key previously created and select the type as `Static`. In the fields I enter the 3 hosts created with their FQDN:
+![Semaphore UI new inventory page](img/semaphore-create-new-static-inventory.png)
+
+![Semaphore UI new inventory page](img/semaphore-create-new-static-inventory.png)
+
+✅ Everything is now setup, I can move forward and test to run an Ansible playbook.
 
 ---
 ## Launching an Ansible playbook
 
+I want to test something simple, install a web server with a custom page on these 3 VMs, I create the playbook `install_nginx.yml`:
+```
+---
+- name: Demo Playbook - Install Nginx and Serve Hostname Page
+  hosts: all
+  become: true
+
+  tasks:
+    - name: Ensure apt cache is updated
+      ansible.builtin.apt:
+        update_cache: true
+        cache_valid_time: 3600
+
+    - name: Install nginx
+      ansible.builtin.apt:
+        name: nginx
+        state: present
+
+    - name: Create index.html with hostname
+      ansible.builtin.copy:
+        dest: /var/www/html/index.html
+        content: |
+          <html>
+          <head><title>Demo</title></head>
+          <body>
+              <h1>Hostname: {{ inventory_hostname }}</h1>
+          </body>
+          </html>
+        owner: www-data
+        group: www-data
+        mode: "0644"
+
+    - name: Ensure nginx is running
+      ansible.builtin.service:
+        name: nginx
+        state: started
+        enabled: true
+```
+
+In Semaphore UI, I can now create my first `Task Template` for Ansible playbook. I give it a name, the playbook path (from the root folder of the repo), the repository and the branch:
+![Semaphore UI new task template](img/semaphore-create-new-ansible-task-template.png)
+
+Time to launch the playbook! In the task templates list, I click on the ▶️ button:
+![Semaphore UI launch Ansible task template](img/semaphore-run-test-playbook.png)
+
+The playbook launches and I can follow the output in real-time:
+![Semaphore UI Ansible task output](img/semaphore-ui-ansible-task-output.png)
+
+I can also check the results of previous runs:
+![Semaphore UI tasks runs list](img/semaphore-ui-task-template-run-list.png)
+
+
+✅ Finally I can confirm the job is done by checking the URL on port 80 (http):
+![Testing URL after applying playbook on hosts ](img/semaphore-ui-test-nginx-page-playbook.png)
+
+Managing the Ansible playbooks from Semaphore UI is pretty simple and really convenient. The interface is really sleek.
+
+There are also a lot of customization available when setting the task template up. I can use variables in a survey, specify limit or tags. I really like it.
+
 
 ---
 ## Deploy with Terraform
+
+
+
+
+
 
 
 ---
