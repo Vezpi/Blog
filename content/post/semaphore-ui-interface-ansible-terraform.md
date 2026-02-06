@@ -189,6 +189,7 @@ There are also a lot of customization available when setting the task template u
 ---
 ## Deploy with Terraform
 
+While running Ansible playbooks was easy out of the box, this was a bit different to deploy with Terraform.
 
 
 
