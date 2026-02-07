@@ -238,7 +238,7 @@ Then I create a new task template, this time with the kind Terraform Code. I giv
 Running the template gives me some additional options related to Terraform:
 ![Semaphore UI run Terraform task](img/semaphore-running-terraform-code-options.png)
 
-After the plan, 
+After the plan, df
 
 
 
