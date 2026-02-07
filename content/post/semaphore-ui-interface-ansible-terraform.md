@@ -238,10 +238,17 @@ Then I create a new task template, this time with the kind Terraform Code. I giv
 Running the template gives me some additional options related to Terraform:
 ![Semaphore UI run Terraform task](img/semaphore-running-terraform-code-options.png)
 
-After the plan, df
+After the Terraform plan, I'm proposed to apply, cancel or stop:
+![Semaphore UI task Terraform plan](img/semaphore-terraform-task-working.png)
 
-
-
+Finally after hit ✅ to apply, I can see the Terraform building the VM. This is exactly the same as using the CLI. At the end, my VMs are successfully deployed on Proxmox:
+![Semaphore UI Terraform deploy complete](img/semaphore-ui-deploy-with-terraform.png)
 
 ---
 ## Conclusion
+
+That's all for the tests with Semaphore UI! 
+
+Overall I think the interface is really nice. I can see myself using it for scheduling some Ansible playbooks. In the intro I was talking about update my OPNsense nodes, I would definitely do that!
+
+For Terraform,
