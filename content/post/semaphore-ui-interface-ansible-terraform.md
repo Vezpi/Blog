@@ -9,16 +9,16 @@ categories:
 ---
 ## Intro
 
-In my homelab, I like to play around with tools like Ansible and Terraform. But the principal way to interact with those tools is the CLI. I love the CLI, but sometime a fancy web interface is great.
+In my homelab, I like to play with tools like Ansible and Terraform. The primary interface is the CLI, which I love, but sometimes a fancy web UI is nicer.
 
-After having setup my OPNsense cluster, I wanted a way to keep it up to date. Of course I wanted it to be automated, so I thought about creating an Ansible playbook. But how to automate and schedule an Ansible playbook?
+After setting up my OPNsense cluster, I wanted a way to keep it up to date on a schedule. Automation means Ansible to me, but how do you automate and schedule playbooks?
 
-In my work environment, I'm using the Red Hat Ansible Automation Platform, which is great, but not suitable in my lab environment. That's how I found Semaphore UI. Let's see what this can do!
+At work I use Red Hat Ansible Automation Platform, which is great, but overkill for my lab. That’s how I found Semaphore UI. Let’s see what it can do.
 
 ---
 ## What is Semaphore UI
 
-[Semaphore UI](https://semaphoreui.com/docs/) is a sleek web interface designed to manage and run tasks using tools like Ansible and Terraform, but also Bash, Powershell or even Python scripts.
+[Semaphore UI](https://semaphoreui.com/docs/) is a sleek web interface designed to run automation with tools like Ansible and Terraform, and even Bash, Powershell or Python scripts.
 
 Initially began as Ansible Semaphore, a web interface created to provide a simple front-end for running solely Ansible playbooks. Over time the community evolved the project into a multi-tool automation control plane.
 
@@ -27,9 +27,9 @@ It is a self-contained Go application with minimal dependencies capable of using
 ---
 ## Installation
 
-Semaphore UI supports many ways to [install](https://semaphoreui.com/docs/category/installation) it: Docker, Kubernetes, package manager or simple binary file.
+Semaphore UI supports several [installation](https://semaphoreui.com/docs/category/installation) methods: Docker, Kubernetes, package manager or simple binary file.
 
-I'll use Docker for my installation, you can see how I deploy application currently in this [post]({{< ref "post/16-how-I-deploy-application" >}})
+I used Docker for my setup, you can see how I currently deploy application in this [post]({{< ref "post/16-how-I-deploy-application" >}})
 
 Here my `docker-compose.yml` file I've configured using PostgreSQL:
 ```yaml
@@ -97,15 +97,17 @@ To generate the encrypting access keys, I use this command:
 head -c32 /dev/urandom | base64
 ```
 
+With Semaphore running, let’s take a quick tour of the UI and wire it up to a repo.
+
 ---
 ## Discovery
 
-After starting the stack, I'm able to reach the login page using the URL.
+After starting the stack, I could reach the login page at the URL:
 ![Semaphore UI login page](img/semaphore-login-page.png)
 
-To login, I use the credentials defined by `SEMAPHORE_ADMIN_NAME`/`SEMAPHORE_ADMIN_PASSWORD` 
+To lo gin, I use the credentials defined by `SEMAPHORE_ADMIN_NAME`/`SEMAPHORE_ADMIN_PASSWORD`. 
 
-Once logged for the first time, I land into the create project page. I create the *Homelab* project:
+On first login, Semaphore prompted me to create a project. I created the Homelab project:
 ![Semaphore UI new project page](img/semaphore-create-project.png)
 
 The first thing I want to do is to add my *homelab* repository, you can find its mirror on Github [here](https://github.com/Vezpi/homelab). In `Repository`, I click the `New Repository` button, and add the repo URL. I don't specify credentials, the repo is public:
@@ -241,14 +243,16 @@ Running the template gives me some additional options related to Terraform:
 After the Terraform plan, I'm proposed to apply, cancel or stop:
 ![Semaphore UI task Terraform plan](img/semaphore-terraform-task-working.png)
 
-Finally after hit ✅ to apply, I can see the Terraform building the VM. This is exactly the same as using the CLI. At the end, my VMs are successfully deployed on Proxmox:
+Finally after hitting ✅ to apply, I can see Terraform building the VM. This is exactly the same as using the CLI. At the end, my VMs are successfully deployed on Proxmox:
 ![Semaphore UI Terraform deploy complete](img/semaphore-ui-deploy-with-terraform.png)
 
 ---
 ## Conclusion
 
-That's all for the tests with Semaphore UI! 
+That's all for the tests with Semaphore UI, I hope this could help you to see what we can do with it.
 
 Overall I think the interface is really nice. I can see myself using it for scheduling some Ansible playbooks. In the intro I was talking about update my OPNsense nodes, I would definitely do that!
 
-For Terraform,
+For Terraform, I might use it to deploy some VMs to test something. I'd love to be able to use the HTTP backend for the tfstate, unfortunately it requires the PRO version.
+
+To conclude, Semaphore UI is a great tool, really intuitive with a beautiful UI, good job!
