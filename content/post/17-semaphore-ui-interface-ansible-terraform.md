@@ -11,10 +11,11 @@ tags:
   - proxmox
   - docker
 categories:
+  - homelab
 ---
 ## Intro
 
-In my homelab, I like to play with tools like Ansible and Terraform. The primary interface is the CLI, which I love, but sometimes a fancy web UI is nicer.
+In my homelab, I like to play with tools like Ansible and Terraform. The primary interface is the CLI, which I love, but sometimes a fancy web UI is just nice.
 
 After setting up my OPNsense cluster, I wanted a way to keep it up to date on a schedule. Automation means Ansible to me, but how do you automate and schedule playbooks?
 
@@ -108,25 +109,23 @@ With Semaphore running, let’s take a quick tour of the UI and wire it up to a 
 ## Discovery
 
 After starting the stack, I can reach the login page at the URL:
-![Semaphore UI login page](img/semaphore-login-page.png)
+![Page de connexion de Semaphore UI](img/semaphore-login-page.png)
 
 To log in, I use the credentials defined by `SEMAPHORE_ADMIN_NAME`/`SEMAPHORE_ADMIN_PASSWORD`. 
 
 On first login, Semaphore prompt me to create a project. I created the Homelab project:
-![Semaphore UI new project page](img/semaphore-create-project.png)
+![Page de création de projet de Semaphore UI](img/semaphore-create-project.png)
 
 The first thing I want to do is to add my *homelab* repository (you can find its mirror on Github [here](https://github.com/Vezpi/homelab)). In `Repository`, I click the `New Repository` button, and add the repo URL. I don't specify credentials because the repo is public:
-![Semaphore UI new repository page](img/semaphore-add-repository.png)
+![Page d'ajout de dépôt de Semaphore UI](img/semaphore-add-repository.png)
 
 ℹ️ Before continue, I deploy 3 VMs for testing purpose: `sem01`, `sem02` and `sem03`. I created them using Terraform with [this project](https://github.com/Vezpi/Homelab/tree/main/terraform/projects/semaphore-vms).
 
 To interact with these VMs I need to configure credentials. In the the `Key Store`, I add the first credential, a SSH key for my user:
-![Semaphore UI new key page](img/semaphore-create-new-ssh-key.png)
+![Page d'ajout d'une nouvelle clé de Semaphore UI](img/semaphore-create-new-ssh-key.png)
 
 Then I create a new `Inventory`. I'm using the Ansible inventory format (the only one available). I select the SSH key previously created and select the type as `Static`. In the fields I enter the 3 hosts created with their FQDN:
-![Semaphore UI new inventory page](img/semaphore-create-new-static-inventory.png)
-
-![Semaphore UI new inventory page](img/semaphore-create-new-static-inventory.png)
+![Page de création d'un inventaire statique de Semaphore UI](img/semaphore-create-new-static-inventory.png)
 
 ✅ With a project, repo, credentials, and inventory in place, I can move forward and test to run an Ansible playbook.
 
@@ -173,25 +172,24 @@ I want to test something simple, install a web server with a custom page on thes
 ```
 
 In Semaphore UI, I can now create my first `Task Template` for Ansible playbook. I give it a name, the playbook path (from the root folder of the repo), the repository and its branch:
-![Semaphore UI new Ansible task template](img/semaphore-create-new-ansible-task-template.png)
+![Nouveau template de tâche Ansible dans Semaphore UI](img/semaphore-create-new-ansible-task-template.png)
 
 Time to launch the playbook! In the task templates list, I click on the ▶️ button:
-![Semaphore UI launch Ansible task template](img/semaphore-run-test-playbook.png)
+![Lancement du template de tâche Ansible dans Semaphore UI](img/semaphore-run-test-playbook.png)
 
 The playbook launches and I can follow the output in real time:
 ![Semaphore UI Ansible task output](img/semaphore-ui-ansible-task-output.png)
 
 I can also review previous runs:
-![Semaphore UI tasks runs list](img/semaphore-ui-task-template-run-list.png)
+![Liste des exécutions de tâches dans Semaphore UI](img/semaphore-ui-task-template-run-list.png)
 
 
 ✅ Finally I can confirm the job is done by checking the URL on port 80 (http):
-![Testing URL after applying playbook on hosts ](img/semaphore-ui-test-nginx-page-playbook.png)
+![Test de l'URL après application du playbook sur les hôtes](img/semaphore-ui-test-nginx-page-playbook.png)
 
 Managing Ansible playbooks in Semaphore UI is pretty simple and really convenient. The interface is really sleek.
 
 There are also a lot of customization available when setting the task template up. I can use variables in a survey, specify limit or tags. I really like it.
-
 
 ---
 ## Deploy with Terraform
@@ -205,7 +203,7 @@ I told myself it was a good opportunity to use Ansible to create a dedicated Pro
 Unable to encrypt nor hash, passlib must be installed. No module named 'passlib'
 ```
 
-This is apparently a known issue with Semaphore’s Python environment. As a workaround, I installed `passlib` directly in the container
+This is apparently a known issue with Semaphore’s Python environment. As a workaround, I installed `passlib` directly in the container:
 ```bash
 docker exec -it semaphore_ui pip install passlib
 ```
@@ -235,19 +233,19 @@ With that in place, the playbook succeeded and I could create the user:
 ```
 
 Next I create a variable group `pve_vm`. A variable group let me define multiple variables and secrets together:
-![Semaphore UI new variable group](img/semaphore-ui-create-variable-group.png)
+![Nouveau groupe de variables dans Semaphore UI](img/semaphore-ui-create-variable-group.png)
 
 Then I create a new task template, this time with the kind Terraform Code. I give it a name, the path of the terraform [project](https://github.com/Vezpi/Homelab/tree/main/terraform/projects/semaphore-vms), a workspace, the repository along with its branch and. the variable group:
-![Semaphore UI new Terraform task template](img/semaphore-task-template-terraform.png)
+![Nouveau template de tâche Terraform dans Semaphore UI](img/semaphore-task-template-terraform.png)
 
 Running the template gives me some additional options related to Terraform:
-![Semaphore UI run Terraform task](img/semaphore-running-terraform-code-options.png)
+![Options d'exécution Terraform dans Semaphore UI](img/semaphore-running-terraform-code-options.png)
 
 After the Terraform plan, I'm proposed to apply, cancel or stop:
-![Semaphore UI task Terraform plan](img/semaphore-terraform-task-working.png)
+![Plan Terraform dans Semaphore UI](img/semaphore-terraform-task-working.png)
 
 Finally after hitting ✅ to apply, I could watch Terraform build the VMs, just like using the CLI. At the end, the VMs were successfully deployed on Proxmox:
-![Semaphore UI Terraform deploy complete](img/semaphore-ui-deploy-with-terraform.png)
+![Déploiement Terraform terminé dans Semaphore UI](img/semaphore-ui-deploy-with-terraform.png)
 
 ---
 ## Conclusion
