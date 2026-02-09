@@ -3,7 +3,7 @@ slug: semaphore-ui-interface-ansible-terraform
 title: Semaphore UI, a Great Interface for Ansible & Terraform
 description: Demonstration of Semaphore UI, a web interface to run Ansible playbooks, Terraform code and even more. Installation with Docker and quick examples.
 date: 2026-02-09
-draft: true
+draft: false
 tags:
   - semaphore-ui
   - ansible
