@@ -19,12 +19,12 @@ During this winter, the node started to fail, it was stopping by itself for no r
 I this article I will walk you through the entire build of my NAS, using TrueNAS.
 
 
-
-
 ## Choose the the right platform
 
 
 For a while I wanted to have a NAS. Not one ready out-of-the-box like Synology or QNAP. While I think these are good products, I wanted to build mine. But I have a huge constraint of space in my tiny rack and the choice for a small NAS case are very limited.
+
+### Hardware
 
 Then I consider full flash NAS. This has several advantages:
 - It is fast
@@ -39,11 +39,13 @@ My first choice was the [Aiffro K100](https://www.aiffro.com/fr/products/all-ssd
 
 This small cube has 2x 2.5Gbps Ethernet ports and can host up to 6x NVMe drives. I started with 2 drives for now, 2 TB each.
 
-## Installation of TrueNAS
 
-### Assembling the Server
 
-### Install TrueNAS OS
+why truenas
+
+## Install TrueNAS
+
+
 
 ## Configuration of TrueNAS
 ### basic conf
