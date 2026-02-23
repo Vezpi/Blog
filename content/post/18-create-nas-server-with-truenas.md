@@ -33,7 +33,11 @@ Then I consider full flash NAS. This has several advantages:
 - It heats less
 But with a major drawback, the price.
 
-While the speed is negligible to me because my network can't handle it, the others are exactly what I'm looking for. I don't need a massive volume a data,
+While the speed is negligible to me because my network can't handle it, the others are exactly what I'm looking for. I don't need a massive volume a data, around 2 TB of usable space is enough.
+
+My first choice was the [Aiffro K100](https://www.aiffro.com/fr/products/all-ssd-nas-k100). But I couldn't find a way to have it deliver in France without doubling the price. Finally I managed to buy a [Beelink ME mini](https://www.bee-link.com/products/beelink-me-mini-n150?variant=48678160236786).
+
+This small cube has 2x 2.5Gbps Ethernet ports and can host up to 6x NVMe drives. I started with 2 drives for now, 2 TB each.
 
 ## Installation of TrueNAS
 
