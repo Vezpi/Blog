@@ -26,7 +26,7 @@ For a while I wanted to have a NAS. Not one ready out-of-the-box like Synology o
 
 ### Hardware
 
-Then I consider full flash NAS. This has several advantages:
+I consider full flash NAS. This has several advantages:
 - It is fast
 - It is small
 - It consumes less
