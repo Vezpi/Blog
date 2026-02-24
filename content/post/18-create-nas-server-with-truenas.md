@@ -142,11 +142,23 @@ I create another dataset: `media`, and a child `photos`. I create a NFS share fr
 On my current NFS server, the files for the photos are owned by `root` (managed by *Immich*). Later I'll see how I can migrate towards a root-less version. For now I set, in `Advanced Options`, the `Maproot User` and `Maproot Group` to `root`. This is equivalent de the attribute `no_squash_root`, the local `root` of the client stays `root` on the server, not a best practice:
 ![NFS share permission in TrueNAS](img/truenas-dataset-photos-nfs-share.png)
 
+At the end, my datasets tree in my `storage` pool look like this:
+- backups
+	- `duplicati`: [Duplicati](https://duplicati.com/) storage backend
+	- `proxmox`: future Proxmox Backup Server
+- `cloud`: `Nextcloud` datas
+- `files`:
+- `media`
+	- `downloads`
+	- `photos`
+	- `videos`
+
+### Data protection
+
+Now let's configure some data protection features, here is the `Data Protection` tab:
+![Data protection features in TrueNAS](img/truenas-data-protection-tab.png)
 
 
-
-
-### data protection
 
 ## Use of TrueNAS
 
