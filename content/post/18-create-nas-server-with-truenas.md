@@ -18,7 +18,7 @@ During this winter, the node started to fail, it was stopping by itself for no r
 
 I this article I will walk you through the entire build of my NAS, using TrueNAS.
 
-
+---
 ## Choose the the right platform
 
 
@@ -59,6 +59,7 @@ Here my requirements:
 
 After comparing the solutions, the choice was made to use TrueNAS Community Edition, which is the new name of FreeNAS.
 
+---
 ## Install TrueNAS
 
 The installation of TrueNAS didn't go as smooth as I expected id to be.
@@ -158,9 +159,17 @@ At the end, my datasets tree in my `storage` pool look like this:
 Now let's configure some data protection features, here is the `Data Protection` tab:
 ![Data protection features in TrueNAS](img/truenas-data-protection-tab.png)
 
+I want to create automatic snapshots for some of my datasets, those I care the most are my cloud files and the photos.
 
+Let's create snapshot tasks. I click on the `Add` button next to `Periodic Snapshot Tasks`. For the `cloud` dataset, I create a daily snapshot with a lifetime of 2 months, for `photos`, only 7 days should be fine:
+![Create periodic snapshot task in TrueNAS ](img/truenas-create-periodic-snapshot.png)
 
+I could also create a `Cloud Sync Task` but I already have Duplicati managing this.
+
+---
 ## Use of TrueNAS
+
+Now my TrueNAS instance is configured, I need to plan the migration of the datas from my current NFS server to TrueNAS.
 
 ### Firewall rule
 
@@ -168,4 +177,6 @@ Now let's configure some data protection features, here is the `Data Protection`
 
 ### Android application
 
+
+---
 ## Conclusion
