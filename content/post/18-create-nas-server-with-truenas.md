@@ -111,7 +111,7 @@ Finally I remove the admin role from `truenas_admin` and lock the account.
 
 ### Pool creation
 
-{what is pool}
+{what is a pool?}
 
 In the `Storage` page, I can find my `Disks`, where I can confirm TrueNAS can see my couple of NVMe drives:
 ![truenas-storage-disks-unconfigured.png](img/truenas-storage-disks-unconfigured.png)
