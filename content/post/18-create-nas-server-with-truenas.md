@@ -37,15 +37,24 @@ While the speed is negligible to me because my network can't handle it, the othe
 
 My first choice was the [Aiffro K100](https://www.aiffro.com/fr/products/all-ssd-nas-k100). But I couldn't find a way to have it deliver in France without doubling the price. Finally I managed to buy a [Beelink ME mini](https://www.bee-link.com/products/beelink-me-mini-n150?variant=48678160236786).
 
-This small cube has 2x 2.5Gbps Ethernet ports and can host up to 6x NVMe drives. I started with 2 drives for now, 2 TB each.
+This small cube has 2x 2.5Gbps Ethernet ports and can host up to 6x NVMe drives, plus a 64 GB eMMC chip to install an OS. I started with 2 drives for now, 2 TB each.
 
+### Software
 
+Now that the hardware choice is done, what I would use as software?
 
-why truenas
+In the past I've heard of several NAS operating system, like FreeNAS, Open Media Vault or Unraid. But I never really dig into the subject.
+
+Here my requirements:
+- NFS shares
+- ZFS support
+- VM capabilities
+
+After comparing the solutions, the choice was made to use TrueNAS Community Edition, which is the new name of FreeNAS.
 
 ## Install TrueNAS
 
-
+The installation of TrueNAS didn't go
 
 ## Configuration of TrueNAS
 ### basic conf
