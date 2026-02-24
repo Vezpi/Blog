@@ -99,7 +99,7 @@ During the installation I didn't choose to define a password for the user `truen
 Once the password is updated, I land on the dashbaord. The UI feels great at first glance:
 ![TrueNAS dashboard](img/truenas-fresh-install-dashboard.png)
 
-The first thing I do is to change the hostname to `granite` and check the box below to define the domain inherited from DHCP:
+I quickly explore the interface, the first thing I do is changing the hostname to `granite` and check the box below to define the domain inherited from DHCP:
 ![TrueNAS hostname configuration](img/truenas-config-change-hostname.png)
 
 In the `General Settings`, I change the `Localization` settings. I set the Console Keyboard Map to `French (AZERTY)` and the Timezone to `Europe/Paris`.
@@ -111,23 +111,40 @@ Finally I remove the admin role from `truenas_admin` and lock the account.
 
 ### Pool creation
 
-{what is a pool?}
+In TrueNAS, a pool is a storage collection created by combining multiple disks into a unified ZFS‑managed space.
 
 In the `Storage` page, I can find my `Disks`, where I can confirm TrueNAS can see my couple of NVMe drives:
-![truenas-storage-disks-unconfigured.png](img/truenas-storage-disks-unconfigured.png)
+![List of available disks in TrueNAS](img/truenas-storage-disks-unconfigured.png)
 
-Now back in the `Storage Dashboard`, I click the `Create Pool` button. I name the pool `storage`:
-![truenas-pool-creation-general.png](img/truenas-pool-creation-general.png)
+Back in the `Storage Dashboard`, I click the `Create Pool` button. I name the pool `storage` because I'm really inspired:
+![Pool creation wizard in TrueNAS](img/truenas-pool-creation-general.png)
 
 Then I select the `Mirror` layout:
-![truenas-pool-creation-layout.png](img/truenas-pool-creation-layout.png)
+![Disk layout selection in the pool creation wizard in TrueNAS](img/truenas-pool-creation-layout.png)
 
-I explore quickly the optional options but none makes sense for my setup. At the end, before creating the pool, there is a Review section:
-![truenas-pool-creation-review.png](img/truenas-pool-creation-review.png)
+I explore quickly the optional configurations, but none makes sense for my setup. At the end, before creating the pool, there is a `Review` section:
+![Review section of the pool creation wizard in TrueNAS](img/truenas-pool-creation-review.png)
 
 After hitting `Create Pool`, I'm warned that everything on the disks will be erased, which I have to confirm. Finally the pool is created.
 
-### dataset config
+### Datasets creation
+
+A dataset is a filesystem inside a pool. It can contains files, directories and child datasets of files, it can be shared using NFS and/or SMB. It allows you to independently manage permissions, compression, snapshots, and quotas for different sets of data within the same storage pool.
+
+Let's now create my first dataset `files` to share files over the network, like ISOs, etc:
+![Create a dataset in TrueNAS](img/truenas-create-dataset-files.png)
+
+Creating my first SMB dataset, TrueNAS prompts me to start and enable the SMB service:
+![Prompt to start SMB service in TrueNAS](img/truenas-start-smb-service.png)
+
+I create another dataset: `media`, and a child `photos`. I create a NFS share from the latter. 
+
+On my current NFS server, the files for the photos are owned by `root` (managed by *Immich*). Later I'll see how I can migrate towards a root-less version. For now I set, in `Advanced Options`, the `Maproot User` and `Maproot Group` to `root`. This is equivalent de the attribute `no_squash_root`, the local `root` of the client stays `root` on the server, not a best practice:
+![NFS share permission in TrueNAS](img/truenas-dataset-photos-nfs-share.png)
+
+
+
+
 
 ### data protection
 
