@@ -171,8 +171,6 @@ I could also create a `Cloud Sync Task` but I already have Duplicati managing th
 
 Now my TrueNAS instance is configured, I need to plan the migration of the datas from my current NFS server to TrueNAS.
 
-### Firewall rule
-
 ### Data migration
 
 ### Android application
