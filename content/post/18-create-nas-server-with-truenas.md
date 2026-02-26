@@ -170,11 +170,22 @@ I could also create a `Cloud Sync Task` but I already have Duplicati managing th
 ## Use of TrueNAS
 
 Now my TrueNAS instance is configured, I need to plan the migration of the datas from my current NFS server to TrueNAS.
-
 ### Data migration
+
+For each of my current NFS shares, on a client, I mount the new NFS share to synchronize the data:
+```
+sudo mkdir /new_photos
+sudo mount 192.168.88.30:/mnt/storage/media/photos /new_photos
+sudo rsync -a --info=progress2 /data/photo/ /new_photo
+```
+
+At the end, I could decommission my old NFS server on the LXC. The dataset layout after migration looks like this:
+![Dataset layout in TrueNAS](img/truenas-datasets-layout.png)
 
 ### Android application
 
+Out of curiosity, I've checked on the Google Play store
+![nasdeck-android-app.png](img/nasdeck-android-app.png)
 
 ---
 ## Conclusion
