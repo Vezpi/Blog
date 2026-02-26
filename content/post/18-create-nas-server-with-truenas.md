@@ -10,16 +10,16 @@ categories:
 ---
 ## Introduction
 
-In my homelab, I need somewhere I can put datas, outside of my Proxmox VE cluster.
+In my homelab, I need somewhere I can put data, outside of my Proxmox VE cluster.
 
 At the beginning, my only one physical server has 2 HDDs disks of 2 TB. When I installed Proxmox on it, these disks were still attached to the host. I managed to share the content using a NFS server in a LXC, but this was far from a good practice.
 
 During this winter, the node started to fail, it was stopping by itself for no reason. This bad boy is 7 years old. When it was shut down, the NFS share were unavailable, which was affecting some services in my homelab. Luckily I could fix it up by replacing its CPU fan, but now I want a safer place for these datas.
 
-I this article I will walk you through the entire build of my NAS, using TrueNAS.
+In this article I will walk you through the entire build of my NAS, using TrueNAS.
 
 ---
-## Choose the the right platform
+## Choose the right platform
 
 
 For a while I wanted to have a NAS. Not one ready out-of-the-box like Synology or QNAP. While I think these are good products, I wanted to build mine. But I have a huge constraint of space in my tiny rack and the choice for a small NAS case are very limited.
@@ -57,7 +57,7 @@ Here my requirements:
 - ZFS support
 - VM capabilities
 
-After comparing the solutions, the choice was made to use TrueNAS Community Edition, which is the new name of FreeNAS.
+After comparing the solutions, the choice was made to use TrueNAS Scale 25.10 Community Edition, which is the new name of FreeNAS.
 
 ---
 ## Install TrueNAS
@@ -87,7 +87,7 @@ The installer was finally able to get through:
 
 Once the installation is complete, I shutdown the machine. Then I install it into my rack on top of the 3 Proxmox VE nodes. I plug both Ethernet cables from my switch, the power and turn it on.
 
-## Configuration of TrueNAS
+## Configure TrueNAS
 
 By default TrueNAS is using DHCP. I check the UniFi interface to gather its MAC, then in OPNsense, I define a new host override in Dnsmasq. Finally in the Caddy plugin, I create a new domain for TrueNAS with that IP. I restart the machine a last time.
 
@@ -167,7 +167,7 @@ Let's create snapshot tasks. I click on the `Add` button next to `Periodic Snaps
 I could also create a `Cloud Sync Task` but I already have Duplicati managing this.
 
 ---
-## Use of TrueNAS
+## Using TrueNAS
 
 Now my TrueNAS instance is configured, I need to plan the migration of the datas from my current NFS server to TrueNAS.
 ### Data migration
@@ -184,8 +184,14 @@ At the end, I could decommission my old NFS server on the LXC. The dataset layou
 
 ### Android application
 
-Out of curiosity, I've checked on the Google Play store
-![nasdeck-android-app.png](img/nasdeck-android-app.png)
+Out of curiosity, I've checked on the Google Play store for an app to manage a TrueNAS instance. I've found [Nasdeck](https://play.google.com/store/apps/details?id=com.strtechllc.nasdeck&hl=fr&pli=1), which is quite nice. Here some screenshots:
+![Screenshots of Nasdeck application](img/nasdeck-android-app.png)
 
 ---
 ## Conclusion
+
+My NAS is now ready to store my datas.
+
+TrueNAS is a really great product. It requires a little bit of hardware to support ZFS.
+
+The next step would be to deploy a Proxmox Backup Server as VM in TrueNAS. 
