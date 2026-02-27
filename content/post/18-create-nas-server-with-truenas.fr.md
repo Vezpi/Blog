@@ -1,7 +1,7 @@
 ---
 slug: create-nas-server-with-truenas
-title: Build and install of my NAS with TrueNAS Scale
-description: "Step-by-step TrueNAS SCALE homelab NAS build: hardware choice, installation, ZFS pool and datasets, SMB/NFS shares and snapshots."
+title: Construction et installation de mon NAS avec TrueNAS SCALE
+description: "Guide pas à pas pour un NAS TrueNAS SCALE en homelab : choix du matériel, installation, pool ZFS et datasets, partages SMB/NFS et snapshots."
 date: 2026-02-27
 draft: true
 tags:
@@ -11,71 +11,72 @@ categories:
 ---
 ## Introduction
 
-In my homelab, I need a place to store data outside of my Proxmox VE cluster.
+Dans mon homelab, j'ai besoin d'un endroit pour stocker des données en dehors de mon cluster Proxmox VE.
 
-At the beginning, my single physical server has 2 HDDs disks of 2 TB. When I installed Proxmox on it, those disks stayed attached to the host. I shared them via an NFS server in an LXC, far from best practice.
+Au départ, mon unique serveur physique a 2 disques HDD de 2 To. Quand j'ai installé Proxmox dessus, ces disques sont restés attachés à l'hôte. Je les ai partagés via un serveur NFS dans un LXC, loin des bonnes pratiques.
 
-This winter, the node started to fail, shutting down for no reason. This buddy is now 7 years old. When it went offline, my NFS shares disappeared, taking a few services down with them in my homelab. Replacing the CPU fan stabilized it, but I now want a safer home for that data.
+Cet hiver, le nœud a commencé à montrer des signes de faiblesse, s'éteignant sans raison. Ce compagnon a maintenant 7 ans. Lorsqu'il est passé hors ligne, mes partages NFS ont disparu, entraînant la chute de quelques services dans mon homelab. Le remplacement du ventilateur du CPU l'a stabilisé, mais je veux maintenant un endroit plus sûr pour ces données.
 
-In this article, I’ll walk you through how I built my NAS with TrueNAS.
-
----
-## Choose the right platform
-
-For a while I wanted a NAS. Not an out‑of‑the‑box Synology or QNAP, even though I think they’re great products. I wanted to build mine. Space is tight in my tiny rack, and small NAS cases are rare.
-
-### Hardware
-
-I went for an all‑flash NAS. Why?
-- It's fast
-- It's ~~furious~~ compact
-- It's quiet
-- It uses less power
-- It runs cooler
-
-The trade‑off is price.
-
- Network speed is my bottleneck anyway, but the other benefits are exactly what I want. I don’t need massive capacity, about 2 TB usable is enough.
-
-My first choice was the [Aiffro K100](https://www.aiffro.com/fr/products/all-ssd-nas-k100). But shipping to France nearly doubled the price. Finally I ended up with a [Beelink ME mini](https://www.bee-link.com/products/beelink-me-mini-n150?variant=48678160236786).
-
-This small cube has:
-- Intel N200 CPU
-- 12 GB RAM
-- 2x 2.5 Gbps Ethernet
-- Up to 6x NVMe drives
-- A 64 GB eMMC chip for the OS
-
-I started with 2 NVMe drives for now, 2 TB each.
-
-### Software
-
-Now that the hardware is chosen, which software will I use?
-
-My requirements were simple:
-- NFS shares
-- ZFS support
-- VM capabilities
-
-I considered FreeNAS/TrueNAS, OpenMediaVault, and Unraid. I chose TrueNAS SCALE 25.10 Community Edition. For clarity: FreeNAS was renamed TrueNAS CORE (FreeBSD‑based), while TrueNAS SCALE is the Linux‑based line. I’m using SCALE.
+Dans cet article, je vais vous expliquer comment j'ai construit mon NAS avec TrueNAS.
 
 ---
-## Install TrueNAS
+## Choisir la bonne plateforme
 
-⚠️ I installed TrueNAS on the eMMC chip. That’s not recommended, eMMC endurance can be a risk.
+Depuis un moment je voulais un NAS. Pas un Synology ou QNAP prêt à l'emploi, même si je pense qu'ils sont de bons produits. Je voulais le construire moi‑même. L'espace est limité dans mon petit rack, et les boîtiers NAS compacts sont rares.
 
-The install didn’t go as smoothly as expected...
+### Matériel
 
-I use [Ventoy](https://www.ventoy.net/en/index.html) to keep multiple ISOs on one USB stick. I was in version 1.0.99, and the ISO wouldn't launch. Updating to 1.1.10 fixed it:
+Je suis parti sur un NAS full‑flash. Pourquoi ?
+
+- C'est rapide
+- C'est ~~furieux~~ compact
+- C'est silencieux
+- Ça consomme moins d'énergie
+- Ça chauffe moins
+
+Le problème est le prix.
+
+La vitesse réseau est de toute façon mon goulot d'étranglement, mais les autres avantages sont exactement ce que je veux. Je n'ai pas besoin d'une capacité massive, environ 2 To utilisables suffisent.
+
+Mon premier choix était le [Aiffro K100](https://www.aiffro.com/fr/products/all-ssd-nas-k100). Mais la livraison vers la France a presque doublé le prix. Finalement j'ai opté pour un [Beelink ME mini](https://www.bee-link.com/products/beelink-me-mini-n150?variant=48678160236786).
+
+Ce petit cube a :
+- CPU Intel N200
+- 12 Go de RAM
+- 2x Ethernet 2,5 Gbps
+- Jusqu'à 6x disques NVMe
+- Une puce eMMC 64 Go pour l'OS
+
+J'ai commencé avec 2 disques NVMe pour l'instant, 2 To chacun.
+
+### Logiciel
+
+Maintenant que le matériel est choisi, quel logiciel vais‑je utiliser ?
+
+Mes besoins étaient simples :
+- partages NFS
+- support ZFS
+- capacités VM
+
+J'ai considéré FreeNAS/TrueNAS, OpenMediaVault et Unraid. J'ai choisi TrueNAS SCALE 25.10 Community Edition. Pour être clair : FreeNAS a été renommé TrueNAS CORE (basé sur FreeBSD), tandis que TrueNAS SCALE est la gamme basée sur Linux. J'utilise SCALE.
+
+---
+## Installer TrueNAS
+
+⚠️ J'ai installé TrueNAS sur la puce eMMC. Ce n'est pas recommandé, l'endurance de l'eMMC peut être un risque.
+
+L'installation ne s'est pas déroulée aussi bien que prévu...
+
+J'utilise [Ventoy](https://www.ventoy.net/en/index.html) pour garder plusieurs ISOs sur une clé USB. J'étais en version 1.0.99, et l'ISO ne se lançait pas. La mise à jour vers 1.1.10 a résolu le problème :
 ![TrueNAS installation splash screen](img/truenas-iso-installation-splash.png)
 
-But here I encountered another problem when launching the installation on my eMMC storage device:
+Mais là j'ai rencontré un autre problème lors du lancement de l'installation sur mon périphérique de stockage eMMC :
 ```
 Failed to find partition number 2 on mmcblk0
 ```
 
-I found a solution on this [post](https://forums.truenas.com/t/installation-failed-on-emmc-odroid-h4/15317/12):
-- Enter the shell
+J'ai trouvé une solution sur ce [post](https://forums.truenas.com/t/installation-failed-on-emmc-odroid-h4/15317/12) :
+- Entrer dans le shell
 ![Enter the shell in TrueNAS installer](img/truenas-iso-enter-shell.png)
 - Edit the file `/lib/python3/dist-packages/truenas_installer/utils.py`
 - Move the line `await asyncio.sleep(1)` right beneath `for _try in range(tries):`
