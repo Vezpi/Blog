@@ -14,7 +14,7 @@ In my homelab, I need a place to store data outside of my Proxmox VE cluster.
 
 At the beginning, my single physical server has 2 HDDs disks of 2 TB. When I installed Proxmox on it, those disks stayed attached to the host. I shared them via an NFS server in an LXC, far from best practice.
 
-During this winter, the node started to fail, shutting down for no reason. This buddy is now 7 years old. When it went offline, my NFS shares disappeared, taking a few services down with them in my homelab. Replacing the CPU fan stabilized it, but I now want a safer home for that data.
+	This winter, the node started to fail, shutting down for no reason. This buddy is now 7 years old. When it went offline, my NFS shares disappeared, taking a few services down with them in my homelab. Replacing the CPU fan stabilized it, but I now want a safer home for that data.
 
 In this article, I’ll walk you through how I built my NAS with TrueNAS.
 
@@ -35,43 +35,41 @@ I went for an all‑flash NAS. Why?
 
 The trade‑off is price.
 
-While the speed is negligible to me because my network can't handle it, the others are exactly what I’m looking for. I don't need a massive volume a data, around 2 TB of usable space is enough.
+ Network speed is my bottleneck anyway, but the other benefits are exactly what I want. I don’t need massive capacity, about 2 TB usable is enough.
 
-My first choice was the [Aiffro K100](https://www.aiffro.com/fr/products/all-ssd-nas-k100). But I couldn't find a way to have it delivered to France without doubling the price. Finally I managed to buy a [Beelink ME mini](https://www.bee-link.com/products/beelink-me-mini-n150?variant=48678160236786).
+My first choice was the [Aiffro K100](https://www.aiffro.com/fr/products/all-ssd-nas-k100). But shipping to France nearly doubled the price. Finally I ended up with a [Beelink ME mini](https://www.bee-link.com/products/beelink-me-mini-n150?variant=48678160236786).
 
 This small cube has:
 - N200 CPU
-- 12 GB of RAM
-- 2x 2.5Gbps Ethernet ports 
-- can host up to 6x NVMe drives
-- a 64 GB eMMC chip to install an OS.
+- 12 GB RAM
+- 2x 2.5 Gbps Ethernet
+- Up to 6x NVMe drives
+- A 64 GB eMMC chip for the OS
 
-I started with 2 drives for now, 2 TB each.
+I started with 2 NVMe drives for now, 2 TB each.
 
 ### Software
 
 Now that the hardware is chosen, which software will I use?
 
-In the past I've heard of several NAS operating system, like FreeNAS, Open Media Vault or Unraid. But I never really dig into the subject.
-
-Here are my requirements:
+My requirements were simple:
 - NFS shares
 - ZFS support
 - VM capabilities
 
-After comparing the solutions, the choice was made to use TrueNAS Scale 25.10 Community Edition, which is the new name of FreeNAS.
+I considered FreeNAS/TrueNAS, OpenMediaVault, and Unraid. I chose TrueNAS SCALE 25.10 Community Edition. For clarity: FreeNAS was renamed TrueNAS CORE (FreeBSD‑based), while TrueNAS SCALE is the Linux‑based line. I’m using SCALE.
 
 ---
 ## Install TrueNAS
 
-⚠️ I'll install the TrueNAS OS on my eMMC chip. This is not recommended as eMMC endurance could be a risk.
+⚠️ I installed TrueNAS on the eMMC chip. That’s not recommended, eMMC endurance can be a risk.
 
-The installation of TrueNAS didn’t go as smoothly as expected.
+The install didn’t go as smoothly as expected...
 
-I'm using [Ventoy](https://www.ventoy.net/en/index.html) to store multiple ISO in a single USB stick. I was in version 1.0.99, and the ISO wouldn't launch. I had to update to version 1.1.10 to make it work:
+I use [Ventoy](https://www.ventoy.net/en/index.html) to keep multiple ISOs on one USB stick. I was in version 1.0.99, and the ISO wouldn't launch. Updating to 1.1.10 fixed it:
 ![TrueNAS installation splash screen](img/truenas-iso-installation-splash.png)
 
-But here I encounter another problem when launching the installation on my eMMC storage device:
+But here I encountered another problem when launching the installation on my eMMC storage device:
 ```
 Failed to find partition number 2 on mmcblk0
 ```
@@ -89,27 +87,27 @@ I found a solution on this [post](https://forums.truenas.com/t/installation-fail
 The installer was finally able to get through:
 ![TrueNAS installation progress](img/truenas-iso-installation.png)
 
-Once the installation is complete, I shut down the machine. Then I install it into my rack on top of the 3 Proxmox VE nodes. I plug both Ethernet cables from my switch, the power and turn it on.
+Once the installation was complete, I shut down the machine. Then I installed it into my rack on top of the 3 Proxmox VE nodes. I plugged both Ethernet cables from my switch and powered it up.
 
 ## Configure TrueNAS
 
-By default TrueNAS is using DHCP. I check the lease given on my UniFi interface to gather its MAC. Then I reserve a static DHCP lease. In OPNsense, I define a new host override in Dnsmasq. Finally in the Caddy plugin, I create a new domain for TrueNAS with that IP. I restart the machine a last time.
+By default, TrueNAS uses DHCP. I found its MAC in UniFi and created a DHCP reservation. In OPNsense, I added a Dnsmasq host override. In the Caddy plugin, I set up a domain for TrueNAS pointing to that IP, then rebooted.
 
 ✅ After a few minutes, TrueNAS is now available on https://nas.vezpi.com.
 ### General Settings
 
-During the installation I didn't choose to define a password for the user `truenas_admin`. I'm requested to change it as soon as I reach the login page:
+During install, I didn’t set a password for truenas_admin. The login page forced me to pick one:
 ![TrueNAS login page to change `truenas_admin` password](img/truenas-login-page-change-password.png)
 
 Once the password is updated, I land on the dashboard. The UI feels great at first glance:
 ![TrueNAS dashboard](img/truenas-fresh-install-dashboard.png)
 
-I quickly explore the interface, the first thing I do is changing the hostname to `granite` and check the box below to define the domain inherited from DHCP:
+I quickly explore the interface, the first thing I do is changing the hostname to `granite` and check the box below et it inherit domain from DHCP:
 ![TrueNAS hostname configuration](img/truenas-config-change-hostname.png)
 
 In the `General Settings`, I change the `Localization` settings. I set the Console Keyboard Map to `French (AZERTY)` and the Timezone to `Europe/Paris`.
 
-I create a new user `vez`, with `Full Admin` role within TrueNAS. I allow SSH access but only with a SSH key, not with password:
+I create a new user `vez`, with `Full Admin` role within TrueNAS. I allow SSH for key‑based auth only, no passwords:
 ![TrueNAS user creation](img/truenas-create-new-user.png)
 
 Finally I remove the admin role from `truenas_admin` and lock the account.
@@ -121,34 +119,34 @@ In TrueNAS, a pool is a storage collection created by combining multiple disks i
 In the `Storage` page, I can find my `Disks`, where I can confirm TrueNAS can see my couple of NVMe drives:
 ![List of available disks in TrueNAS](img/truenas-storage-disks-unconfigured.png)
 
-Back in the `Storage Dashboard`, I click the `Create Pool` button. I name the pool `storage` because I'm really inspired:
+Back in the `Storage Dashboard`, I click the `Create Pool` button. I name the pool `storage` because I'm really inspired to give it a name:
 ![Pool creation wizard in TrueNAS](img/truenas-pool-creation-general.png)
 
 Then I select the `Mirror` layout:
 ![Disk layout selection in the pool creation wizard in TrueNAS](img/truenas-pool-creation-layout.png)
 
-I explore quickly the optional configurations, but the defaults are fine for me: autotrim, compression, no dedup, etc. At the end, before creating the pool, there is a `Review` section:
+I explore quickly the optional configurations, but the defaults are fine to me: autotrim, compression, no dedup, etc. At the end, before creating the pool, there is a `Review` section:
 ![Review section of the pool creation wizard in TrueNAS](img/truenas-pool-creation-review.png)
 
-After hitting `Create Pool`, I'm warned that everything on the disks will be erased, which I confirm. Finally the pool is created.
+After hitting `Create Pool`, I'm warned that everything on the disks will be wiped, which I confirm. Finally the pool is created.
 
 ### Datasets creation
 
-A dataset is a filesystem inside a pool. It can contains files, directories and child datasets of files, it can be shared using NFS and/or SMB. It allows you to independently manage permissions, compression, snapshots, and quotas for different sets of data within the same storage pool.
+A dataset is a filesystem inside a pool. It can contains files, directories and child datasets, it can be shared using NFS and/or SMB. It allows you to independently manage permissions, compression, snapshots, and quotas for different sets of data within the same storage pool.
 
 #### SMB share
 
-Let's now create my first dataset `files` to share files over the network, like ISOs, etc:
+Let's now create my first dataset `files` to share files over the network for my Windows client, like ISOs, etc:
 ![Create a dataset in TrueNAS](img/truenas-create-dataset-files.png)
 
-Creating my first SMB dataset, TrueNAS prompts me to start and enable the SMB service:
+When creating SMB datasets in SCALE, set Share Type to SMB so the right ACL/xattr defaults apply. TrueNAS then prompts me to start/enable the SMB service:
 ![Prompt to start SMB service in TrueNAS](img/truenas-start-smb-service.png)
 
-From my Windows Laptop, I try to access my new share `\\granite.mgmt.vezpi.com\files`. As expected I'm prompted to give credentials.
+From my Windows Laptop, I try to access my new share `\\granite.mgmt.vezpi.com\files`. As expected I'm prompt to give credentials.
 
 I create a new user account with SMB permission.
 
-✅ I can now browse the share and copy files into it.
+✅ Success: I can browse and copy files.
 
 #### NFS share
 
