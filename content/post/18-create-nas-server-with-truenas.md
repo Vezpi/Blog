@@ -3,7 +3,7 @@ slug: create-nas-server-with-truenas
 title: Build and install of my NAS with TrueNAS Scale
 description: "Step-by-step TrueNAS SCALE homelab NAS build: hardware choice, installation, ZFS pool and datasets, SMB/NFS shares and snapshots."
 date: 2026-02-27
-draft: true
+draft: false
 tags:
   - truenas
 categories:
