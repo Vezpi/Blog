@@ -10,25 +10,25 @@ categories:
 ---
 ## Introduction
 
-In my homelab, I need somewhere I can put data, outside of my Proxmox VE cluster.
+In my homelab, I need a place to store data outside of my Proxmox VE cluster.
 
-At the beginning, my only one physical server has 2 HDDs disks of 2 TB. When I installed Proxmox on it, these disks were still attached to the host. I managed to share the content using a NFS server in a LXC, but this was far from a good practice.
+At the beginning, my single physical server has 2 HDDs disks of 2 TB. When I installed Proxmox on it, those disks stayed attached to the host. I shared them via an NFS server in an LXC, far from best practice.
 
-During this winter, the node started to fail, it was stopping by itself for no reason. This bad boy is 7 years old. When it was shut down, the NFS shares were unavailable, which was affecting some services in my homelab. Luckily I could fix it up by replacing its CPU fan, but now I want a safer place for these data.
+During this winter, the node started to fail, shutting down for no reason. This buddy is now 7 years old. When it went offline, my NFS shares disappeared, taking a few services down with them in my homelab. Replacing the CPU fan stabilized it, but I now want a safer home for that data.
 
-In this article I will walk you through the entire build of my NAS, using TrueNAS.
+In this article, I’ll walk you through how I built my NAS with TrueNAS.
 
 ---
 ## Choose the right platform
 
 
-For a while I wanted to have a NAS. Not one ready out-of-the-box like Synology or QNAP. While I think these are good products, I wanted to build mine. But I have a huge constraint of space in my tiny rack and the choice for a small NAS case are very limited.
+For a while I wanted a NAS. Not an out‑of‑the‑box Synology or QNAP, even though I think they’re solid. I wanted to build mine. Space is tight in my tiny rack, and small NAS cases are rare.
 
 ### Hardware
 
-I consider full flash NAS. This has several advantages:
-- It is fast
-- It is small
+I went for an all‑flash NAS. Why?
+- It's fast
+- It's _furious_
 - It consumes less
 - It heats less
 But with a major drawback, the price.

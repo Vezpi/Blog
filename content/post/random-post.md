@@ -27,3 +27,4 @@ Checklist:
 - [ ] Not Checked
 - [x] Checked
 
+Look this is strike !
