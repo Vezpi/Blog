@@ -89,7 +89,7 @@ Once the installation is complete, I shutdown the machine. Then I install it int
 
 ## Configure TrueNAS
 
-By default TrueNAS is using DHCP. I check the UniFi interface to gather its MAC, then in OPNsense, I define a new host override in Dnsmasq. Finally in the Caddy plugin, I create a new domain for TrueNAS with that IP. I restart the machine a last time.
+By default TrueNAS is using DHCP. I check the lease given on my UniFi interface to gather its MAC. Then I reserve a static DHCP lease. In OPNsense, I define a new host override in Dnsmasq. Finally in the Caddy plugin, I create a new domain for TrueNAS with that IP. I restart the machine a last time.
 
 ✅ After a few minutes, TrueNAS is now available on https://nas.vezpi.com.
 ### General Settings
@@ -123,7 +123,7 @@ Back in the `Storage Dashboard`, I click the `Create Pool` button. I name the po
 Then I select the `Mirror` layout:
 ![Disk layout selection in the pool creation wizard in TrueNAS](img/truenas-pool-creation-layout.png)
 
-I explore quickly the optional configurations, but none makes sense for my setup. At the end, before creating the pool, there is a `Review` section:
+I explore quickly the optional configurations, but the defaults are fine for me: autotrim, compression, no dedup, etc. At the end, before creating the pool, there is a `Review` section:
 ![Review section of the pool creation wizard in TrueNAS](img/truenas-pool-creation-review.png)
 
 After hitting `Create Pool`, I'm warned that everything on the disks will be erased, which I have to confirm. Finally the pool is created.
@@ -132,11 +132,21 @@ After hitting `Create Pool`, I'm warned that everything on the disks will be era
 
 A dataset is a filesystem inside a pool. It can contains files, directories and child datasets of files, it can be shared using NFS and/or SMB. It allows you to independently manage permissions, compression, snapshots, and quotas for different sets of data within the same storage pool.
 
+#### SMB share
+
 Let's now create my first dataset `files` to share files over the network, like ISOs, etc:
 ![Create a dataset in TrueNAS](img/truenas-create-dataset-files.png)
 
 Creating my first SMB dataset, TrueNAS prompts me to start and enable the SMB service:
 ![Prompt to start SMB service in TrueNAS](img/truenas-start-smb-service.png)
+
+From my Windows Laptop, I try to access my new share `\\granite.mgmt.vezpi.com\files`. As expected I'm prompted to give credentials.
+
+I create a new user account with SMB permission.
+
+✅ I can now browse the share and copy files into it.
+
+#### NFS share
 
 I create another dataset: `media`, and a child `photos`. I create a NFS share from the latter. 
 
@@ -154,6 +164,7 @@ At the end, my datasets tree in my `storage` pool look like this:
 	- `photos`
 	- `videos`
 
+On the requirement, I talked about VM capabilities. I won't cover that is this post, it will be covered next time.
 ### Data protection
 
 Now let's configure some data protection features, here is the `Data Protection` tab:
@@ -192,6 +203,8 @@ Out of curiosity, I've checked on the Google Play store for an app to manage a T
 
 My NAS is now ready to store my datas.
 
+I didn't address VM capabilities as I will experience it soon to install Proxmox Backup Server as VM. Also I didn't configure notifications, I need to setup a solution to receive email alerts to my notification system.
+
 TrueNAS is a really great product. It requires a little bit of hardware to support ZFS.
 
-The next step would be to deploy a Proxmox Backup Server as VM in TrueNAS. 
+The next step would be to deploy a  in TrueNAS. 
