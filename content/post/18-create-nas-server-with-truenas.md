@@ -14,7 +14,7 @@ In my homelab, I need somewhere I can put data, outside of my Proxmox VE cluster
 
 At the beginning, my only one physical server has 2 HDDs disks of 2 TB. When I installed Proxmox on it, these disks were still attached to the host. I managed to share the content using a NFS server in a LXC, but this was far from a good practice.
 
-During this winter, the node started to fail, it was stopping by itself for no reason. This bad boy is 7 years old. When it was shut down, the NFS share were unavailable, which was affecting some services in my homelab. Luckily I could fix it up by replacing its CPU fan, but now I want a safer place for these datas.
+During this winter, the node started to fail, it was stopping by itself for no reason. This bad boy is 7 years old. When it was shut down, the NFS shares were unavailable, which was affecting some services in my homelab. Luckily I could fix it up by replacing its CPU fan, but now I want a safer place for these data.
 
 In this article I will walk you through the entire build of my NAS, using TrueNAS.
 
@@ -33,9 +33,9 @@ I consider full flash NAS. This has several advantages:
 - It heats less
 But with a major drawback, the price.
 
-While the speed is negligible to me because my network can't handle it, the others are exactly what I'm looking for. I don't need a massive volume a data, around 2 TB of usable space is enough.
+While the speed is negligible to me because my network can't handle it, the others are exactly what I’m looking for. I don't need a massive volume a data, around 2 TB of usable space is enough.
 
-My first choice was the [Aiffro K100](https://www.aiffro.com/fr/products/all-ssd-nas-k100). But I couldn't find a way to have it deliver in France without doubling the price. Finally I managed to buy a [Beelink ME mini](https://www.bee-link.com/products/beelink-me-mini-n150?variant=48678160236786).
+My first choice was the [Aiffro K100](https://www.aiffro.com/fr/products/all-ssd-nas-k100). But I couldn't find a way to have it delivered to France without doubling the price. Finally I managed to buy a [Beelink ME mini](https://www.bee-link.com/products/beelink-me-mini-n150?variant=48678160236786).
 
 This small cube has:
 - N200 CPU
@@ -48,11 +48,11 @@ I started with 2 drives for now, 2 TB each.
 
 ### Software
 
-Now that the hardware choice is done, what I would use as software?
+Now that the hardware is chosen, which software will I use?
 
 In the past I've heard of several NAS operating system, like FreeNAS, Open Media Vault or Unraid. But I never really dig into the subject.
 
-Here my requirements:
+Here are my requirements:
 - NFS shares
 - ZFS support
 - VM capabilities
@@ -62,7 +62,9 @@ After comparing the solutions, the choice was made to use TrueNAS Scale 25.10 Co
 ---
 ## Install TrueNAS
 
-The installation of TrueNAS didn't go as smooth as I expected id to be.
+⚠️ I'll install the TrueNAS OS on my eMMC chip. This is not recommended as eMMC endurance could be a risk.
+
+The installation of TrueNAS didn’t go as smoothly as expected.
 
 I'm using [Ventoy](https://www.ventoy.net/en/index.html) to store multiple ISO in a single USB stick. I was in version 1.0.99, and the ISO wouldn't launch. I had to update to version 1.1.10 to make it work:
 ![TrueNAS installation splash screen](img/truenas-iso-installation-splash.png)
@@ -85,7 +87,7 @@ I found a solution on this [post](https://forums.truenas.com/t/installation-fail
 The installer was finally able to get through:
 ![TrueNAS installation progress](img/truenas-iso-installation.png)
 
-Once the installation is complete, I shutdown the machine. Then I install it into my rack on top of the 3 Proxmox VE nodes. I plug both Ethernet cables from my switch, the power and turn it on.
+Once the installation is complete, I shut down the machine. Then I install it into my rack on top of the 3 Proxmox VE nodes. I plug both Ethernet cables from my switch, the power and turn it on.
 
 ## Configure TrueNAS
 
@@ -97,7 +99,7 @@ By default TrueNAS is using DHCP. I check the lease given on my UniFi interface 
 During the installation I didn't choose to define a password for the user `truenas_admin`. I'm requested to change it as soon as I reach the login page:
 ![TrueNAS login page to change `truenas_admin` password](img/truenas-login-page-change-password.png)
 
-Once the password is updated, I land on the dashbaord. The UI feels great at first glance:
+Once the password is updated, I land on the dashboard. The UI feels great at first glance:
 ![TrueNAS dashboard](img/truenas-fresh-install-dashboard.png)
 
 I quickly explore the interface, the first thing I do is changing the hostname to `granite` and check the box below to define the domain inherited from DHCP:
@@ -126,7 +128,7 @@ Then I select the `Mirror` layout:
 I explore quickly the optional configurations, but the defaults are fine for me: autotrim, compression, no dedup, etc. At the end, before creating the pool, there is a `Review` section:
 ![Review section of the pool creation wizard in TrueNAS](img/truenas-pool-creation-review.png)
 
-After hitting `Create Pool`, I'm warned that everything on the disks will be erased, which I have to confirm. Finally the pool is created.
+After hitting `Create Pool`, I'm warned that everything on the disks will be erased, which I confirm. Finally the pool is created.
 
 ### Datasets creation
 
@@ -150,14 +152,18 @@ I create a new user account with SMB permission.
 
 I create another dataset: `media`, and a child `photos`. I create a NFS share from the latter. 
 
-On my current NFS server, the files for the photos are owned by `root` (managed by *Immich*). Later I'll see how I can migrate towards a root-less version. For now I set, in `Advanced Options`, the `Maproot User` and `Maproot Group` to `root`. This is equivalent de the attribute `no_squash_root`, the local `root` of the client stays `root` on the server, not a best practice:
+On my current NFS server, the files for the photos are owned by `root` (managed by *Immich*). Later I'll see how I can migrate towards a root-less version. 
+
+⚠️ For now I set, in `Advanced Options`, the `Maproot User` and `Maproot Group` to `root`. This is equivalent to the attribute `no_squash_root`, the local `root` of the client stays `root` on the server, don't do that:
 ![NFS share permission in TrueNAS](img/truenas-dataset-photos-nfs-share.png)
+
+✅ I try to mount the NFS share on a client, this is working fine.
 
 At the end, my datasets tree in my `storage` pool look like this:
 - backups
 	- `duplicati`: [Duplicati](https://duplicati.com/) storage backend
 	- `proxmox`: future Proxmox Backup Server
-- `cloud`: `Nextcloud` datas
+- `cloud`: `Nextcloud` data
 - `files`:
 - `media`
 	- `downloads`
@@ -180,14 +186,14 @@ I could also create a `Cloud Sync Task` but I already have Duplicati managing th
 ---
 ## Using TrueNAS
 
-Now my TrueNAS instance is configured, I need to plan the migration of the datas from my current NFS server to TrueNAS.
+Now my TrueNAS instance is configured, I need to plan the migration of the data from my current NFS server to TrueNAS.
 ### Data migration
 
 For each of my current NFS shares, on a client, I mount the new NFS share to synchronize the data:
 ```
 sudo mkdir /new_photos
 sudo mount 192.168.88.30:/mnt/storage/media/photos /new_photos
-sudo rsync -a --info=progress2 /data/photo/ /new_photo
+sudo rsync -a --info=progress2 /data/photo/ /new_photos
 ```
 
 At the end, I could decommission my old NFS server on the LXC. The dataset layout after migration looks like this:
@@ -201,10 +207,10 @@ Out of curiosity, I've checked on the Google Play store for an app to manage a T
 ---
 ## Conclusion
 
-My NAS is now ready to store my datas.
+My NAS is now ready to store my data.
 
 I didn't address VM capabilities as I will experience it soon to install Proxmox Backup Server as VM. Also I didn't configure notifications, I need to setup a solution to receive email alerts to my notification system.
-
+****
 TrueNAS is a really great product. It requires a little bit of hardware to support ZFS.
 
 The next step would be to deploy a  in TrueNAS. 
