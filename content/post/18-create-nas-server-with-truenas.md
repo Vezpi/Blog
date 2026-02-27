@@ -28,10 +28,12 @@ For a while I wanted a NAS. Not an out‑of‑the‑box Synology or QNAP, even t
 
 I went for an all‑flash NAS. Why?
 - It's fast
-- It's _furious_
-- It consumes less
-- It heats less
-But with a major drawback, the price.
+- It's ~~furious~~ compact
+- It's quieter
+- It uses less power
+- It runs cooler
+
+The trade‑off is price.
 
 While the speed is negligible to me because my network can't handle it, the others are exactly what I’m looking for. I don't need a massive volume a data, around 2 TB of usable space is enough.
 
