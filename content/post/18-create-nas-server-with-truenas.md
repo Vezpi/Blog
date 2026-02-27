@@ -81,34 +81,34 @@ I found a solution on this [post](https://forums.truenas.com/t/installation-fail
 - Move the line `await asyncio.sleep(1)` right beneath `for _try in range(tries):`
 - Edit line 46 to add `+ 'p'`:
 `for partdir in filter(lambda x: x.is_dir() and x.name.startswith(device + 'p'), dir_contents):`
-![Fixed file in the TrueNAS installer](img/truenas-iso-fix-installer.png)
+![Fichier corrigé dans l'installateur TrueNAS](img/truenas-iso-fix-installer.png)
 - Exit the shell and start the installation without reboot
 
 The installer was finally able to get through:
-![TrueNAS installation progress](img/truenas-iso-installation.png)
+![Progression de l'installation de TrueNAS](img/truenas-iso-installation.png)
 
 Once the installation was complete, I shut down the machine. Then I installed it into my rack on top of the 3 Proxmox VE nodes. I plugged both Ethernet cables from my switch and powered it up.
 
 ## Configure TrueNAS
 
-By default, TrueNAS uses DHCP. I found its MAC in UniFi and created a DHCP reservation. In OPNsense, I added a Dnsmasq host override. In the Caddy plugin, I set up a domain for TrueNAS pointing to that IP, then rebooted.
+By default, TrueNAS uses DHCP. I found its MAC address in my UniFi interface and created a DHCP reservation. In OPNsense, I added a Dnsmasq host override. In the Caddy plugin, I set up a domain for TrueNAS pointing to that IP, then rebooted.
 
 ✅ After a few minutes, TrueNAS is now available on https://nas.vezpi.com.
 ### General Settings
 
 During install, I didn’t set a password for truenas_admin. The login page forced me to pick one:
-![TrueNAS login page to change `truenas_admin` password](img/truenas-login-page-change-password.png)
+![Page de connexion TrueNAS pour changer le mot de passe de `truenas_admin`](img/truenas-login-page-change-password.png)
 
 Once the password is updated, I land on the dashboard. The UI feels great at first glance:
-![TrueNAS dashboard](img/truenas-fresh-install-dashboard.png)
+![Tableau de bord de TrueNAS](img/truenas-fresh-install-dashboard.png)
 
 I quickly explore the interface, the first thing I do is changing the hostname to `granite` and check the box below et it inherit domain from DHCP:
-![TrueNAS hostname configuration](img/truenas-config-change-hostname.png)
+![Configuration du hostname dans TrueNAS](img/truenas-config-change-hostname.png)
 
 In the `General Settings`, I change the `Localization` settings. I set the Console Keyboard Map to `French (AZERTY)` and the Timezone to `Europe/Paris`.
 
 I create a new user `vez`, with `Full Admin` role within TrueNAS. I allow SSH for key‑based auth only, no passwords:
-![TrueNAS user creation](img/truenas-create-new-user.png)
+![Création d'un utilisateur dans TrueNAS](img/truenas-create-new-user.png)
 
 Finally I remove the admin role from `truenas_admin` and lock the account.
 
@@ -120,7 +120,7 @@ In the `Storage` page, I can find my `Disks`, where I can confirm TrueNAS can se
 ![List of available disks in TrueNAS](img/truenas-storage-disks-unconfigured.png)
 
 Back in the `Storage Dashboard`, I click the `Create Pool` button. I name the pool `storage` because I'm really inspired to give it a name:
-![Pool creation wizard in TrueNAS](img/truenas-pool-creation-general.png)
+![Assistant de création de pool dans TrueNAS](img/truenas-pool-creation-general.png)
 
 Then I select the `Mirror` layout:
 ![Disk layout selection in the pool creation wizard in TrueNAS](img/truenas-pool-creation-layout.png)
@@ -136,11 +136,11 @@ A dataset is a filesystem inside a pool. It can contains files, directories and 
 
 #### SMB share
 
-Let's now create my first dataset `files` to share files over the network for my Windows client, like ISOs, etc:
+Let's now create my first dataset `files` to share files over the network for my Windows clients, like ISOs, etc:
 ![Create a dataset in TrueNAS](img/truenas-create-dataset-files.png)
 
 When creating SMB datasets in SCALE, set Share Type to SMB so the right ACL/xattr defaults apply. TrueNAS then prompts me to start/enable the SMB service:
-![Prompt to start SMB service in TrueNAS](img/truenas-start-smb-service.png)
+![Invite à démarrer le service SMB dans TrueNAS](img/truenas-start-smb-service.png)
 
 From my Windows Laptop, I try to access my new share `\\granite.mgmt.vezpi.com\files`. As expected I'm prompt to give credentials.
 
@@ -160,7 +160,7 @@ On my current NFS server, the files for the photos are owned by `root` (managed 
 ✅ I mount the NFS share on a client, this works fine.
 
 After initial setup, my `storage` pool datasets look like:
-- backups
+- `backups`
 	- `duplicati`: [Duplicati](https://duplicati.com/) storage backend
 	- `proxmox`: future Proxmox Backup Server
 - `cloud`: `Nextcloud` data
@@ -171,6 +171,7 @@ After initial setup, my `storage` pool datasets look like:
 	- `videos`
 
 I mentioned VM capabilities in my requirements. I won't cover that is this post, it will be covered next time.
+
 ### Data protection
 
 Now time to enable some data protection features:
@@ -204,7 +205,7 @@ At the end, I could decommission my old NFS server on the LXC. The dataset layou
 ### Android application
 
 Out of curiosity, I've checked on the Google Play store for an app to manage a TrueNAS instance. I've found [Nasdeck](https://play.google.com/store/apps/details?id=com.strtechllc.nasdeck&hl=fr&pli=1), which is quite nice. Here some screenshots:
-![Screenshots of Nasdeck application](img/nasdeck-android-app.png)
+![Captures d'écran de l'application Nasdeck](img/nasdeck-android-app.png)
 
 ---
 ## Conclusion
