@@ -14,7 +14,7 @@ categories:
 
 ## Intro
 
-My router is the heart of my homelab. When it’s down, everything is down: internet, DNS, VLAN routing, reverse proxy… the whole stack.
+My router is the heart of my homelab. When it’s down, everything is down: internet, DNS, VLAN firewall, reverse proxy… the whole stack.
 
 I’m running an [[OPNsense]] HA cluster made of **two virtual machines** inside my [[Proxmox]] VE cluster. It works great… except for one annoying edge case: when the Proxmox cluster is down (rare, but it happens), I suddenly have **no router left**.
 
