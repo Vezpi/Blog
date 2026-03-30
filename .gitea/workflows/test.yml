@@ -1,0 +1,139 @@
+name: Blog Test
+
+on:
+  push:
+    branches:
+      - 'fix/**'
+      - 'feat/**'
+
+env:
+  DOCKER_IMAGE: vezpi-blog
+
+jobs:
+  Check-Rebuild:
+    runs-on: docker
+    defaults:
+      run:
+        shell: sh
+    outputs:
+      latest_hugo_version: ${{ steps.get_latest.outputs.version }}
+      current_hugo_version: ${{ steps.get_current.outputs.version }}
+      newer_version_available: ${{ steps.compare.outputs.version }}
+      current_docker_image: ${{ steps.current_docker.outputs.image }}
+      docker_folder_changed: ${{ steps.docker_folder.outputs.changed }}
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ gitea.ref_name }}
+          token: ${{ secrets.REPO_TOKEN }}
+
+      - name: Check Latest Hugo Version
+        id: get_latest
+        run: |
+          apk add curl
+          latest_version=$(curl -s https://api.github.com/repos/gohugoio/hugo/releases/latest | grep tag_name | sed -E 's/.*"v([^"]+)".*/\1/')
+          echo "version=$latest_version" | tee -a $GITEA_OUTPUT
+
+      - name: Check Current Hugo Version
+        id: get_current
+        run: |
+          current_version=$(docker image ls ${DOCKER_IMAGE} --format '{{.Tag}}' | head -n1)
+          echo "version=$current_version" | tee -a $GITEA_OUTPUT
+      
+      - name: Compare Current and Latest Hugo Versions
+        id: compare
+        run: |
+          if [ "${{ steps.get_latest.outputs.version }}" != "${{ steps.get_current.outputs.version }}" ]; then
+            new_version_available=true
+            echo "New version available: ${{ steps.get_latest.outputs.version }}"
+          else
+            new_version_available=false
+            echo "Current version is the latest: ${{ steps.get_latest.outputs.version }}"
+          fi
+          echo "version=$new_version_available" | tee -a $GITEA_OUTPUT
+
+      - name: Get Current Docker Image ID
+        id: current_docker
+        run: |
+          current_image=$(docker image ls ${DOCKER_IMAGE}:latest --format '{{.ID}}' | head -n1)
+          echo "image=$current_image" | tee -a $GITEA_OUTPUT
+
+      - name: Check Changes in the Docker Folder
+        id: docker_folder
+        run: |
+          if git diff --name-only origin/main | grep -q '^docker/'; 
+          then 
+            docker_folder_changed=true
+            echo "Change detected in the /docker folder"
+          else 
+            docker_folder_changed=false
+            echo "No change in the /docker folder"
+          fi
+          echo "changed=$docker_folder_changed" | tee -a $GITEA_OUTPUT
+
+  Build:
+    needs: Check-Rebuild
+    if: needs.Check-Rebuild.outputs.newer_version_available == 'true' || needs.Check-Rebuild.outputs.docker_folder_changed == 'true'
+    runs-on: docker
+    defaults:
+      run:
+        shell: sh
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ gitea.ref_name }}
+          token: ${{ secrets.REPO_TOKEN }}
+
+      - name: Build Docker Image
+        run: |  
+          cd docker
+          docker build \
+            --build-arg HUGO_VERSION=${{ needs.Check-Rebuild.outputs.latest_hugo_version }} \
+            --tag ${DOCKER_IMAGE}:${{ needs.Check-Rebuild.outputs.latest_hugo_version }} \
+            .
+          docker tag ${DOCKER_IMAGE}:${{ needs.Check-Rebuild.outputs.latest_hugo_version }} ${DOCKER_IMAGE}:test
+
+  Deploy-Test:
+    needs:
+      - Check-Rebuild
+      - Build
+    if: always() && needs.Check-Rebuild.result == 'success' && (needs.Build.result == 'skipped' || needs.Build.result == 'success')
+    runs-on: docker
+    container:
+      volumes:
+        - /appli/docker/blog:/blog
+    defaults:
+      run:
+        shell: sh
+    env:
+      CONTAINER_NAME: blog_test
+    steps:
+      - name: Launch Blog Test Deployment
+        run: |
+          cd /blog
+          docker compose down ${CONTAINER_NAME} 
+          BLOG_TEST_BRANCH=${{ gitea.ref_name }} docker compose up -d ${CONTAINER_NAME}
+          sleep 5
+          echo "- Displaying container logs"
+          docker compose logs ${CONTAINER_NAME}
+
+  Test:
+    needs: Deploy-Test
+    runs-on: ubuntu
+    env:
+      URL: "https://blog-test.vezpi.com/en/"
+    steps:
+      - name: Check HTTP Response
+        run: |
+          code=$(curl -s -o /dev/null -w "%{http_code}" "$URL")
+          echo "HTTP response code: $code"
+
+          if [ "$code" -ne 200 ]; then
+            echo "❌ Service is not healthy (HTTP $code)"
+            exit 1
+          else
+            echo "✅ Service is healthy"
+          fi
+
