@@ -23,10 +23,7 @@ jobs:
       docker_folder_changed: ${{ steps.docker_folder.outputs.changed }}
     steps:
       - name: Checkout Repository
-        uses: actions/checkout@v4
-        with:
-          ref: ${{ gitea.ref_name }}
-          token: ${{ secrets.REPO_TOKEN }}
+        run: git clone --branch ${{ gitea.ref_name }} https://${{ secrets.REPO_TOKEN }}@git.vezpi.com/Vezpi/blog.git .
 
       - name: Check Latest Hugo Version
         id: get_latest
@@ -81,10 +78,7 @@ jobs:
         shell: sh
     steps:
       - name: Checkout Repository
-        uses: actions/checkout@v4
-        with:
-          ref: ${{ gitea.ref_name }}
-          token: ${{ secrets.REPO_TOKEN }}
+        run: git clone --branch ${{ gitea.ref_name }} https://${{ secrets.REPO_TOKEN }}@git.vezpi.com/Vezpi/blog.git .
 
       - name: Build Docker Image
         run: |  
