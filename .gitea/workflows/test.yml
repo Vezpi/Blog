@@ -87,7 +87,7 @@ jobs:
             --build-arg HUGO_VERSION=${{ needs.Check-Rebuild.outputs.latest_hugo_version }} \
             --tag ${DOCKER_IMAGE}:${{ needs.Check-Rebuild.outputs.latest_hugo_version }} \
             .
-          docker tag ${DOCKER_IMAGE}:${{ needs.Check-Rebuild.outputs.latest_hugo_version }} ${DOCKER_IMAGE}:test
+          docker tag ${DOCKER_IMAGE}:${{ needs.Check-Rebuild.outputs.latest_hugo_version }} ${DOCKER_IMAGE}:dev
 
   Deploy-Test:
     needs:
@@ -102,7 +102,7 @@ jobs:
       run:
         shell: sh
     env:
-      CONTAINER_NAME: blog_test
+      CONTAINER_NAME: blog_dev
     steps:
       - name: Launch Blog Test Deployment
         run: |
@@ -117,7 +117,7 @@ jobs:
     needs: Deploy-Test
     runs-on: ubuntu
     env:
-      URL: "https://blog-test.vezpi.com/en/"
+      URL: "https://blog-dev.vezpi.com/en/"
     steps:
       - name: Check HTTP Response
         run: |
