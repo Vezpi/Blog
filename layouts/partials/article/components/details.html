@@ -1,8 +1,13 @@
+{{- $IsList := .IsList -}}
+{{- $Page := .Page -}}
 <div class="article-details">
-    {{ if .Params.categories }}
+    {{ if $Page.Params.categories }}
     <header class="article-category">
-        {{ range (.GetTerms "tags") }}
-            <a href="{{ .RelPermalink }}" {{ with .Params.style }}style="background-color: {{ .background }}; color: {{ .color }};"{{ end }}>
+        {{ range ($Page.GetTerms "tags") }}
+            {{ $color := partial "helper/color-from-str" .LinkTitle }}
+            {{ $BackgroundColor := default $color.BackgroundColor .Params.style.background }}
+            {{ $TextColor := default $color.TextColor .Params.style.color }}
+            <a href="{{ .RelPermalink }}" style="background-color: {{ $BackgroundColor | safeCSS }}; color: {{ $TextColor | safeCSS }};">
                 {{ .LinkTitle }}
             </a>
         {{ end }}
@@ -12,49 +17,50 @@
     <div class="article-title-wrapper">
         <h2 class="article-title">
             <a href="{{ .RelPermalink }}">
-                {{- .Title -}}
+                {{- $Page.Title -}}
             </a>
         </h2>
     
-        {{ with .Params.description }}
+        {{ with $Page.Params.description }}
         <h3 class="article-subtitle">
             {{ . }}
         </h3>
         {{ end }}
     </div>
 
-    {{ $showReadingTime := .Params.readingTime | default (.Site.Params.article.readingTime) }}
-    {{ $showDate := not .Date.IsZero }}
-    {{ $showFooter := or $showDate $showReadingTime }}
-    {{ if $showFooter }}
-    <footer class="article-time">
-        {{ if $showDate }}
-            <div>
+    {{ $showReadingTime := $Page.Params.readingTime | default ($Page.Site.Params.article.readingTime) }}
+    {{ $showDate := not $Page.Date.IsZero }}
+    {{ $showTime := or $showDate $showReadingTime }}
+ 
+    {{ if $showTime }}
+    <footer class="article-meta">
+        <div class="inline-meta">
+            {{ if $showDate }}
                 {{ partial "helper/icon" "date" }}
-                <time class="article-time--published">
-                    {{- .Date | time.Format (or .Site.Params.dateFormat.published "Jan 02, 2006") -}}
+                <time class="article-time--published" datetime='{{ $Page.Date.Format "2006-01-02T15:04:05Z07:00" }}'>
+                    {{- $Page.Date | time.Format $Page.Site.Params.dateFormat.published -}}
                 </time>
-            </div>
-        {{ end }}
+            {{ end }}
 
-        {{ if $showReadingTime }}
-            <div>
-                {{ partial "helper/icon" "stopwatch" }}
+            {{ if $showReadingTime }}
+                {{ partial "helper/icon" "clock" }}
                 <time class="article-time--reading">
-                    {{ T "article.readingTime" .ReadingTime }}
+                    {{ T "article.readingTime" $Page.ReadingTime }}
                 </time>
-            </div>
-        {{ end }}
-        {{- $date := .Date.Format "20060102" | int -}}
-        {{- $lastmod := .Lastmod.Format "20060102" | int -}}
-        {{- if gt $lastmod $date -}}
-            <div class="article-lastmod">
-              {{ partial "helper/icon" "refresh" }}
-              <time>
-                {{ T "article.lastUpdatedOn" }} {{ .Lastmod | time.Format ( or .Site.Params.dateFormat.lastUpdated "Jan 02, 2006 15:04 MST" ) }}
-              </time>
-            </div>
-        {{- end -}}
+            {{ end }}
+
+            {{- $date := $Page.Date.Format "20060102" | int -}}
+            {{- $lastmod := $Page.Lastmod.Format "20060102" | int -}}
+            {{- if gt $lastmod $date -}}
+                <div class="article-lastmod">
+                {{ partial "helper/icon" "refresh" }}
+                <time>
+                    {{ T "article.lastUpdatedOn" }} {{ $Page.Lastmod | time.Format ( or $Page.Site.Params.dateFormat.lastUpdated "Jan 02, 2006 15:04 MST" ) }}
+                </time>
+                </div>
+            {{- end -}}
+        </div>
+
     </footer>
     {{ end }}
 </div>

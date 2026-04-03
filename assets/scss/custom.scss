@@ -3,9 +3,15 @@
 }
 
 .lang-toggle-icon {
-  margin-left: auto;
+  margin-left: 0;
   svg {
     width: 64px;
     height: 24px;
   }
+}
+
+.container {
+    .left-sidebar {
+        width: unset;
+    }
 }
