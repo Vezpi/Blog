@@ -8,7 +8,7 @@ defaultContentLanguageInSubdir: true
 
 languages:
   en:
-    languageName: English
+    label: English
     weight: 1
     menu:
       main:
@@ -54,7 +54,7 @@ languages:
         lastUpdated: "Jan 2, 2006"
 
   fr:
-    languageName: Français
+    label: Français
     weight: 2
     menu:
       main:
