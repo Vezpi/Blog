@@ -1,7 +1,7 @@
 baseURL: "https://blog.vezpi.com/"
 title: "Vezpi Lab"
 theme: "stack"
-languageCode: "en-us"
+locale: "en-us"
 enableGitInfo: true
 DefaultContentLanguage: "en"
 defaultContentLanguageInSubdir: true
