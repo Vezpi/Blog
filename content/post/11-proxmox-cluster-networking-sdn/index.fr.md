@@ -13,7 +13,7 @@ categories:
 ## Intro
 
 Quand j’ai construit mon cluster **Proxmox VE 8** pour la première fois, le réseau n’était pas ma priorité. Je voulais simplement remplacer rapidement un vieux serveur physique, alors j’ai donné la même configuration de base à chacun de mes trois nœuds, créé le cluster et commencé à créer des VM :  
-![Configuration réseau d’un nœud Proxmox](img/proxmox-node-network-configuration.png)
+![Configuration réseau d’un nœud Proxmox](images/proxmox-node-network-configuration.png)
 
 Cela a bien fonctionné pendant un moment. Mais comme je prévois de virtualiser mon routeur **OPNsense**, j’ai besoin de quelque chose de plus structuré et cohérent. C’est là que la fonctionnalité **S**oftware-**D**efined **N**etworking (SDN) de Proxmox entre en jeu.
 
@@ -21,7 +21,7 @@ Cela a bien fonctionné pendant un moment. Mais comme je prévois de virtualiser
 ## Mon Réseau Homelab
 
 Par défaut, chaque nœud Proxmox dispose de sa propre zone locale, appelée `localnetwork`, qui contient le pont Linux par défaut (`vmbr0`) comme VNet :  
-![Proxmox default `localnetwork` zones](img/proxmox-default-localnetwork-zone.png)
+![Zones `localnetwork` par défaut dans Proxmox](images/proxmox-default-localnetwork-zone.png)
 
 C’est suffisant pour des configurations isolées, mais rien n’est coordonné au niveau du cluster.
 
@@ -61,29 +61,29 @@ Proxmox prend en charge plusieurs types de zones :
 - **EVPN** : VXLAN avec BGP pour du routage L3 dynamique
 
 Comme mon réseau domestique utilise déjà des VLAN, j’ai créé une **zone VLAN** appelée `homelan`, en utilisant `vmbr0` comme pont et en l’appliquant à tout le cluster :  
-![Create a VLAN zone in the Proxmox SDN](img/proxmox-create-vlan-zone-homelan.png)
+![Création d’une zone VLAN dans Proxmox SDN](images/proxmox-create-vlan-zone-homelan.png)
 
 ### VNets
 
 Un **VNet** est un réseau virtuel à l’intérieur d’une zone. Dans une zone VLAN, chaque VNet correspond à un ID VLAN spécifique.
 
 J’ai commencé par créer `vlan55` dans la zone `homelan` pour mon réseau DMZ :  
-![Create a VNet for VLAN 55 in the homelan zone](img/proxmox-create-vlan-vnet-homelan.png)
+![Création d’un VNet pour le VLAN 55 dans la zone homelan](images/proxmox-create-vlan-vnet-homelan.png)
 
 Puis j’ai ajouté les VNets correspondant à la plupart de mes VLAN, puisque je prévois de les rattacher à une VM OPNsense :  
-![All my VLANs created in the Proxmox SDN](img/proxmox-sdn-all-vlan-homelan.png)
+![Tous mes VLANs créés dans le Proxmox SDN](images/proxmox-sdn-all-vlan-homelan.png)
 
 Enfin, j’ai appliqué la configuration dans **Datacenter → SDN** :  
-![Application de la configuration SDN dans Proxmox](img/proxmox-apply-sdn-homelan-configuration.png)
+![Application de la configuration SDN dans Proxmox](images/proxmox-apply-sdn-homelan-configuration.png)
 
 ---
 ## Test de la Configuration Réseau
 
 Dans une vieille VM que je n'utilise plus, je remplace l'actuel `vmbr0` avec le VLAN tag 66 par mon nouveau VNet `vlan66`:
-![Change the network bridge in a VM](img/proxmox-change-vm-nic-vlan-vnet.png)
+![Changement du pont réseau dans une VM](images/proxmox-change-vm-nic-vlan-vnet.png)
 
 Après l'avoir démarrée, la VM obtient une IP du DHCP d'OPNsense sur ce VLAN, ce qui est super. J'essaye également de ping une autre machine et ça fonctionne :
-![Ping another machine in the same VLAN](img/proxmox-console-ping-vm-vlan-66.png)
+![Ping d’une autre machine dans le même VLAN](images/proxmox-console-ping-vm-vlan-66.png)
 
 ---
 ## Mise à jour de Cloud-Init et Terraform
@@ -92,7 +92,7 @@ Pour aller plus loin, j’ai mis à jour le pont réseau utilisé dans mon **tem
 Comme avec la VM précédente, j’ai remplacé `vmbr0` et le tag VLAN 66 par le nouveau VNet `vlan66`.
 
 J’ai aussi adapté mon code **Terraform** pour refléter ce changement :  
-![Mise à jour du code Terraform pour vlan66](img/terraform-code-update-vlan66.png)
+![Mise à jour du code Terraform pour vlan66](images/terraform-code-update-vlan66.png)
 
 Ensuite, j’ai validé qu’aucune régression n’était introduite en déployant une VM de test :
 ```bash
@@ -129,7 +129,7 @@ vm_ip = "192.168.66.181"
 ```
 
 La création s’est déroulée sans problème, tout est bon :
-![VM déployée par Terraform sur vlan66](img/proxmox-terraform-test-deploy-vlan66.png)
+![VM déployée par Terraform sur vlan66](images/proxmox-terraform-test-deploy-vlan66.png)
 
 ---
 ## Conclusion

@@ -13,7 +13,7 @@ categories:
 ## Intro
 
 When I first built my **Proxmox VE 8** cluster, networking wasn’t my main concern. I just wanted to replace an old physical server quickly, so I gave each of my three nodes the same basic config, created the cluster, and started running VMs:
-![Configuration réseau d’un nœud Proxmox](img/proxmox-node-network-configuration.png)
+![Proxmox node network configuration](images/proxmox-node-network-configuration.png)
 
 That worked fine for a while. But as I plan to virtualize my **OPNsense** router, I need something more structured and consistent. This is where Proxmox **S**oftware-**D**efined **N**etworking (SDN) feature comes in.
 
@@ -21,7 +21,7 @@ That worked fine for a while. But as I plan to virtualize my **OPNsense** router
 ## My Homelab Network
 
 By default, every Proxmox node comes with its own local zone, called `localnetwork`, which contains the default Linux bridge (`vmbr0`) as a VNet:
-![Proxmox default `localnetwork` zones](img/proxmox-default-localnetwork-zone.png)
+![Proxmox default `localnetwork` zones](images/proxmox-default-localnetwork-zone.png)
 
 That’s fine for isolated setups, but at the cluster level nothing is coordinated.
 
@@ -61,29 +61,29 @@ Proxmox supports several zone types:
 - **EVPN**: VXLAN with BGP to establish Layer 3 routing
 
 Since my home network already relies on VLANs, I created a **VLAN Zone** named `homelan`, using `vmbr0` as the bridge and applying it cluster-wide:
-![Create a VLAN zone in the Proxmox SDN](img/proxmox-create-vlan-zone-homelan.png)
+![Create a VLAN zone in the Proxmox SDN](images/proxmox-create-vlan-zone-homelan.png)
 
 ### VNets
 
 A **VNet** is a virtual network inside a zone. In a VLAN zone, each VNet corresponds to a specific VLAN ID.
 
 I started by creating `vlan55` in the `homelan` zone for my DMZ network:
-![Create a VNet for VLAN 55 in the homelan zone](img/proxmox-create-vlan-vnet-homelan.png)
+![Create a VNet for VLAN 55 in the homelan zone](images/proxmox-create-vlan-vnet-homelan.png)
 
 Then I added VNets for most of my VLANs, since I plan to attach them to an OPNsense VM:
-![All my VLANs created in the Proxmox SDN](img/proxmox-sdn-all-vlan-homelan.png)
+![All my VLANs created in the Proxmox SDN](images/proxmox-sdn-all-vlan-homelan.png)
 
 Finally, I applied the configuration in **Datacenter → SDN**:
-![Application de la configuration SDN dans Proxmox](img/proxmox-apply-sdn-homelan-configuration.png)
+![Apply SDN configuration in Proxmox](images/proxmox-apply-sdn-homelan-configuration.png)
 
 ---
 ## Test the Network Configuration
 
 In a old VM which I don't use anymore, I replace the current `vmbr0` with VLAN tag 66 to my new VNet `vlan66`:
-![Change the network bridge in a VM](img/proxmox-change-vm-nic-vlan-vnet.png)
+![Change the network bridge in a VM](images/proxmox-change-vm-nic-vlan-vnet.png)
 
 After starting it, the VM gets an IP from the DHCP on OPNsense on that VLAN, which sounds good. I also try to ping another machine and it works:
-![Ping another machine in the same VLAN](img/proxmox-console-ping-vm-vlan-66.png)
+![Ping another machine in the same VLAN](images/proxmox-console-ping-vm-vlan-66.png)
 
 ---
 ## Update Cloud-Init Template and Terraform
@@ -91,7 +91,7 @@ After starting it, the VM gets an IP from the DHCP on OPNsense on that VLAN, whi
 To go further, I update the bridge used in my **cloud-init** template, which I detailed the creation in that [post]({{< ref "post/1-proxmox-cloud-init-vm-template" >}}). Pretty much the same thing I've done with the VM, I replace the current `vmbr0` with VLAN tag 66 with my new VNet `vlan66`.
 
 I also update the **Terrafom** code to take this change into account:
-![Mise à jour du code Terraform pour vlan66](img/terraform-code-update-vlan66.png)
+![Terraform code change for the vlan66](images/terraform-code-update-vlan66.png)
 
 I quicky check if I don't have regression and can still deploy a VM with Terraform:
 ```bash
@@ -128,7 +128,7 @@ vm_ip = "192.168.66.181"
 ```
 
 The VM is deploying without any issue, everything is OK:
-![VM déployée par Terraform sur vlan66](img/proxmox-terraform-test-deploy-vlan66.png)
+![VM hardware in Proxmox deployed by Terraform](images/proxmox-terraform-test-deploy-vlan66.png)
 
 ---
 ## Conclusion

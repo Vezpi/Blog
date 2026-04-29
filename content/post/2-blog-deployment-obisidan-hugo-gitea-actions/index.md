@@ -59,7 +59,7 @@ The idea is simple:
 
 This way, I never need to manually copy files or trigger deployments. Everything flows from writing markdown in Obsidian to having a fully deployed website.
 
-![Workflow depuis l'écriture de notes sur Obsidian au Blog publié](img/obsidian-blog-gitea-actions-workflow.png)
+![Workflow from writing notes on Obsidian to Blog published](images/obsidian-blog-gitea-actions-workflow.png)
 
 ---
 ## ⚙️ Implementation
@@ -100,17 +100,17 @@ container:
 ```
 
 The runner appears in the `Administration Area`, under `Actions`>`Runners`. To obtain the registration token, click on the `Create new Runner` button
-![New runner visible in Gitea](img/gitea-runners-management.png)
+![New runner visible in Gitea](images/gitea-runners-management.png)
 
 ### Step 3: Set up Gitea Actions for Obsidian Repository
 
 First I enabled the Gitea Actions, this is disabled by default, tick the box `Enable Repository Actions`  in the settings for that repository
 
 I created a new PAT (Personal Access Token) with RW permission on the repositories
-![New personal access token creation in Gitea](img/gitea-new-pat.png)
+![New personal access token creation in Gitea](images/gitea-new-pat.png)
 
 I added this token as secret `REPO_TOKEN` in the repository
-![Add secret window for repository in Gitea](img/gitea-add-repo-secret.png)
+![Add secret window for repository in Gitea](images/gitea-add-repo-secret.png)
 
 
 I needed to create the workflow that will spin-up a container and do the following:
@@ -170,7 +170,7 @@ jobs:
           git push -u origin main
 ```
 
-Obsidian uses wiki-style links for images, like `![[image name.png]]`, which isn't compatible with Hugo out of the box. Here's how I automated a workaround in a Gitea Actions workflow:
+Obsidian uses wiki-style links for images, like `![`, which isn't compatible with Hugo out of the box. Here's how I automated a workaround in a Gitea Actions workflow:](images/image_name.png)
 - I find all used image references in `.md` files.
 - For each referenced image, I update the link in relevant `.md` files like `![image name](img/image_name.png)`.
 - I then copy those used images to the blog's static directory while replacing white-spaces by underscores.

@@ -33,12 +33,12 @@ First, I configure my layer 2 network which is managed by UniFi. There I need to
 - *pfSync* (44), communication between my OPNsense nodes.
 
 In the UniFi controller, in `Settings` > `Networks`, I add a `New Virtual Network`. I name it `WAN` and give it the VLAN ID 20:
-![Creation of the WAN VLAN in the UniFi Controller](img/unifi-add-vlan-for-wan.png)
+![Creation of the WAN VLAN in the UniFi Controller](images/unifi-add-vlan-for-wan.png)
 
 I do the same thing again for the `pfSync` VLAN with the VLAN ID 44.
 
 I plan to plug my ISP box on the port 15 of my switch, which is disabled for now. I set it as active, set the native VLAN on the newly created one `WAN (20)` and disable trunking:
-![Configuration du port du switch UniFi pour la liaison WAN](img/unifi-enable-port-wan-vlan.png)
+![Configuration of the UniFi switch port for the WAN uplink](images/unifi-enable-port-wan-vlan.png)
 
 Once this setting applied, I make sure that only the ports where are connected my Proxmox nodes propagate these VLAN on their trunk. 
 
@@ -49,7 +49,7 @@ I'm done with UniFi configuration.
 Now that the VLAN can reach my nodes, I want to handle it in the Proxmox SDN. I've configured the SDN in [that article]({{< ref "post/11-proxmox-cluster-networking-sdn" >}}).
 
 In `Datacenter` > `SDN` > `VNets`, I create a new VNet, call it `vlan20` to follow my own naming convention, give it the *WAN* alias and use the tag (VLAN ID) 20:
-![Creation of the VNet for the WAN in the Proxmox SDN](img/proxmox-sdn-new-vnet-wan.png)
+![Creation of the VNet for the WAN in the Proxmox SDN](images/proxmox-sdn-new-vnet-wan.png)
 
 I also create the `vlan44` for the *pfSync* VLAN, then I apply this configuration and we are done with the SDN.
 
@@ -74,7 +74,7 @@ The first VM is named `cerbere-head1` (I didn't tell you? My current firewall is
 	6. `vlan55` *(DMZ)*
 	7. `vlan66` *(Lab)*
 
-![Hardware settings of the OPNsense VM in Proxmox](img/proxmox-cerbere-vm-settings.png)
+![Hardware settings of the OPNsense VM in Proxmox](images/proxmox-cerbere-vm-settings.png)
 
 ℹ️ Now I clone that VM to create `cerbere-head2`, then I proceed with OPNsense installation. I don't want to go into much details about OPNsense installation, I already documented it in the [proof of concept]({{< ref "post/12-opnsense-virtualization-highly-available" >}}).
 
@@ -115,7 +115,7 @@ In Proxmox VE 8, It was possible to create HA groups, depending of their resourc
 The Proxmox cluster is able to provide HA for the resources, but you need to define the rules.
 
 In `Datacenter` > `HA`, you can see the status and manage the resources. In the `Resources` panel I click on `Add`. I need to pick the resource to configure as HA in the list, here `cerbere-head1` with ID 122. Then in the tooltip I can define the maximum of restart and relocate, I keep `Failback` enabled and the requested state to `started`:
-![Create HA resource in Proxmox](img/proxmox-add-vm-ha.png)
+![Create HA resource in Proxmox](images/proxmox-add-vm-ha.png)
 
 The Proxmox cluster will now make sure this VM is started. I do the same for the other OPNsense VM, `cerbere-head2`.  
 
@@ -124,7 +124,7 @@ The Proxmox cluster will now make sure this VM is started. I do the same for the
 Great, but I don't want them on the same node. This is when the new feature HA affinity rules, of Proxmox VE 9, come in. Proxmox allows to create node affinity and resource affinity rules. I don't mind on which node they run, but I don't want them together. I need a resource affinity rule.
 
 In `Datacenter` > `HA` > `Affinity Rules`, I add a new HA resource affinity rule. I select both VMs and pick the option `Keep Separate`:
-![Create HA resource affinity in Proxmox](img/proxmox-ha-resource-affinity-rule.png)
+![Create HA resource affinity in Proxmox](images/proxmox-ha-resource-affinity-rule.png)
 
 ✅ My OPNsense VMs are now fully ready!
 
@@ -390,7 +390,7 @@ When manually entering CARP maintenance mode from the WebGUI interface, no packe
 
 To simulate a failover, I kill the active OPNsense VM. Here I observe only one packet dropped. Awesome.
 
-![Ping test during OPNsense CARP failover](img/opnsense-ping-failover.png)
+![Ping test during OPNsense CARP failover](images/opnsense-ping-failover.png)
 
 3. **Disaster Recovery**
 

@@ -22,13 +22,13 @@ Since the blog is automatically redeployed every time I modify content in Obsidi
 
 Currently, my blog redeploys automatically on every change to the `main` branch of the [Git repository](https://git.vezpi.com/Vezpi/Blog) hosted on my **Gitea** instance, using a **Gitea Actions** workflow. Every change made in my **Obsidian** vault is automatically pushed to this branch.
 
-![Workflow depuis l'écriture de notes sur Obsidian au Blog publié](img/obsidian-blog-gitea-actions-workflow.png)
+![Workflow from writing notes on Obsidian to Blog published](images/obsidian-blog-gitea-actions-workflow.png)
 
 ### Create a New Branch
 
 The first and easiest step was to create a new branch to receive these changes. So I created a `preview` branch in this repository and then updated the target branch in the workflow of my Obsidian Git repo.
 
-![Create the preview branch from the main branch in Gitea](img/gitea-create-new-branch.png)
+![Create the preview branch from the main branch in Gitea](images/gitea-create-new-branch.png)
 
 ### Containerize the Blog
 
@@ -211,7 +211,7 @@ Now, here’s what the new workflow does:
 
 Here’s an example of a deployment triggered by an automatic commit from **Obsidian**. You can see that the Docker image wasn’t rebuilt because no new Hugo version was available and the `docker` folder hadn’t changed, so the final `Clean` job wasn’t necessary either.
 
-![Gitea Actions workflow for blog deployment](img/gitea-actions-deploy-blog-workflow.png)
+![Gitea Actions workflow for blog deployment](images/gitea-actions-deploy-blog-workflow.png)
 
 #### Code
 

@@ -93,17 +93,17 @@ BGP is disabled by default on both OPNsense and Cilium. Let’s enable it on bot
 According to the [official OPNsense documentation](https://docs.opnsense.org/manual/dynamic_routing.html#bgp-section), enabling BGP requires installing a plugin.
 
 Head to `System` > `Firmware` > `Plugins` and install the `os-frr` plugin:  
-![  ](img/opnsense-add-os-frr-plugin.png)
+![  ](images/opnsense-add-os-frr-plugin.png)
 Install `os-frr` plugin in OPNsense
 
 Once installed, enable the plugin under `Routing` > `General`:  
-![  ](img/opnsense-enable-routing-frr-plugin.png)
+![  ](images/opnsense-enable-routing-frr-plugin.png)
 Enable routing in OPNsense
 
 Then navigate to the `BGP` section. In the **General** tab:
 - Tick the box to enable BGP.
 - Set your **BGP ASN**. I used `64512`, the first private ASN from the reserved range (see [ASN table](https://en.wikipedia.org/wiki/Autonomous_system_\(Internet\)#ASN_Table)):
-![  ](img/opnsense-enable-bgp.png)
+![  ](images/opnsense-enable-bgp.png)
 General BGP configuration in OPNsense
 
 Now create your BGP neighbors. I’m only peering with my **worker nodes** (since only they run workloads). For each neighbor:
@@ -111,15 +111,15 @@ Now create your BGP neighbors. I’m only peering with my **worker nodes** (sinc
 - Use `64513` as the **Remote AS** (Cilium’s ASN)
 - Set `Update-Source Interface` to `Lab`
 - Tick `Next-Hop-Self`:  
-![  ](img/opnsense-bgp-create-neighbor.png)
+![  ](images/opnsense-bgp-create-neighbor.png)
 BGP neighbor configuration in OPNsense
 
 Here’s how my neighbors list looks once complete:  
-![  ](img/opnsense-bgp-neighbor-list.png)
+![  ](images/opnsense-bgp-neighbor-list.png)
 BGP neighbor list
 
 Don’t forget to create a firewall rule allowing BGP (port `179/TCP`) from the **Lab** VLAN to the firewall:  
-![  ](img/opnsense-create-firewall-rule-bgp-peering.png)
+![  ](images/opnsense-create-firewall-rule-bgp-peering.png)
 Allow TCP/179 from Lab to OPNsense
 
 #### In Cilium
@@ -292,7 +292,7 @@ test-lb      LoadBalancer   10.100.167.198   192.168.55.20   80:31350/TCP   169m
 The service got the first IP from our defined pool: `192.168.55.20`.
 
 Now from any device on the LAN, try to reach that IP on port 80:
-![Test LoadBalancer service with BGP](img/k8s-test-loadbalancer-service-with-bgp.png)
+![Test LoadBalancer service with BGP](images/k8s-test-loadbalancer-service-with-bgp.png)
 
 ✅ Our pod is reachable through BGP-routed `LoadBalancer` IP, first step successful!
 
@@ -449,10 +449,10 @@ Then I apply the `Ingress` manifest as shown earlier to expose the service over 
 
 Since I'm using the Caddy plugin on OPNsense, I still need a local Layer 4 route to forward traffic for `test.vezpi.me` to the NGINX Ingress Controller IP (`192.168.55.55`). I simply create a new rule in the Caddy plugin.
 
-![Create Layer4 router in Caddy plugin for OPNsense](img/opnsense-caddy-create-layer4-route-http.png)
+![Create Layer4 router in Caddy plugin for OPNsense](images/opnsense-caddy-create-layer4-route-http.png)
 
 Now let’s test it in the browser:
-![  ](img/ingress-controller-nginx-test-simple-webserver.png)
+![  ](images/ingress-controller-nginx-test-simple-webserver.png)
 Test Ingress on HTTP
 
 ✅ Our pod is now reachable on its HTTP URL using an Ingress. Second step complete!
@@ -556,7 +556,7 @@ Behind the scenes, Cert-Manager goes through this workflow to issue the certific
 - The Ingress automatically uses the Secret to serve HTTPS.
 
 ✅ Once this process completes, your Ingress is secured with a TLS certificate.
-![Certificat TLS validé avec le serveur de staging de Let’s Encrypt](img/k8s-test-deploy-service-tls-certificate-staging-lets-encrypt.png)
+![TLS certificate verified with the staging Let's Encrypt server](images/k8s-test-deploy-service-tls-certificate-staging-lets-encrypt.png)
 
 ### Switch to Production Certificates
 
@@ -612,7 +612,7 @@ kubectl delete secret test-vezpi-me-tls
 ```
 
 🎉 My `Ingress` is now secured with a valid TLS certificate from Let’s Encrypt. Requests to `https://test.vezpi.me` are encrypted end-to-end and routed by the NGINX Ingress Controller to my `nginx` pod:
-![Ingress HTTPS avec certificat validé par Let’s Encrypt](img/k8s-deploy-test-service-tls-certificate-lets-encrypt.png)
+![Ingress HTTPS with certificate verified by Let's Encrypt](images/k8s-deploy-test-service-tls-certificate-lets-encrypt.png)
 
 
 ---

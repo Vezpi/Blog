@@ -70,11 +70,11 @@ To host an OPNsense VM properly, TrueNAS must be able to present the right netwo
 
 In TrueNAS, I went to `System` > `Network` and created VLAN interfaces (example with VLAN 13):
 
-![truenas-create-new-vlan-interface.png](img/truenas-create-new-vlan-interface.png)
+![truenas-create-new-vlan-interface.png](images/truenas-create-new-vlan-interface.png)
 
 TrueNAS is nice here: changes aren’t applied blindly. You can **test** them and you get a rollback window, which is exactly what you want when you’re touching the network config remotely:
 
-![truenas-network-confirm-add-vlans.png](img/truenas-network-confirm-add-vlans.png)
+![truenas-network-confirm-add-vlans.png](images/truenas-network-confirm-add-vlans.png)
 
 ### Management bridge
 
@@ -85,21 +85,21 @@ I created a bridge `br1` for the management interface, shared between:
 
 And moved the IP configuration to the bridge:
 
-![truenas-network-mgmt-bridge.png](img/truenas-network-mgmt-bridge.png)
+![truenas-network-mgmt-bridge.png](images/truenas-network-mgmt-bridge.png)
 
 Final view before apply:
 
-![truenas-network-changes-before-apply.png](img/truenas-network-changes-before-apply.png)
+![truenas-network-changes-before-apply.png](images/truenas-network-changes-before-apply.png)
 
 ### Static IP vs DHCP (and why I stayed static)
 
 I initially tried switching the management bridge to DHCP by updating the MAC address in OPNsense (Dnsmasq override):
 
-![opnsense-update-dnsmasq-override-truenas-bridge.png](img/opnsense-update-dnsmasq-override-truenas-bridge.png)
+![opnsense-update-dnsmasq-override-truenas-bridge.png](images/opnsense-update-dnsmasq-override-truenas-bridge.png)
 
 Then I attempted to flip TrueNAS from static to DHCP:
 
-![truenas-network-bridge-switch-static-to-dhcp.png](img/truenas-network-bridge-switch-static-to-dhcp.png)
+![truenas-network-bridge-switch-static-to-dhcp.png](images/truenas-network-bridge-switch-static-to-dhcp.png)
 
 But DHCP didn’t behave as I expected: it kept receiving random IPs from the pool. I suspected existing leases played a role. I even tried manually editing leases and restarting the service, but after another change, it still ended up with a random address again.
 
@@ -111,7 +111,7 @@ This became important later: I originally planned to attach VLAN interfaces dire
 
 So I created **one bridge per VLAN** (ex: `br13` with `vlan13` as the only member), and used those bridges for the VM NICs:
 
-![truenas-network-bridges-for-vlan.png](img/truenas-network-bridges-for-vlan.png)
+![truenas-network-bridges-for-vlan.png](images/truenas-network-bridges-for-vlan.png)
 
 That ended up being the difference between “split-brain chaos” and “stable HA”.
 
@@ -178,7 +178,7 @@ Now the fun part: recreating the VM on TrueNAS with the same “spirit” as the
 
 From `Virtual Machines`:
 
-![truenas-vm-menu.png](img/truenas-vm-menu.png)
+![truenas-vm-menu.png](images/truenas-vm-menu.png)
 
 ### VM settings I used
 
@@ -215,23 +215,23 @@ I created a new VM with:
 
 Summary screen:
 
-![truenas-vm-create-new-summary.png](img/truenas-vm-create-new-summary.png)
+![truenas-vm-create-new-summary.png](images/truenas-vm-create-new-summary.png)
 
 After saving, TrueNAS converted the imported image into a Zvol:
 
-![truenas-vm-disk-image-conversion.png](img/truenas-vm-disk-image-conversion.png)
+![truenas-vm-disk-image-conversion.png](images/truenas-vm-disk-image-conversion.png)
 
 ### Adding the additional NICs
 
 After the VM was created, I added the additional NICs in the VM device list:
 
-![truenas-vm-details.png](img/truenas-vm-details.png)
+![truenas-vm-details.png](images/truenas-vm-details.png)
 
 At first, I attached VLAN interfaces directly and started the VM… and instantly broke my network (great success).
 
 The VM itself booted fine though, and seeing OPNsense come up cleanly on TrueNAS was a good sign:
 
-![truenas-vm-opnsense-start-shell.png](img/truenas-vm-opnsense-start-shell.png)
+![truenas-vm-opnsense-start-shell.png](images/truenas-vm-opnsense-start-shell.png)
 
 But HA-wise, it was a mess: split-brain symptoms, with the TrueNAS-hosted node thinking it was MASTER on almost everything except Mgmt.
 

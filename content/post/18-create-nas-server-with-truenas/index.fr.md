@@ -68,7 +68,7 @@ J'ai considéré FreeNAS/TrueNAS, OpenMediaVault et Unraid. J'ai choisi TrueNAS 
 L'installation ne s'est pas déroulée aussi bien que prévu...
 
 J'utilise [Ventoy](https://www.ventoy.net/en/index.html) pour garder plusieurs ISOs sur une clé USB. J'étais en version 1.0.99, et l'ISO ne se lançait pas. La mise à jour vers 1.1.10 a résolu le problème :
-![TrueNAS installation splash screen](img/truenas-iso-installation-splash.png)
+![Écran d'accueil d'installation de TrueNAS](images/truenas-iso-installation-splash.png)
 
 Mais là j'ai rencontré un autre problème lors du lancement de l'installation sur mon périphérique de stockage eMMC :
 ```
@@ -77,16 +77,16 @@ Failed to find partition number 2 on mmcblk0
 
 J'ai trouvé une solution sur ce [post](https://forums.truenas.com/t/installation-failed-on-emmc-odroid-h4/15317/12) :
 - Entrer dans le shell
-![Enter the shell in TrueNAS installer](img/truenas-iso-enter-shell.png)
+![Entrer dans le shell de l'installateur TrueNAS](images/truenas-iso-enter-shell.png)
 - Éditer le fichier `/lib/python3/dist-packages/truenas_installer/utils.py`
 - Déplacer la ligne `await asyncio.sleep(1)` juste sous `for _try in range(tries):`
 - Modifier la ligne 46 pour ajouter `+ 'p'` : 
 `for partdir in filter(lambda x: x.is_dir() and x.name.startswith(device + 'p'), dir_contents):`
-![Fichier corrigé dans l'installateur TrueNAS](img/truenas-iso-fix-installer.png)
+![Fichier corrigé dans l'installateur TrueNAS](images/truenas-iso-fix-installer.png)
 - Quitter le shell et lancer l'installation sans redémarrer
 
 L'installateur a finalement pu passer :
-![Progression de l'installation de TrueNAS](img/truenas-iso-installation.png)
+![Progression de l'installation de TrueNAS](images/truenas-iso-installation.png)
 
 Une fois l'installation terminée, j'ai éteint la machine. Ensuite je l'ai installée dans mon rack au-dessus des 3 nœuds Proxmox VE. J'ai branché les deux câbles Ethernet depuis mon switch et je l'ai mise sous tension.
 
@@ -99,18 +99,18 @@ Par défaut, TrueNAS utilise DHCP. J'ai trouvé son adresse MAC dans mon interfa
 ### Paramètres généraux
 
 Pendant l'installation, je n'ai pas défini de mot de passe pour truenas_admin. La page de connexion m'a forcé à en choisir un :
-![Page de connexion TrueNAS pour changer le mot de passe de `truenas_admin`](img/truenas-login-page-change-password.png)
+![Page de connexion TrueNAS pour changer le mot de passe de `truenas_admin`](images/truenas-login-page-change-password.png)
 
 Une fois le mot de passe mis à jour, j'arrive sur le tableau de bord. L'interface donne une bonne impression au premier abord :
-![Tableau de bord de TrueNAS](img/truenas-fresh-install-dashboard.png)
+![Tableau de bord de TrueNAS](images/truenas-fresh-install-dashboard.png)
 
 J'explore rapidement l'interface, la première chose que je fais est de changer le hostname en `granite` et de cocher la case en dessous pour hériter du domaine depuis DHCP :
-![Configuration du hostname dans TrueNAS](img/truenas-config-change-hostname.png)
+![Configuration du hostname dans TrueNAS](images/truenas-config-change-hostname.png)
 
 Dans les `General Settings`, je change les paramètres de `Localization`. Je mets le Console Keyboard Map sur `French (AZERTY)` et le Fuseau horaire sur `Europe/Paris`.
 
 Je crée un nouvel utilisateur `vez`, avec le rôle `Full Admin` dans TrueNAS. J'autorise SSH uniquement pour l'authentification par clé, pas de mots de passe :
-![Création d'un utilisateur dans TrueNAS](img/truenas-create-new-user.png)
+![Création d'un utilisateur dans TrueNAS](images/truenas-create-new-user.png)
 
 Finalement je retire le rôle admin de `truenas_admin` et verrouille le compte.
 
@@ -119,16 +119,16 @@ Finalement je retire le rôle admin de `truenas_admin` et verrouille le compte
 Dans TrueNAS, un pool est une collection de stockage créée en combinant plusieurs disques en un espace unifié géré par ZFS.
 
 Dans la page `Storage`, je trouve mes `Disks`, où je peux confirmer que TrueNAS voit mon couple de NVMe :
-![List of available disks in TrueNAS](img/truenas-storage-disks-unconfigured.png)
+![Liste des disques disponibles dans TrueNAS](images/truenas-storage-disks-unconfigured.png)
 
 De retour sur le `Storage Dashboard`, je clique sur le bouton `Create Pool`. Je nomme le pool `storage` parce que je suis vraiment inspiré pour lui donner un nom :
-![Assistant de création de pool dans TrueNAS](img/truenas-pool-creation-general.png)
+![Assistant de création de pool dans TrueNAS](images/truenas-pool-creation-general.png)
 
 Puis je sélectionne la disposition `Mirror` :
-![Disk layout selection in the pool creation wizard in TrueNAS](img/truenas-pool-creation-layout.png)
+![Sélection de la disposition des disques dans l'assistant de création de pool dans TrueNAS](images/truenas-pool-creation-layout.png)
 
 J'explore rapidement les configurations optionnelles, mais les valeurs par défaut me conviennent : autotrim, compression, pas de dedup, etc. À la fin, avant de créer le pool, il y a une section `Review` :
-![Review section of the pool creation wizard in TrueNAS](img/truenas-pool-creation-review.png)
+![Section de révision de l'assistant de création de pool dans TrueNAS](images/truenas-pool-creation-review.png)
 
 Après avoir cliqué sur `Create Pool`, on m'avertit que tout sur les disques sera effacé, ce que je confirme. Finalement le pool est créé.
 
@@ -139,10 +139,10 @@ Un dataset est un système de fichiers à l'intérieur d'un pool. Il peut conten
 #### Partage SMB
 
 Créons maintenant mon premier dataset `files` pour partager des fichiers sur le réseau pour mes clients Windows, comme des ISOs, etc :
-![Create a dataset in TrueNAS](img/truenas-create-dataset-files.png)
+![Créer un dataset dans TrueNAS](images/truenas-create-dataset-files.png)
 
 Lors de la création de datasets SMB dans SCALE, définissez le Share Type sur SMB afin que les bons ACL/xattr par défaut s'appliquent. TrueNAS me demande alors de démarrer/activer le service SMB :
-![Invite à démarrer le service SMB dans TrueNAS](img/truenas-start-smb-service.png)
+![Invite à démarrer le service SMB dans TrueNAS](images/truenas-start-smb-service.png)
 
 Depuis mon portable Windows, j'essaie d'accéder à mon nouveau partage `\\granite.mgmt.vezpi.com\files`. Comme prévu on me demande des identifiants.
 
@@ -157,7 +157,7 @@ Je crée un autre dataset : `media`, et un enfant `photos`. Je crée un partag
 Sur mon serveur NFS actuel, les fichiers photos sont possédés par `root` (gérés par _Immich_). Plus tard je verrai comment migrer vers une version sans root.
 
 ⚠️ Pour l'instant je définis, dans les `Advanced Options`, le `Maproot User` et le `Maproot Group` sur `root`. Cela équivaut à l'attribut NFS `no_squash_root`, le `root` local du client reste `root` sur le serveur, ne faites pas ça :
-![NFS share permission in TrueNAS](img/truenas-dataset-photos-nfs-share.png)
+![Permissions du partage NFS dans TrueNAS](images/truenas-dataset-photos-nfs-share.png)
 
 ✅ Je monte le partage NFS sur un client, cela fonctionne bien.
 
@@ -178,14 +178,14 @@ J'ai mentionné les capacités VM dans mes exigences. Je ne couvrirais pas cela 
 ### Protection des données
 
 Il est maintenant temps d'activer quelques fonctionnalités de protection des données :
-![Data protection features in TrueNAS](img/truenas-data-protection-tab.png)
+![Fonctionnalités de protection des données dans TrueNAS](images/truenas-data-protection-tab.png)
 
 Je veux créer des snapshots automatiques pour certains de mes datasets, ceux qui me tiennent le plus à cœur : mes fichiers cloud et les photos.
 
 Créons des tâches de snapshot. Je clique sur le bouton `Add` à côté de `Periodic Snapshot Tasks` :
 - cloud : snapshots quotidiens, conserver pendant 2 mois
 - photos : snapshots quotidiens, conserver pendant 7 jours
-![Create periodic snapshot task in TrueNAS ](img/truenas-create-periodic-snapshot.png)
+![Créer une tâche de snapshot périodique dans TrueNAS](images/truenas-create-periodic-snapshot.png)
 
 Je pourrais aussi configurer une `Cloud Sync Task`, mais Duplicati gère déjà les sauvegardes hors site.
 
@@ -204,12 +204,12 @@ sudo rsync -a --info=progress2 /data/photo/ /new_photos
 ```
 
 À la fin, je pourrais décommissionner mon ancien serveur NFS sur le LXC. La disposition des datasets après migration ressemble à ceci :
-![Dataset layout in TrueNAS](img/truenas-datasets-layout.png)
+![Disposition des datasets dans TrueNAS](images/truenas-datasets-layout.png)
 
 ### Application Android
 
 Par curiosité, j'ai cherché sur le Play Store une application pour gérer une instance TrueNAS. J'ai trouvé [Nasdeck](https://play.google.com/store/apps/details?id=com.strtechllc.nasdeck&hl=fr&pli=1), qui est plutôt sympa. Voici quelques captures d'écran :
-![Captures d'écran de l'application Nasdeck](img/nasdeck-android-app.png)
+![Captures d'écran de l'application Nasdeck](images/nasdeck-android-app.png)
 
 ---
 ## Conclusion

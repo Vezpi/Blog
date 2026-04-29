@@ -32,7 +32,7 @@ First, we need to download an image with cloud-init support. Although Rocky Linu
 Find cloud-ready images from the [OpenStack Image Guide](https://docs.openstack.org/image-guide/obtain-images.html).
 
 In Proxmox, navigate to **Storage > ISO Images > Upload** to upload the downloaded image.
-![Download window for ISO images in Proxmox](img/proxmox-download-iso-img.png)
+![Download window for ISO images in Proxmox](images/proxmox-download-iso-img.png)
 
 ## Create the VM
 

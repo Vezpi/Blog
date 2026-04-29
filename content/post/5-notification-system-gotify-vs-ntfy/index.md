@@ -95,10 +95,10 @@ $ docker compose up -d
 ```
 
 ✅ Reaching the URL https://gotify.vezpi.me gives me the Gotify login page:
-![Gotify login page](img/gotify-login-page.png)
+![Gotify login page](images/gotify-login-page.png)
 
 After login, I can access the dashboard, with no messages obviously:
-![Gotify dashboard on a fresh installation](img/gotify-dashboard-no-messages.png)
+![Gotify dashboard on a fresh installation](images/gotify-dashboard-no-messages.png)
 
 ### Creating an Application
 
@@ -107,10 +107,10 @@ To allow messages to be pushed, I before need to create an application for which
 - **REST-API**
 
 For the test, I will use the WebUI, I click on the `APPS` button at the top and `CREATE APPLICATION`. I choose a wonderful application name and description.
-![Create an application on Gotify](img/gotify-create-new-application.png)
+![Create an application on Gotify](images/gotify-create-new-application.png)
 
 Once my application in created, a token is generated for it. I can edit the application to change anything, I can also upload an icon.
-![Gotify application list showing my new Potato application](img/gotify-application-list.png)
+![Gotify application list showing my new Potato application](images/gotify-application-list.png)
 
 ### Testing
 
@@ -122,15 +122,15 @@ curl "https://gotify.vezpi.me/message?token=<apptoken>" -F "title=Cooked!" -F "m
 I instantly received the notification on my mobile and on my browser.
 
 I retried to send another message but with a lower priority: `-2`. I didn't get any notification in my browser, I see a slight differences between the two messages. On my mobile, only my watch received it, I don't see it on my screen, but I can find it on the notification center.
-![Messages received on Gotify WebUI](img/gotify-messages-received.png)
+![Messages received on Gotify WebUI](images/gotify-messages-received.png)
 
 ### Android App
 
 Here some screenshots from my Android device:
-![Capture d’écran de l’application Android Gotify pour la page de connexion](img/gotify-android-first-login.png)
+![Gotify's Android App screenshot for the login page](images/gotify-android-first-login.png)
 
 For some reason, a notification randomly pops up to tell me that I'm connected to Gotify:
-![Capture d’écran de l’application Android Gotify avec les messages de test](img/gotify-android-test-messages.png)
+![Gotify's Android App screenshot for test messages](images/gotify-android-test-messages.png)
 ### Conclusion
 
 On the [documentation](https://gotify.net/docs/msgextras), I found some extras features, like adding images or click actions. In summary, it does the job, that's it. Easy installation process, the utilization is not hard, but I need to create an application for a token, then add this token anytime I want to push messages there.
@@ -204,7 +204,7 @@ $ docker compose up -d
 ```
 
 ✅ The URL https://ntfy.vezpi.me gives me to the Ntfy dashboard:
-![Ntfy dashboard](img/ntfy-login-dashboard.png)
+![Ntfy dashboard](images/ntfy-login-dashboard.png)
 
 At start I don't have any user and none is created by default, as I denied all access to anonymous in the config, I need to create one.
 
@@ -227,7 +227,7 @@ I can now login into the WebUI, and I can now switch to dark mode, my eyes are g
 ### Topics
 
 In Ntfy there are no applications to create, but messages are grouped into topics, more readable than a token when sending messages. When the topic is created I can change the display name or send test messages. On the WebUI though I don't find any option to change the icon, where I can find this option in the Android App which is not really convenient.
-![Example messages in Ntfy](img/ntfy-topic-messages.png)
+![Example messages in Ntfy](images/ntfy-topic-messages.png)
 
 ### Testing
 
@@ -244,7 +244,7 @@ curl \
 ### Android App
 
 Here are some screenshots of Ntfy Android App:
-![Captures de l’application Android Ntfy](img/ntfy-android-app.png)
+![Ntfy's Android App screenshots](images/ntfy-android-app.png)
 ### Conclusion
 
 Ntfy is a beautiful application with a really strong [documentation](https://docs.ntfy.sh/). The possibilities are endless and the list of integration is impressive. The installation was not hard but required a bit of more setup. The needs for CLI to configure users and permissions is not really convenient.
@@ -286,7 +286,7 @@ $ curl -u gitea_blog:<password> -d "Message test from gitea_blog!" https://ntfy.
 {"id":"xIgwz9dr1w9Z","time":1749587681,"expires":1749630881,"event":"message","topic":"blog","message":"Message test from gitea_blog!"}
 ```
 
-![Test d’envoi de messages sur le topic blog avec Ntfy  ](img/ntfy-testing-gitea-blog-user.png)
+![Testing Ntfy messages in the blog topic](images/ntfy-testing-gitea-blog-user.png)
 ✅ Message received!
 
 I also try to send a message on my test topic:
@@ -318,7 +318,7 @@ Now my users are setup, I want to add a `Notify` job in my CI/CD pipeline for th
 #### Create a Secret
 
 To allow my Gitea Runner to use my `gitea_blog` user in its job, I want to create a secret. I explore the `Blog` Gitea repository `Settings`, then `Actions` > `Secrets` > `Add Secret`. Here I set the secret value with the `<user>:<password>` format:
-![Add a secret in the blog Gitea repository](img/gitea-blog-ntfy-credentials.png)
+![Add a secret in the blog Gitea repository](images/gitea-blog-ntfy-credentials.png)
 
 ### Write the `Notify` Code
 
@@ -368,7 +368,7 @@ If anything fails, I want to be notified on my mobile with higher priority. Ntfy
 ```
 
 ✅ Testing both cases, work as expected:
-![Checking both test scenario in Ntfy WebUI](img/ntfy-testing-blog-notifications.png)
+![Checking both test scenario in Ntfy WebUI](images/ntfy-testing-blog-notifications.png)
 
 ## Conclusion
 

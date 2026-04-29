@@ -21,7 +21,7 @@ Ce genre d’exercice est la pire chose que vous souhaitez voir arriver, parce q
 
 Ma box OPNsense tournait parfaitement depuis des mois. Routeur, pare-feu, DNS, DHCP, VLANs, VPN, reverse proxy et même contrôleur UniFi : toutes les pièces de mon homelab passe par elle. Mais pas seulement, elle fournit aussi Internet à la maison.
 
-![Diagram of my home network ](img/homelab-network-schema.png)
+![Le schéma réseau de mon Homelab](images/homelab-network-schema.png)
 
 Cette box est le cœur de mon réseau, sans elle, je ne peux quasiment rien faire. J’ai détaillé son fonctionnement dans ma section [Homelab]({{< ref "page/homelab" >}}). Tout “fonctionnait juste”, et je ne m’en inquiétait pas. J’étais confiant, sa sauvegarde vivait uniquement à l’intérieur de la machine…
 
@@ -61,7 +61,7 @@ pkg: sqlite error while executing iterator in file pkgdb_iterator.c:1110: databa
 ```
 
 🚨 Mon alarme interne s'est déclenchée. J’ai pensé aux sauvegardes et j’ai immédiatement téléchargé la dernière :  
-![Backup configuration in OPNsense](img/opnsense-download-backup.png)
+![Sauvegarde de configuration dans OPNsense](images/opnsense-download-backup.png)
 
 En cliquant sur le bouton `Download configuration`, j’ai récupéré le `config.xml` en cours d’utilisation. Je pensais que ça suffirait.
 

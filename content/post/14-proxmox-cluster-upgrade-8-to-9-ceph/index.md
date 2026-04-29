@@ -108,7 +108,7 @@ apt full-upgrade -y
 ```
 
 After the upgrade on the first node, the Ceph version now shows `19.2.3`, I can see my OSDs appear as outdated, the monitors need either an upgrade or a restart:
-![Ceph storage status in Proxmox after first node Ceph package udpate](img/proxmox-ceph-version-upgrade.png)
+![Ceph storage status in Proxmox after first node Ceph package udpate](images/proxmox-ceph-version-upgrade.png)
 
 I carry on and upgrade the packages on the 2 other nodes. 
 
@@ -132,7 +132,7 @@ systemctl restart ceph-osd.target
 ```
 
 I monitor the Ceph status with the Proxmox WebGUI. After the restart, it is showing some fancy colors. I'm just waiting for the PGs to be back to green, it takes less than a minute:
-![Ceph storage status in Proxmox during the first OSD restart](img/proxmox-ceph-status-osd-restart.png)
+![Ceph storage status in Proxmox during the first OSD restart](images/proxmox-ceph-status-osd-restart.png)
 
 A warning shows up: `HEALTH_WARN: all OSDs are running squid or later but require_osd_release < squid`
 

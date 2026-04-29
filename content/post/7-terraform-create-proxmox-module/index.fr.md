@@ -594,7 +594,7 @@ vm_ip = "192.168.66.159"
 
 ✅ La VM est maintenant prête !
 
-![VM on Proxmox WebUI deployed using a Terraform module](img/proxmox-vm-deployed-using-terraform-module.png)
+![VM sur l'interface Proxmox déployé avec le module Terraform](images/proxmox-vm-deployed-using-terraform-module.png)
 
 🕗 _Ne faites pas attention à l’uptime, j’ai pris la capture d’écran le lendemain._
 

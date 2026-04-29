@@ -122,9 +122,9 @@ La meilleure solution que j'ai trouvée a été de percer deux trous de 40 mm a
 
 Voici à quoi ça ressemble :
 
-![Front view of my homelab with legend](img/homelab-rack-legend.png)
+![Vue de face de mon homelab avec légende](images/homelab-rack-legend.png)
 
-![Different views of my homelab with open and closed enclosure](img/homelab-enclore-open-closed.png)
+![Différentes vues de mon homelab avec armoire ouverte et fermée](images/homelab-enclore-open-closed.png)
 
 ---
 ## Stack Logicielle
@@ -183,7 +183,7 @@ Cette configuration de proxy à deux couches centralise la gestion des certifica
 Pour un accès distant sécurisé, j'ai configuré **WireGuard** sur OPNsense. Ce VPN léger fournit une connectivité chiffrée à mon lab où que je sois, permettant ainsi de gérer tous mes services sans les exposer directement à Internet.
 #### Schéma Réseau
 
-![Diagram of my home network ](img/homelab-network-schema.png)
+![Schéma de mon réseau domestique](images/homelab-network-schema.png)
 
 ### Application
 

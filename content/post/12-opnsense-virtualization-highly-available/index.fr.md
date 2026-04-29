@@ -29,7 +29,7 @@ Au sommet de mon installation, mon modem FAI, une _Freebox_ en mode bridge, reli
 Ce switch relie également mes trois nœuds Proxmox, chacun sur un port trunk avec le même VLAN natif. Chaque nœud dispose de deux cartes réseau : une pour le trafic général, et l’autre dédiée au réseau de stockage Ceph, connecté à un switch séparé de 2,5 Gbps.
 
 Depuis le crash d’OPNsense, j’ai simplifié l’architecture en supprimant le lien LACP, qui n’apportait pas de réelle valeur :
-![Current homelab network diagram](img/homelan-current-physical-layout.png)
+![Schéma réseau du homelab actuel](images/homelan-current-physical-layout.png)
 
 Jusqu’à récemment, le réseau Proxmox de mon cluster était très basique : chaque nœud était configuré individuellement sans véritable logique commune. Cela a changé après la découverte du SDN Proxmox, qui m’a permis de centraliser les définitions de VLAN sur l’ensemble du cluster. J’ai décrit cette étape dans [cet article]({{< ref "post/11-proxmox-cluster-networking-sdn" >}}).
 
@@ -43,7 +43,7 @@ Place au lab. Voici les étapes principales :
 4. Configurer la haute disponibilité
 5. Tester la bascule
 
-![Diagram of the POC for OPNsense high availability](img/poc-opnsense-diagram.png)
+![Schéma du POC pour OPNsense en haute disponibilité](images/poc-opnsense-diagram.png)
 
 ### Ajouter des VLANs dans mon homelab
 
@@ -53,7 +53,7 @@ Pour cette expérimentation, je crée trois nouveaux VLANs :
 - **VLAN 103** : _POC pfSync_
 
 Dans l’interface Proxmox, je vais dans `Datacenter` > `SDN` > `VNets` et je clique sur `Create` :
-![Create POC VLANs in the Proxmox SDN](img/proxmox-sdn-create-poc-vlans.png)
+![Création des VLANs POC dans le SDN Proxmox](images/proxmox-sdn-create-poc-vlans.png)
 
 Une fois les trois VLANs créés, j’applique la configuration.
 
@@ -114,7 +114,7 @@ La VM `fake-freebox` est maintenant prête à fournir du DHCP sur le VLAN 101, a
 ### Construire les VMs OPNsense
 
 Je commence par télécharger l’ISO d’OPNsense et je l’upload sur un de mes nœuds Proxmox :  
-![Upload de l’ISO OPNsense dans Proxmox](img/proxmox-upload-opnsense-iso.png)
+![Upload de l’ISO OPNsense dans Proxmox](images/proxmox-upload-opnsense-iso.png)
 
 #### Création de la VM
 
@@ -128,69 +128,69 @@ Je crée la première VM `poc-opnsense-1` avec les paramètres suivants :
     1. VLAN 101 (_POC WAN_)
     2. VLAN 102 (_POC LAN_)
     3. VLAN 103 (_POC pfSync_)
-![OPNsense VM settings in Proxmox](img/proxmox-create-poc-vm-opnsense.png)
+![Paramètres de la VM OPNsense dans Proxmox](images/proxmox-create-poc-vm-opnsense.png)
 
 ℹ️ Avant de la démarrer, je clone cette VM pour préparer la seconde : `poc-opnsense-2`
 
 Au premier démarrage, je tombe sur une erreur “access denied”. Pour corriger, j’entre dans le BIOS, **Device Manager > Secure Boot Configuration**, je décoche _Attempt Secure Boot_ et je redémarre :  
-![Disable Secure Boot in Proxmox BIOS](img/proxmox-disable-secure-boot-option.png)
+![Désactiver Secure Boot dans le BIOS de Proxmox](images/proxmox-disable-secure-boot-option.png)
 
 #### Installation d’OPNsense
 
 La VM démarre sur l’ISO, je ne touche à rien jusqu’à l’écran de login :  
-![OPNsense CLI login screen in LiveCD](img/opnsense-vm-installation-welcome.png)
+![Écran de login OPNsense en mode LiveCD](images/opnsense-vm-installation-welcome.png)
 
 Je me connecte avec `installer` / `opnsense` et je lance l’installateur. Je sélectionne le disque QEMU de 20 Go comme destination et je démarre l’installation :  
-![Barre de progression de l’installation OPNsense](img/opnsense-vm-installation-progress-bar.png)
+![Barre de progression de l’installation OPNsense](images/opnsense-vm-installation-progress-bar.png)
 
 Une fois terminé, je retire l’ISO du lecteur et je redémarre la machine.
 
 #### Configuration de Base d’OPNsense
 
 Au redémarrage, je me connecte avec `root` / `opnsense` et j’arrive au menu CLI :  
-![Menu CLI après une installation fraîche d’OPNsense](img/opnsense-vm-installation-cli-menu.png)
+![Menu CLI après une installation fraîche d’OPNsense](images/opnsense-vm-installation-cli-menu.png)
 
 Avec l’option 1, je réassigne les interfaces :  
-![Configuration des interfaces dans OPNsense via le CLI](img/opnsense-vm-installation-assign-interfaces.png)
+![Configuration des interfaces dans OPNsense via le CLI](images/opnsense-vm-installation-assign-interfaces.png)
 
 L’interface WAN récupère bien `10.101.0.150/24` depuis la `fake-freebox`. Je configure le LAN sur `10.102.0.2/24` et j’ajoute un pool DHCP de `10.102.0.10` à `10.102.0.99` :  
-![Interface WAN OPNsense recevant une IP depuis la VM `fake-freebox`](img/opnsense-vm-installation-interfaces-configured.png)
+![Interface WAN OPNsense recevant une IP depuis la VM `fake-freebox`](images/opnsense-vm-installation-interfaces-configured.png)
 
 ✅ La première VM est prête, je reproduis l’opération pour la seconde OPNsense `poc-opnsense-2`, qui aura l’IP `10.102.0.3`.
 
 ### Configurer OPNsense en Haute Disponibilité
 
 Avec les deux VMs OPNsense opérationnelles, il est temps de passer à la configuration via le WebGUI. Pour y accéder, j’ai connecté une VM Windows au VLAN _POC LAN_ et ouvert l’IP de l’OPNsense sur le port 443 :  
-![OPNsense WebGUI depuis une VM Windows](img/opnsense-vm-webgui-from-poc-lan.png)
+![OPNsense WebGUI depuis une VM Windows](images/opnsense-vm-webgui-from-poc-lan.png)
 
 #### Ajouter l’Interface pfSync
 
 La troisième carte réseau (`vtnet2`) est assignée à l’interface _pfSync_. Ce réseau dédié permet aux deux firewalls de synchroniser leurs états via le VLAN _POC pfSync_ :  
-![Add pfSync interface in OPNsense](img/opnsense-vm-assign-pfsync-interface.png)
+![Ajouter l’interface pfSync dans OPNsense](images/opnsense-vm-assign-pfsync-interface.png)
 
 J’active l’interface sur chaque instance et je leur attribue une IP statique :
 - **poc-opnsense-1** : `10.103.0.2/24`
 - **poc-opnsense-2** : `10.103.0.3/24`
 
 Puis, j’ajoute une règle firewall sur chaque nœud pour autoriser tout le trafic provenant de ce réseau sur l’interface _pfSync_ :  
-![Create new firewall rule on pfSync interface to allow any traffic in that network](img/opnsense-vm-firewall-allow-pfsync.png)
+![Règle firewall pour autoriser tout le trafic pfSync](images/opnsense-vm-firewall-allow-pfsync.png)
 
 #### Configurer la Haute Disponibilité
 
 Direction `System` > `High Availability` > `Settings`.
 - Sur le master (`poc-opnsense-1`), je configure les `General Settings` et les `Synchronization Settings`.
 - Sur le backup (`poc-opnsense-2`), seuls les `General Settings` suffisent (on ne veut pas qu’il écrase la config du master).  
-![OPNsense High Availability settings](img/opnsense-vm-high-availability-settings.png)
+![Paramètres de Haute Disponibilité dans OPNsense](images/opnsense-vm-high-availability-settings.png)
 
 Une fois appliqué, je vérifie la synchro dans l’onglet `Status` :  
-![OPNsense High Availability status](img/opnsense-vm-high-availability-status.png)
+![Statut de la Haute Disponibilité OPNsense](images/opnsense-vm-high-availability-status.png)
 
 #### Créer une IP Virtuelle
 
 Pour fournir une passerelle partagée aux clients, je crée une IP virtuelle (VIP) en **CARP** (Common Address Redundancy Protocol) sur l’interface LAN. L’IP est portée par le nœud actif et bascule automatiquement en cas de failover.
 
 Menu : `Interfaces` > `Virtual IPs` > `Settings` :  
-![Create CARP virtual IP in OPNsense](img/opnsense-vm-create-vip-carp.png)
+![Création d’une VIP CARP dans OPNsense](images/opnsense-vm-create-vip-carp.png)
 
 Je réplique ensuite la config depuis `System > High Availability > Status` avec le bouton `Synchronize and reconfigure all`.
 
@@ -205,7 +205,7 @@ Sur le master :
 - `DHCP ranges` : cocher aussi `Disable HA sync`
 - `DHCP options` : ajouter l’option `router [3]` avec la valeur `10.102.0.1` (VIP LAN)
 - `DHCP options` : cloner la règle pour `dns-server [6]` vers la même VIP.  
-![Edit DHCP options for Dnsmasq in OPNsense](img/opnsense-vm-dnsmasq-add-option.png)
+![Options DHCP dans Dnsmasq](images/opnsense-vm-dnsmasq-add-option.png)
 
 Sur le backup :
 - `Services` > `Dnsmasq DNS & DHCP` > `General` : cocher `Disable HA sync`
@@ -262,7 +262,7 @@ if ($type === "MASTER") {
 Passons aux tests !
 
 OPNsense propose un _CARP Maintenance Mode_. Avec le master actif, seul lui avait son WAN monté. En activant le mode maintenance, les rôles basculent : le master devient backup, son WAN est désactivé et celui du backup est activé :  
-![Mode maintenance CARP dans OPNsense](img/opnsense-vm-carp-status.png)
+![Mode maintenance CARP dans OPNsense](images/opnsense-vm-carp-status.png)
 
 Pendant mes pings vers l’extérieur, aucune perte de paquets au moment du basculement.
 

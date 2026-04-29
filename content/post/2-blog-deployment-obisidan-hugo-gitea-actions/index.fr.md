@@ -60,7 +60,7 @@ L'idée est simple :
 
 De cette façon, je n'ai plus besoin de copier manuellement de fichiers ni de gérer les déploiements. Tout se déroule, de l'écriture de Markdown dans Obsidian au déploiement complet du site web.
 
-![Workflow depuis l'écriture de notes sur Obsidian au Blog publié](img/obsidian-blog-gitea-actions-workflow.png)
+![Workflow depuis l'écriture de notes sur Obsidian au Blog publié](images/obsidian-blog-gitea-actions-workflow.png)
 
 ---
 ## ⚙️ Implémentation
@@ -101,17 +101,17 @@ container:
 ```
 
 Le runner apparaît dans `Administration Area`, sous `Actions`>`Runners`. Pour obtenir le token d'enrôlement , on clique sur le bouton `Create new Runner` 
-![New runner visible in Gitea](img/gitea-runners-management.png)
+![Nouveau runner visible dans Gitea](images/gitea-runners-management.png)
 
 ### Étape 3 : Configurer les Gitea Actions pour le dépôt Obsidian
 
 J'ai d'abord activé les Gitea Actions. Celles-ci sont désactivées par défaut. Cochez la case `Enable Repository Actions`  dans les paramètres de ce dépôt.
 
 J'ai créé un nouveau PAT (Personal Access Token) avec autorisation RW sur les dépôts.
-![New personal access token creation in Gitea](img/gitea-new-pat.png)
+![Nouvelle création de token d'accès personnel dans Gitea](images/gitea-new-pat.png)
 
 J'ai ajouté le token comme secret `REPO_TOKEN` dans le dépôt.
-![Add secret window for repository in Gitea](img/gitea-add-repo-secret.png)
+![Fenêtre d'ajout de secret dans un dépôt Gitea](images/gitea-add-repo-secret.png)
 
 
 J'ai dû créer le workflow qui lancera un conteneur et effectuera les opérations suivantes :
@@ -171,7 +171,7 @@ jobs:
           git push -u origin main
 ```
 
-Obsidian utilise des liens de type wiki pour les images, comme `![[nom_image.png]]`, ce qui n'est pas compatible avec Hugo par défaut. Voici comment j'ai automatisé une solution de contournement dans un workflow Gitea Actions :
+Obsidian utilise des liens de type wiki pour les images, comme `![`, ce qui n'est pas compatible avec Hugo par défaut. Voici comment j'ai automatisé une solution de contournement dans un workflow Gitea Actions :](images/nom_image.png)
 - Je trouve toutes les références d'images utilisées dans des fichiers `.md`.
 - Pour chaque image référencée, je mets à jour le lien dans les fichiers `.md` correspondants, comme `![nom_image](img/nom_image.png)`.
 - Je copie ensuite ces images utilisées dans le répertoire statique du blog en remplaçant les espaces par des underscores.

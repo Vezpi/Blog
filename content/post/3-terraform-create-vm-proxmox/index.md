@@ -697,7 +697,7 @@ vm_ip = "192.168.66.156"
 
 ✅ Done! We’ve successfully created our first VM on Proxmox using Terraform in just a few minutes.
 
-![Résumé de la nouvelle VM crée sur Proxmox](img/proxmox-terraform-new-vm.png)
+![Summary of the newly created VM on Proxmox](images/proxmox-terraform-new-vm.png)
 
 ### SSH Connection
 

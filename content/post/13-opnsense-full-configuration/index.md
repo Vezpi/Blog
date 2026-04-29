@@ -92,7 +92,7 @@ Finally I restart the VM. Once started, from the Proxmox WebGUI, I can see the I
 ## Interfaces
 
 On both firewalls, I assign the remaining NICs to new interfaces adding a description. The VMs have 7 interfaces, I carefully compare MAC addresses to avoid mixing interfaces:
-![Assign interfaces menu in OPNsense](img/opnsense-assign-interfaces.png)
+![Assign interfaces menu in OPNsense](images/opnsense-assign-interfaces.png)
 
 In the end, the interfaces configuration looks like this:
 
@@ -157,13 +157,13 @@ The HA is setup in `System` > `High Availability` > `Settings`
 ### HA Status
 
 In the section `System` > `High Availability` > `Status`, I can verify if the synchronization is working. On this page I can replicate any or all services from my master to my backup node:
-![OPNsense high availability status page](img/opnsense-high-availability-status.png)
+![OPNsense high availability status page](images/opnsense-high-availability-status.png)
 
 ---
 ## Virtual IPs
 
 Now that HA is configured, I can give my networks a virtual IP shared across my nodes. In `Interfaces` > `Virtual IPs` > `Settings`, I create one VIP for each of my networks using **CARP** (Common Address Redundancy Protocol). The target is to reuse the IP addresses used by my current OPNsense instance, but as it is still routing my network, I use different IPs for the configuration phase:
-![Liste des IPs virtuelles dans OPNsense](img/opnsense-interface-virtual-ips.png)
+![OPNsense virtual IPs list](images/opnsense-interface-virtual-ips.png)
 
 ℹ️ OPNsense allows CARP by default, no special firewall rule required
 
@@ -239,7 +239,7 @@ To begin, in `Firewall` > `Groups`, I create 2 zones to regroup my interfaces:
 ### Network Aliases
 
 Next, in `Firewall` > `Aliases`, I create an alias `InternalNetworks` to regroup all my internal networks:
-![Création d'alias pour les réseaux locaux dansOPNsense](img/opnsense-create-alias-internalnetworks.png)
+![OPNsense alias creation for internal networks ](images/opnsense-create-alias-internalnetworks.png)
 
 ### Firewall Rules
 
@@ -343,17 +343,17 @@ On the backup node, I configure it the same, the only difference will be the **D
 ### DHCP Ranges
 
 Next I configure the DHCP ranges. Both firewalls will have different ranges, the backup node will have smaller ones (only 10 leases should be enough). On the master, they are configured as follow:
-![OPNsense DHCP ranges in Dnsmasq](img/opnsense-dnsmasq-dhcp-ranges.png)
+![OPNsense DHCP ranges in Dnsmasq](images/opnsense-dnsmasq-dhcp-ranges.png)
 
 ### DHCP Options
 
 Then I set some DHCP options for each domain: the `router`, the `dns-server` and the `domain-name`. I'm pointing the IP addresses to the interface's VIP:
-![OPNsense DHCP options in Dnsmasq](img/opnsense-dnsmasq-dhcp-options.png)
+![OPNsense DHCP options in Dnsmasq](images/opnsense-dnsmasq-dhcp-options.png)
 
 ### Hosts
 
 Finally in in the `Hosts` tab, I define static DHCP mappings but also static IP not managed by the DHCP, to have them registered in the DNS:
-![Hôtes DHCP de Dnsmasq dans OPNsense](img/opnsense-dnsmasq-dhcp-hosts.png)
+![OPNsense DHCP hosts in Dnsmasq](images/opnsense-dnsmasq-dhcp-hosts.png)
 
 ---
 ## DNS
@@ -370,7 +370,7 @@ Unbound is the recursive resolver, for local zones I forward queries to Dnsmasq.
 ### Unbound General Settings
 
 Let's configure it, in `Services` > `Unbound DNS` > `General`:
-![OPNsense Unbound DNS general settings](img/opnsense-unbound-general-settings.png)
+![OPNsense Unbound DNS general settings](images/opnsense-unbound-general-settings.png)
 
 ### DNS Blocklist
 
@@ -381,7 +381,7 @@ To maintain the service up to date, in `System` > `Settings` > `Cron`, I add my 
 ### Query Forwarding
 
 Finally I configure query forwarding for my local domains to Dnsmasq. In `Services` > `Unbound DNS` > `Query Forwarding`, I add each of my local domains with their reverse lookup (PTR record):
-![Configuration du transfert de requêtes d'Unbound DNS dans OPNsense](img/opnsense-unbound-dns-query-forwarding.png)
+![OPNsense Unbound DNS query forwarding configuration](images/opnsense-unbound-dns-query-forwarding.png)
 
 ---
 ## VPN

@@ -37,7 +37,7 @@ Node-RED does not replace Home Assistant, it empowers it. I won't cover the inst
 ## Previous Workflow
 
 I was already having a good solution to control my AC from Home Assistant with Node-RED, but I wanted to enhance it to also handle the humidity level at home. My current workflow, despite being functional, was not really scalable and quite hard to maintain:  
-![Ancien workflow Node-RED pour contrôler la climatisation](img/node-red-ha-ac-automation-before.png)
+![Old Node-RED workflow to control air conditioning](images/node-red-ha-ac-automation-before.png)
 
 ## New Workflow
 
@@ -54,12 +54,12 @@ To help me achieve that, I'm using 4 [Aqara temperature and humidity sensors](ht
 ### Workflow
 
 Let me introduce my new AC workflow within Node-RED and explain what it does in detail:  
-![New Node-RED air conditioning workflow](img/node-red-new-ac-workflow-with-legend.png)
+![New Node-RED air conditioning workflow](images/node-red-new-ac-workflow-with-legend.png)
 
 #### 1. Temperature Sensors
 
 In the first node, I combined all the temperature sensors together in one `trigger state node`, but I also added humidity levels in addition to the temperature, managed by the sensor. The node then contains 8 entities in a list (2 for each of my sensor). Each time one value change out of these 8 entities, the node is triggered:  
-![Nœud trigger state dans Node-RED avec les 8 entités](img/node-red-temperature-sensors-trigger-node.png)
+![Trigger state node in Node-RED with all 8 entities](images/node-red-temperature-sensors-trigger-node.png)
 
 Each of my temperature sensors are named with a color in French, because each has its own color sticker to distinguish them:
 - **Jaune**: Living room
@@ -93,7 +93,7 @@ return msg;
 ```
 
 For the last node, most of the time, the sensors will send two messages at the same time, one containing the temperature value and the other, the humidity level. I added a `join node` to combined the two messages if they are sent within the same second:  
-![Join node in Node-RED to merge temperature and humidity](img/node-red-temperature-sensor-join-node.png)
+![Join node in Node-RED to merge temperature and humidity](images/node-red-temperature-sensor-join-node.png)
 
 #### 2. Notification
 
@@ -132,17 +132,17 @@ return null; // Don't send anything now
 ```
 
 The second node is a `call service node` which send a notification on my Android device with the value given:  
-![Node-RED call service node for notification](img/node-red-call-service-node-notification.png)
+![Node-RED call service node for notification](images/node-red-call-service-node-notification.png)
 
 #### 3. Temperature Sliders
 
 To have a control over the temperature without having to change the workflow, I created two Home Assistant helper, as number, which I can adjust for each unit, giving me 6 helpers in total:  
-![Curseur de température dans Home Assistant pour chaque unité](img/home-assistant-temperature-room-sliders.png)
+![Home Assistant temperature slider for each unit](images/home-assistant-temperature-room-sliders.png)
 
 These values are the base temperature used for the calculation of the threshold, depending off the offset which I will detail further.
 
 The first node is a `trigger state node`, with all 6 entities combined. If I change one value, the node is triggered:  
-![Node-RED trigger state node for sliders](img/node-red-trigger-state-mode-for-sliders.png)
+![Node-RED trigger state node for sliders](images/node-red-trigger-state-mode-for-sliders.png)
 
 The second node is a `function node`, to determine the room affected:
 ```js
@@ -164,17 +164,17 @@ return msg;
 In Home Assistant, I'm using other helper but as boolean, the most important is the AC one, where I can manually disable the whole workflow. I have other which are automated, for the time of the day or for detect presence at home.
 
 I have another `trigger state node` with all my toggles as boolean, including a test button, for debug purpose:  
-![Node-RED trigger state node for toggles](img/node-red-trigger-state-node-toggles.png)
+![Node-RED trigger state node for toggles](images/node-red-trigger-state-node-toggles.png)
 
 As toggles affect the whole apartment and not a single unit, the next node is a `change node`, which set the room value to `partout` (everywhere):  
-![Node-RED change node to set room to partout](img/node-red-change-node-room-partout.png)
+![Node-RED change node to set room to partout](images/node-red-change-node-room-partout.png)
 
 #### 5. Windows
 
 The last triggers are my windows, if I open or close a window next to my unit, it triggers the workflow. I have door sensor for some of my doors, but for the hallway unit, I'm using the Velux windows state. Some rooms have more than one, I created a group helper for them.
 
 The first node is the last `trigger state node`, the returned value is a string which I will have to convert later into boolean:  
-![Node-RED trigger state node for windows](img/node-red-trigger-state-node-windows.png)
+![Node-RED trigger state node for windows](images/node-red-trigger-state-node-windows.png)
 
 Connected to it, again a `function node` to select the affect room:
 ```js
@@ -195,20 +195,20 @@ return msg;
 When I open a window, it is not necessarily to let it open for a long time. I could just let the cat out or having a look at my portal. I don't want my AC tuned off as soon as open it. To workaround that I created a watchdog for each unit, to delay the message for some time.
 
 The first node is a `switch node`, based on the room given by the previous node, it will send the message to the associated watchdog:  
-![Node-RED switch node based on the room for the watchdog](img/node-red-switch-node-room-selector-watchdog.png)
+![Node-RED switch node based on the room for the watchdog](images/node-red-switch-node-room-selector-watchdog.png)
 
 After are the watchdogs, `trigger nodes`, which will delay the message by some time and extend the delay if another message if received:  
-![Node-RED trigger node for window watchdog](img/node-red-trigger-node-window-watchdog.png)
+![Node-RED trigger node for window watchdog](images/node-red-trigger-node-window-watchdog.png)
 
 #### 7. AC Enabled ?
 
 All these triggers are now entering the computing pipeline, to determine what the system must do with the action. But before, it is checking if the automation is even enabled. I add this kill switch, just in case, but I rarely use it anyway.
 
 The first node is a `delay node` which regulate the rate of every incoming messages to 1 per second:  
-![Node-RED delay node to limit the rate to 1 message per second](img/node-red-delay-node-1-msg-per-second.png)
+![Node-RED delay node to limit the rate to 1 message per second](images/node-red-delay-node-1-msg-per-second.png)
 
 The second node is a `current state node` which checks if the `climatisation` boolean is enabled:  
-![Node-RED current state node for climatisation](img/node-red-current-state-node-climatisation-enabled.png)
+![Node-RED current state node for climatisation](images/node-red-current-state-node-climatisation-enabled.png)
 #### 8. Room Configuration
 
 The idea here is to attach the configuration of the room to the message. Each room have their own configuration, which unit is used, which sensors and more importantly, when should they be turned on and off. 
@@ -222,7 +222,7 @@ AC units have 4 mode which can be used:
 To determine which mode should be used, I'm using threshold for each mode and unit fan's speed, with different offset depending the situation. I can then define a offset during the night or when I'm away. I can also set the offset to `disabled`, which will force the unit to shut down.
 
 The first node is a `switch node`, based on the `room` value, which will route the message to the associated room configuration. When the room is `partout` (everywhere), the message is split to all 3 room configuration:  
-![Node-RED switch node for room configuration](img/node-red-switch-node-room-config.png)
+![Node-RED switch node for room configuration](images/node-red-switch-node-room-config.png)
 
 It is connected to a `change node` which will attach the configuration to the `room_config`, here an example with the living-room configuration:
 ```json
@@ -443,13 +443,13 @@ return msg;
 ```
 
 The third node is a `filter node`, which drops subsequent messages with similar payload:  
-![Node-RED filter node to block similar message](img/node-red-filter-node-blocker.png)
+![Node-RED filter node to block similar message](images/node-red-filter-node-blocker.png)
 
 The fourth node checks if any lock is set, with a `current state node`, we verify if the timer associated to the unit is idle. If not, the message is discarded:  
-![Node-RED current state node for timer lock](img/node-red-current-state-node-lock-timer.png)
+![Node-RED current state node for timer lock](images/node-red-current-state-node-lock-timer.png)
 
 The last node is another `current state node` which will fetch the unit state and properties:  
-![Node-RED current state node to get current unit state](img/node-red-current-state-node-get-unit-state.png)
+![Node-RED current state node to get current unit state](images/node-red-current-state-node-get-unit-state.png)
 
 #### 10. Target State
 
@@ -606,17 +606,17 @@ return msg;
 #### 11. Action Switch
 
 Based on the action to take, the `switch node` will route the message accordingly:  
-![Node-RED `switch node` pour sélectionner l’action](img/node-red-switch-node-select-action.png)
+![Node-RED switch node to select the action](images/node-red-switch-node-select-action.png)
 
 #### 12. Start
 
 When the action is `start`, we first need to turn the unit online, while this takes between 20 to 40 seconds depending on the unit model, it is also locking the unit for a short period for future messages.
 
 The first node is a `call service node` using the `turn_on` service on the AC unit:  
-![Node-RED call service node with turn_on service](img/node-red-call-service-node-turn-on.png)
+![Node-RED call service node with turn_on service](images/node-red-call-service-node-turn-on.png)
 
 The second node is another `call service node` which will start the lock timer of this unit for 45 seconds:  
-![Node-RED call service node to start the unit timer](img/node-red-call-service-node-start-timer.png)
+![Node-RED call service node to start the unit timer](images/node-red-call-service-node-start-timer.png)
 
 The last one is a `delay node` of 5 seconds, to give the time to the Home Assistant Daikin integration to resolve the new state.
 
@@ -625,19 +625,19 @@ The last one is a `delay node` of 5 seconds, to give the time to the Home Assist
 The `change` action is used to change from one mode to another, but also used right after the start action.
 
 The first node is a `call service node` using `the set_hvac_mode` service on the AC unit:  
-![Node-RED call service node with set_hvac_mode service](img/node-red-call-service-node-set-hvac-mode.png)
+![Node-RED call service node with set_hvac_mode service](images/node-red-call-service-node-set-hvac-mode.png)
 
 The following node is another delay of 5 seconds.
 
 The last one verify with a `switch node` if the target temperature needs to be set, this is only required for the modes `cool` and `heat`:  
-![Node-RED switch node for set_temp](img/node-red-switch-node-set-temp.png)
+![Node-RED switch node for set_temp](images/node-red-switch-node-set-temp.png)
 
 #### 14. Set Target Temperature
 
 The target temperature is only relevant for `cool` and `heat` mode, when you use a normal AC unit, you define a temperature to reach. This is exactly what is defined here. But because each unit is using its own internal sensor to verify, I don't trust it. If the value is already reached, the unit won't blow anything.
 
 The first node is another `call service node` using the `set_temperature` service:  
-![Node-RED call service node with set_temperature service](img/node-red-call-service-node-set-temperature-service.png)
+![Node-RED call service node with set_temperature service](images/node-red-call-service-node-set-temperature-service.png)
 
 Again, this node is followed by a `delay node` of 5 seconds
 
@@ -646,20 +646,20 @@ Again, this node is followed by a `delay node` of 5 seconds
 The `check` action is almost used everytime, it is actually only checks and compare the desired fan speed, it changes the fan speed if needed.
 
 The first node is a `switch node` which verify if the `speed` is defined:  
-![Node-RED switch node to test if speed is defined](img/node-red-switch-node-fan-speed.png)
+![Node-RED switch node to test if speed is defined](images/node-red-switch-node-fan-speed.png)
 
 The second is another `switch node` to compare the `speed` value with the current speed:  
-![Node-Red switch node to compare speed](img/node-red-switch-node-compare-speed.png)
+![Node-Red switch node to compare speed](images/node-red-switch-node-compare-speed.png)
 
 Finally the last node is a `call service node` using the `set_fan_mode` to set the fan speed:  
-![Node-RED call service node with set_fan_mode](img/node-red-call-service-node-set-fan-mode.png)
+![Node-RED call service node with set_fan_mode](images/node-red-call-service-node-set-fan-mode.png)
 
 #### 16. Stop
 
 When the `action` is stop, the AC unit is simply turned off
 
 The first node is a `call service noded` using the service `turn_off`:  
-![Node-RED call service node with turn_off service](img/node-red-call-service-node-turn-off.png)
+![Node-RED call service node with turn_off service](images/node-red-call-service-node-turn-off.png)
 
 The second node is another `call service node` which will start the lock timer of this unit for 45 seconds
 
@@ -668,7 +668,7 @@ The second node is another `call service node` which will start the lock timer o
 Sometime, for some reason, we want to use the AC manually. When we do, we don't want the workflow to change our manual setting, at least for some time. Node-RED is using its own user in Home Assistant, so when an AC unit change state without this user, this was manually done.
 
 The first node is a `trigger state node`, which will send a message when any AC unit is changing state:  
-![node-red-trigger-state-unit-change.png](img/node-red-trigger-state-unit-change.png)
+![node-red-trigger-state-unit-change.png](images/node-red-trigger-state-unit-change.png)
 
 The second is a `function node` which willassociate the unit with its timer:
 ```js
@@ -683,13 +683,13 @@ return msg;
 ```
 
 The third is a `switch node` that will let through the message when the user_id is not the Node-RED user's one:  
-![Node-RED switch node not specific user_id](img/node-red-switch-node-user-id.png)
+![Node-RED switch node not specific user_id](images/node-red-switch-node-user-id.png)
 
 The fourth is another `switch node` which checks if there are any `user_id`:  
-![Node-RED switch node check user_id not null](img/node-red-switch-node-check-user-id.png)
+![Node-RED switch node check user_id not null](images/node-red-switch-node-check-user-id.png)
 
 Lastly, the final node is a `call service node` using `start` service on the unit's timer with its default duration (60 minutes):  
-![Node-RED call service node start timer with default duration](img/node-red-call-service-node-start-unit-timer.png)
+![Node-RED call service node start timer with default duration](images/node-red-call-service-node-start-unit-timer.png)
 
 ## TL;DR
 

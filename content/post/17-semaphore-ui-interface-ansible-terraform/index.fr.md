@@ -109,23 +109,23 @@ Avec Semaphore en fonctionnement, faisons rapidement le tour de l'UI et connecto
 ## Discovery
 
 Après avoir démarré la stack, je peux atteindre la page de connexion à l'URL :
-![Page de connexion de Semaphore UI](img/semaphore-login-page.png)
+![Page de connexion de Semaphore UI](images/semaphore-login-page.png)
 
 Pour me connecter, j'utilise les identifiants définis par `SEMAPHORE_ADMIN_NAME`/`SEMAPHORE_ADMIN_PASSWORD`.
 
 Au premier accès, Semaphore me demande de créer un projet. J'ai créé le projet Homelab :
-![Page de création de projet de Semaphore UI](img/semaphore-create-project.png)
+![Page de création de projet de Semaphore UI](images/semaphore-create-project.png)
 
 La première chose que je veux faire est d'ajouter mon dépôt _homelab_ (vous pouvez trouver son miroir sur Github [ici](https://github.com/Vezpi/homelab)). Dans `Repository`, je clique sur le bouton `New Repository`, et j'ajoute l'URL du repo. Je ne spécifie pas d'identifiants car le dépôt est public :
-![Page d'ajout de dépôt de Semaphore UI](img/semaphore-add-repository.png)
+![Page d'ajout de dépôt de Semaphore UI](images/semaphore-add-repository.png)
 
 ℹ️ Avant de continuer, je déploie 3 VM à des fins de test : `sem01`, `sem02` et `sem03`. Je les ai créées avec Terraform via [ce projet](https://github.com/Vezpi/Homelab/tree/main/terraform/projects/semaphore-vms).
 
 Pour interagir avec ces VM, je dois configurer des identifiants. Dans le `Key Store`, j'ajoute la première donnée d'identification, une clé SSH pour mon utilisateur :
-![Page d'ajout d'une nouvelle clé de Semaphore UI](img/semaphore-create-new-ssh-key.png)
+![Page d'ajout d'une nouvelle clé de Semaphore UI](images/semaphore-create-new-ssh-key.png)
 
 Ensuite je crée un nouvel `Inventory`. J'utilise le format d'inventaire Ansible (le seul disponible). Je sélectionne la clé SSH créée précédemment et choisis le type `Static`. Dans les champs je renseigne les 3 hôtes créés avec leur FQDN :
-![Page de création d'un inventaire statique de Semaphore UI](img/semaphore-create-new-static-inventory.png)
+![Page de création d'un inventaire statique de Semaphore UI](images/semaphore-create-new-static-inventory.png)
 
 ✅ Avec un projet, un repo, des identifiants et un inventaire en place, je peux avancer et tester l'exécution d'un playbook Ansible.
 
@@ -172,20 +172,20 @@ Je veux tester quelque chose de simple : installer un serveur web avec une page 
 ```
 
 Dans Semaphore UI, je peux maintenant créer mon premier `Task Template` pour un playbook Ansible. Je lui donne un nom, le chemin du playbook (depuis le dossier racine du repo), le dépôt et sa branche :
-![Nouveau template de tâche Ansible dans Semaphore UI](img/semaphore-create-new-ansible-task-template.png)
+![Nouveau template de tâche Ansible dans Semaphore UI](images/semaphore-create-new-ansible-task-template.png)
 
 Il est temps de lancer le playbook ! Dans la liste des task templates, je clique sur le bouton ▶️ :
-![Lancement du template de tâche Ansible dans Semaphore UI](img/semaphore-run-test-playbook.png)
+![Lancement du template de tâche Ansible dans Semaphore UI](images/semaphore-run-test-playbook.png)
 
 Le playbook se lance et je peux suivre la sortie en temps réel :
-![Semaphore UI Ansible task output](img/semaphore-ui-ansible-task-output.png)
+![Sortie de la tâche Ansible dans Semaphore UI](images/semaphore-ui-ansible-task-output.png)
 
 Je peux aussi consulter les exécutions précédentes :
-![Liste des exécutions de tâches dans Semaphore UI](img/semaphore-ui-task-template-run-list.png)
+![Liste des exécutions de tâches dans Semaphore UI](images/semaphore-ui-task-template-run-list.png)
 
 
 ✅ Enfin, je peux confirmer que le travail est fini en vérifiant l'URL sur le port 80 (http) :
-![Test de l'URL après application du playbook sur les hôtes](img/semaphore-ui-test-nginx-page-playbook.png)
+![Test de l'URL après application du playbook sur les hôtes](images/semaphore-ui-test-nginx-page-playbook.png)
 
 Gérer des playbooks Ansible dans Semaphore UI est assez simple et vraiment pratique. L'interface est très soignée.
 
@@ -233,19 +233,19 @@ Avec cela en place, le playbook a réussi et j'ai pu créer l'utilisateur :
 ```
 
 Ensuite je crée un variable group `pve_vm`. Un variable group me permet de définir plusieurs variables et secrets ensemble :
-![Nouveau groupe de variables dans Semaphore UI](img/semaphore-ui-create-variable-group.png)
+![Nouveau groupe de variables dans Semaphore UI](images/semaphore-ui-create-variable-group.png)
 
 Puis je crée un nouveau task template, cette fois de type Terraform Code. Je lui donne un nom, le chemin du projet Terraform, un workspace, le dépôt avec sa branche et le variable group :
-![Nouveau template de tâche Terraform dans Semaphore UI](img/semaphore-task-template-terraform.png)
+![Nouveau template de tâche Terraform dans Semaphore UI](images/semaphore-task-template-terraform.png)
 
 Lancer le template me donne quelques options supplémentaires liées à Terraform :
-![Options d'exécution Terraform dans Semaphore UI](img/semaphore-running-terraform-code-options.png)
+![Options d'exécution Terraform dans Semaphore UI](images/semaphore-running-terraform-code-options.png)
 
 Après le plan Terraform, il me propose d'appliquer, d'annuler ou d'arrêter :
-![Plan Terraform dans Semaphore UI](img/semaphore-terraform-task-working.png)
+![Plan Terraform dans Semaphore UI](images/semaphore-terraform-task-working.png)
 
 Enfin, après avoir cliqué sur ✅ pour appliquer, j'ai pu regarder Terraform construire les VM, comme avec le CLI. À la fin, les VM ont été déployées avec succès sur Proxmox :
-![Déploiement Terraform terminé dans Semaphore UI](img/semaphore-ui-deploy-with-terraform.png)
+![Déploiement Terraform terminé dans Semaphore UI](images/semaphore-ui-deploy-with-terraform.png)
 
 ---
 ## Conclusion

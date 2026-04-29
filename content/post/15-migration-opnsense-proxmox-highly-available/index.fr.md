@@ -34,12 +34,12 @@ D'abord, je configure mon réseau de couche 2 qui est géré par UniFi. Là, je 
 - _pfSync_ (44), communication entre mes nœuds OPNsense.
 
 Dans le contrôleur UniFi, dans `Paramètres` > `Réseaux`, j'ajoute un `New Virtual Network`. Je le nomme `WAN` et lui donne l'ID VLAN 20 :
-![Creation of the WAN VLAN in the UniFi Controller](img/unifi-add-vlan-for-wan.png)
+![Création du VLAN WAN dans le contrôleur UniFi](images/unifi-add-vlan-for-wan.png)
 
 Je fais la même chose pour le VLAN `pfSync` avec l'ID VLAN 44.
 
 Je prévois de brancher ma box FAI sur le port 15 de mon switch, qui est désactivé pour l'instant. Je l'active, définis le VLAN natif sur le nouveau `WAN (20)` et désactive le trunking :
-![Configuration du port du switch UniFi pour la liaison WAN](img/unifi-enable-port-wan-vlan.png)
+![Configuration du port du switch UniFi pour la liaison WAN](images/unifi-enable-port-wan-vlan.png)
 
 Une fois ce réglage appliqué, je m'assure que seules les ports où sont connectés mes nœuds Proxmox propagent ces VLANs sur leur trunk.
 
@@ -50,7 +50,7 @@ J'ai fini la configuration UniFi.
 Maintenant que le VLAN peut atteindre mes nœuds, je veux le gérer dans le SDN de Proxmox. J'ai configuré le SDN dans [cet article]({{< ref "post/11-proxmox-cluster-networking-sdn" >}}).
 
 Dans `Datacenter` > `SDN` > `VNets`, je crée un nouveau VNet, je l'appelle `vlan20` pour suivre ma propre convention de nommage, je lui donne l'alias _WAN_ et j'utilise le tag (ID VLAN) 20 :
-![Creation of the VNet for the WAN in the Proxmox SDN](img/proxmox-sdn-new-vnet-wan.png)
+![Création du VNet pour le WAN dans le SDN Proxmox](images/proxmox-sdn-new-vnet-wan.png)
 
 Je crée aussi le `vlan44` pour le VLAN _pfSync_, puis j'applique cette configuration et nous avons terminé avec le SDN.
 
@@ -75,7 +75,7 @@ La première VM s'appelle `cerbere-head1` (je ne vous l'ai pas dit ? Mon firew
     6. `vlan55` _(DMZ)_
     7. `vlan66` _(Lab)_
 
-![Hardware settings of the OPNsense VM in Proxmox](img/proxmox-cerbere-vm-settings.png)
+![Paramètres matériels de la VM OPNsense dans Proxmox](images/proxmox-cerbere-vm-settings.png)
 
 ℹ️ Maintenant je clone cette VM pour créer `cerbere-head2`, puis je procède à l'installation d'OPNsense. Je ne veux pas entrer trop dans les détails de l'installation d'OPNsense, je l'ai déjà documentée dans le [proof of concept]({{< ref "post/12-opnsense-virtualization-highly-available" >}}).
 
@@ -117,7 +117,7 @@ Dans Proxmox VE 8, il était possible de créer des groupes HA, en fonction de l
 Le cluster Proxmox est capable de fournir de la HA pour les ressources, mais vous devez définir les règles.
 
 Dans `Datacenter` > `HA`, vous pouvez voir le statut et gérer les ressources. Dans le panneau `Resources` je clique sur `Add`. Je dois choisir la ressource à configurer en HA dans la liste, ici `cerbere-head1` avec l'ID 122. Puis dans l'infobulle je peux définir le maximum de redémarrages et de relocations, je laisse `Failback` activé et l'état demandé à `started` :
-![Create HA resource in Proxmox](img/proxmox-add-vm-ha.png)
+![Créer une ressource HA dans Proxmox](images/proxmox-add-vm-ha.png)
 
 Le cluster Proxmox s'assurera maintenant que cette VM est démarrée. Je fais de même pour l'autre VM OPNsense, `cerbere-head2`.
 
@@ -126,7 +126,7 @@ Le cluster Proxmox s'assurera maintenant que cette VM est démarrée. Je fais de
 Super, mais je ne veux pas qu'elles tournent sur le même nœud. C'est là qu'intervient la nouvelle fonctionnalité des règles d'affinité HA de Proxmox VE 9. Proxmox permet de créer des règles d'affinité de nœud et de ressource. Peu m'importe sur quel nœud elles tournent, mais je ne veux pas qu'elles soient ensemble. J'ai besoin d'une règle d'affinité de ressource.
 
 Dans `Datacenter` > `HA` > `Affinity Rules`, j'ajoute une nouvelle règle d'affinité de ressource HA. Je sélectionne les deux VMs et choisis l'option `Keep Separate` :
-![Create HA resource affinity in Proxmox](img/proxmox-ha-resource-affinity-rule.png)
+![Créer une affinité de ressource HA dans Proxmox](images/proxmox-ha-resource-affinity-rule.png)
 
 ✅ Mes VMs OPNsense sont maintenant entièrement prêtes !
 
@@ -393,7 +393,7 @@ En entrant manuellement en mode maintenance CARP depuis l'interface WebGUI, aucu
 
 Pour simuler un failover, je tue la VM OPNsense active. Ici j'observe une seule perte de paquet. Génial.
 
-![Ping test during OPNsense CARP failover](img/opnsense-ping-failover.png)
+![Test de ping pendant le CARP failover d'OPNsense](images/opnsense-ping-failover.png)
 
 3. **Reprise après sinistre**
 

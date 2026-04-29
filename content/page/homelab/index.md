@@ -121,9 +121,9 @@ Inside the rack, I also added two 80mm fans to help with airflow. To keep everyt
 
 Here what is look like:
 
-![Front view of my homelab with legend](img/homelab-rack-legend.png)
+![Front view of my homelab with legend](images/homelab-rack-legend.png)
 
-![Different views of my homelab with open and closed enclosure](img/homelab-enclore-open-closed.png)
+![Different views of my homelab with open and closed enclosure](images/homelab-enclore-open-closed.png)
 
 
 ---
@@ -184,7 +184,7 @@ This two-layer proxy setup centralizes SSL certificate management in **Caddy** w
 For secure remote access, I configured **WireGuard** on OPNsense. This lightweight VPN provides encrypted connectivity to my lab from anywhere, allowing management of all my services without exposing them all directly to the internet.
 #### Network Diagram
 
-![Diagram of my home network ](img/homelab-network-schema.png)
+![Diagram of my home network ](images/homelab-network-schema.png)
 ### Application
 
 Let's dive into the fun part! What started as a modest setup meant to serve a few personal needs quickly turned into a full ecosystem of open source services, each solving a specific need or just satisfying curiosity.
