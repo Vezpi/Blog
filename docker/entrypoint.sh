@@ -24,6 +24,7 @@ git clone --recurse-submodules --branch "$BRANCH" "$REPO_URL" "$CLONE_DIR"
 # Patch references not yet fixed in Stack theme
 sed -i 's/\.Site\.Data/hugo.Data/g' "$CLONE_DIR/themes/stack/layouts/_partials/article/components/photoswipe.html"
 sed -i 's/LanguageDirection/Direction/g' "$CLONE_DIR/themes/stack/layouts/baseof.html"
+sed -i 's/\.LanguageCode/.Language.Locale/g' "$CLONE_DIR/themes/stack/layouts/baseof.html"
 
 # Generate static files with hugo
 echo "- Building site with Hugo v$HUGO_VERSION in $HUGO_DEST..."
