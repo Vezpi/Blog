@@ -163,7 +163,7 @@ jobs:
           cd /blog
           docker compose down ${CONTAINER_NAME} 
           docker compose up -d ${CONTAINER_NAME}
-          sleep 5
+          sleep 10
           echo "- Displaying container logs"
           docker compose logs ${CONTAINER_NAME}
 
