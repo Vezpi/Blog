@@ -24,7 +24,7 @@ Recently, I installed a TrueNAS server in the lab. You can find the infos in tha
 This way, if the Proxmox cluster goes down, the passive OPNsense node can still take over and keep the network alive.
 
 ---
-## Preparing the OPNsense nodes
+## Prepare the OPNsense Nodes
 
 Before moving anything, I want to make sure the OPNsense VMs could run with less memory.
 
@@ -44,7 +44,7 @@ Then I repeat the same operation on the active node, `cerbere-head1`.
 Doing it one node at a time allow me to keep the HA cluster healthy while validating that the reduced memory allocation is still enough for my setup.
 
 ---
-## Preparing the TrueNAS network
+## Prepare the TrueNAS Network
 
 The most important part of this migration is not the disk export or the VM creation. It is the network.
 
@@ -89,11 +89,11 @@ The final TrueNAS network configuration:
 ![Creating one bridge per VLAN for the OPNsense VM](images/truenas-network-bridges-for-vlan.png)
 
 ---
-## Creating a temporary export dataset
+## Create a Temporary Export Dataset
 
 To move the passive OPNsense VM disk from Proxmox to TrueNAS, I first need a place to export the disk image.
 
-In TrueNAS, I create a dataset named `disk`, then created an NFS share from it.
+In TrueNAS, I create a dataset named `storage/vm/disk`, then create a NFS share from it.
 
 In the advanced options of the NFS share, I configured:
 
@@ -105,25 +105,11 @@ In the advanced options of the NFS share, I configured:
 
 These are the Proxmox VE nodes allowed to mount the share.
 
-Later, I reorganized the dataset layout. I created a parent dataset called `storage/vm` and renamed the original export dataset from `storage/disk` to `storage/vm/files`.
-
-From the TrueNAS shell, this was done with ZFS commands:
-
-```zsh
-sudo zfs create storage/vm
-```
-
-```zsh
-sudo zfs rename storage/disk storage/vm/files
-```
-
-I did not manually create a zvol at that point. The VM creation process in TrueNAS handled the disk import and conversion.
+I don't manually create a zvol at that point. The VM creation process in TrueNAS handle the disk import and conversion.
 
 ## Exporting the VM disk from Proxmox
 
-From the Proxmox VE web interface, I located the node hosting the passive OPNsense VM `cerbere-head2`.
-
-It was running on `Zenith`.
+From the Proxmox VE web interface, I locate the node hosting the passive OPNsense VM `cerbere-head2`, it is running on `Zenith`.
 
 I logged into that Proxmox node over SSH and mounted the NFS share from TrueNAS:
 
