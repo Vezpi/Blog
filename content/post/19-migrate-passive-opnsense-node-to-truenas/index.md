@@ -3,7 +3,7 @@ slug: migrate-passive-opnsense-node-to-truenas
 title: Migrate my Passive OPNsense HA Node to TrueNAS
 description: I migrated my passive OPNsense HA VM from Proxmox to TrueNAS to keep routing and firewalling available even when my Proxmox cluster is down.
 date: 2026-05-24
-draft: true
+draft: false
 tags:
   - opnsense
   - truenas
