@@ -1,7 +1,7 @@
 ---
 slug: migrate-passive-opnsense-node-to-truenas
-title: Migrate my Passive OPNsense HA Node to TrueNAS
-description: I migrated my passive OPNsense HA VM from Proxmox to TrueNAS to keep routing and firewalling available even when my Proxmox cluster is down.
+title: Migrer mon nœud OPNsense HA passif vers TrueNAS
+description: J’ai migré ma VM OPNsense HA passive de Proxmox vers TrueNAS pour garder le routage et le firewalling disponibles même lorsque mon cluster Proxmox est arrêté.
 date: 2026-05-24
 draft: true
 tags:
@@ -90,38 +90,38 @@ La configuration réseau finale de TrueNAS :
 ![Créer un bridge par VLAN pour la VM OPNsense](images/truenas-network-bridges-for-vlan.png)
 
 ---
-## Create a Temporary Export Dataset
+## Créer un dataset d’export temporaire
 
-To move the passive OPNsense VM disk from Proxmox to TrueNAS, I first need a place to export the disk image.
+Pour déplacer le disque de la VM OPNsense passive de Proxmox vers TrueNAS, j’ai d’abord besoin d’un endroit pour exporter l’image disque.
 
-In TrueNAS, I create a dataset named `storage/vm/disk`, then create a NFS share from it.
+Dans TrueNAS, je crée un dataset nommé `storage/vm/disk`, puis je crée un partage NFS à partir de celui-ci.
 
-In the advanced options of the NFS share, I configured:
+Dans les options avancées du partage NFS, j’ai configuré :
 
-- Maproot user: `root`
-- Authorized hosts:
+- Utilisateur Maproot : `root`
+- Hôtes autorisés :
   - `192.168.88.21`
   - `192.168.88.22`
   - `192.168.88.23`
 
-These are the Proxmox VE nodes allowed to mount the share.
+Ce sont les nœuds Proxmox VE autorisés à monter le partage.
 
-I don't manually create a zvol at that point. The VM creation process in TrueNAS handle the disk import and conversion.
+Je ne crée pas manuellement de zvol à ce moment-là. Le processus de création de VM dans TrueNAS gère l’import et la conversion du disque.
 
 ---
-## Export the VM Disk from Proxmox
+## Exporter le disque de la VM depuis Proxmox
 
-From the Proxmox VE web interface, I locate the node hosting the passive OPNsense VM `cerbere-head2`, it is running on `Zenith`.
+Depuis l’interface web Proxmox VE, je localise le nœud qui héberge la VM OPNsense passive `cerbere-head2`, elle fonctionne sur `Zenith`.
 
-I log into that Proxmox node over SSH and mount the NFS share from TrueNAS:
+Je me connecte à ce nœud Proxmox en SSH et je monte le partage NFS depuis TrueNAS :
 
 ```bash
 mount granite.mgmt.vezpi.com:/mnt/storage/vm/disk /mnt
 ```
 
-Then I shut down the VM from the Proxmox VE interface. I don't shut it down from inside OPNsense because the VM has HA enabled.
+Ensuite, j’éteins la VM depuis l’interface Proxmox VE. Je ne l’éteins pas depuis l’intérieur d’OPNsense parce que la VM a la HA activée.
 
-Once the VM is stopped, I export the main disk to qcow2. I don't export the EFI disk.
+Une fois la VM arrêtée, j’exporte le disque principal en qcow2. Je n’exporte pas le disque EFI.
 
 ```bash
 qemu-img convert -f raw -O qcow2 -p \
@@ -129,155 +129,155 @@ qemu-img convert -f raw -O qcow2 -p \
          /mnt/cerbere-head2.qcow2
 ```
 
-The conversion took about one minute for a 20 GB disk.
+La conversion a pris environ une minute pour un disque de 20 GB.
 
-At this point, the passive OPNsense disk is available on TrueNAS and ready to be imported into a new VM.
-
----
-## Recreate the OPNsense VM in TrueNAS
-
-The next step is to recreate the passive OPNsense VM in TrueNAS with parameters matching the original VM as closely as possible.
-
-From the TrueNAS web interface, I go to the `Virtual Machines` section.
-
-![The Virtual Machines section in TrueNAS](images/truenas-vm-menu.png)
-
-I create a new VM with these settings.
-
-For the operating system:
-
-- Guest Operating System: `FreeBSD`
-- Name: `cerberehead2`
-- System Clock: `Local`
-- Boot Method: `UEFI`
-- Enable Secure Boot: disabled
-- Enable Trusted Platform Module: disabled
-- Shutdown Timeout: `90`
-- Start on Boot: enabled
-- Enable Display VNC: disabled
-
-The VM name does not use dashes because TrueNAS do not allow them there.
-
-For CPU and memory:
-
-- Virtual CPUs: `1`
-- Cores: `2`
-- Threads: `1`
-- CPU Mode: `Custom`
-- CPU Model: `qemu64`
-- Memory Size: `2 GiB`
-
-For the disk:
-
-- Create new disk image
-- Import Image: enabled
-- Image source: `/mnt/storage/vm/files/cerbere-head2.qcow2`
-- Disk Type: `VirtIO`
-- Storage Location: `storage/vm`
-- Size: `20 GiB`
-
-For the first network interface:
-
-- Adapter Type: `VirtIO`
-- MAC Address: keep the proposed one
-- Attach NIC: `br1: Mgmt`
-
-I skip installation media and GPU configuration, then confirm the summary.
-
-![Summary before creating the OPNsense VM in TrueNAS](images/truenas-vm-create-new-summary.png)
-
-After confirmation, TrueNAS convert the imported qcow2 image into a zvol.
-
-![TrueNAS converting the imported disk image into a zvol](images/truenas-vm-disk-image-conversion.png)
-
-Once the VM is created, I open the VM details and add the remaining NICs.
-
-![The VM devices in TrueNAS](images/truenas-vm-details.png)
-
-For each additional NIC, I used VirtIO as the adapter type and attach it to the corresponding bridge.
-
-For the WAN NIC, I copy the old MAC address because I use a single WAN IP address trick. I also increment the digit in the Device Order to keep the same as in Proxmox.
-
-![Additional VirtIO network interface to the OPNsense VM](images/truenas-vm-add-nic.png)
-
-🎉 Finally I can start the OPNsense VM in TrueNAS.
-
-![OPNsense booting successfully as a TrueNAS VM](images/truenas-vm-opnsense-start-shell.png)
+À ce stade, le disque OPNsense passif est disponible sur TrueNAS et prêt à être importé dans une nouvelle VM.
 
 ---
-## Validate the HA cluster
+## Recréer la VM OPNsense dans TrueNAS
 
-Once the passive node is running on TrueNAS, I need to validate that the OPNsense HA cluster is still behaving correctly.
+L’étape suivante consiste à recréer la VM OPNsense passive dans TrueNAS avec des paramètres correspondant aussi étroitement que possible à la VM d’origine.
 
-I start with basic checks on the passive node:
+Depuis l’interface web TrueNAS, je vais dans la section `Virtual Machines`.
 
-- Management interface ping from the bastion: `192.168.88.3`
-- User interface ping from a laptop: `192.168.13.3`
-- IoT interface ping: `192.168.37.3`
-- pfSync ping from the other node: `192.168.44.2`
-- DMZ interface ping: `192.168.55.3`
-- Lab interface ping from DockerVM: `192.168.66.3`
+![La section Machines virtuelles dans TrueNAS](images/truenas-vm-menu.png)
 
-I also check that the node was accessible over SSH from my laptop using `192.168.13.3`, and that the web interface was reachable at:
+Je crée une nouvelle VM avec ces paramètres.
+
+Pour le système d’exploitation :
+
+- Système d’exploitation invité : `FreeBSD`
+- Nom : `cerberehead2`
+- Horloge système : `Local`
+- Méthode de démarrage : `UEFI`
+- Activer Secure Boot : désactivé
+- Activer Trusted Platform Module : désactivé
+- Timeout d’arrêt : `90`
+- Démarrer au boot : activé
+- Activer l’affichage VNC : désactivé
+
+Le nom de la VM n’utilise pas de tirets parce que TrueNAS ne les autorise pas ici.
+
+Pour le CPU et la mémoire :
+
+- CPU virtuels : `1`
+- Cœurs : `2`
+- Threads : `1`
+- Mode CPU : `Custom`
+- Modèle CPU : `qemu64`
+- Taille mémoire : `2 GiB`
+
+Pour le disque :
+
+- Créer une nouvelle image disque
+- Importer une image : activé
+- Source de l’image : `/mnt/storage/vm/files/cerbere-head2.qcow2`
+- Type de disque : `VirtIO`
+- Emplacement de stockage : `storage/vm`
+- Taille : `20 GiB`
+
+Pour la première interface réseau :
+
+- Type d’adaptateur : `VirtIO`
+- Adresse MAC : garder celle proposée
+- Attacher la NIC : `br1: Mgmt`
+
+Je passe le média d’installation et la configuration GPU, puis je confirme le résumé.
+
+![Résumé avant de créer la VM OPNsense dans TrueNAS](images/truenas-vm-create-new-summary.png)
+
+Après confirmation, TrueNAS convertit l’image qcow2 importée en zvol.
+
+![TrueNAS convertissant l’image disque importée en zvol](images/truenas-vm-disk-image-conversion.png)
+
+Une fois la VM créée, j’ouvre les détails de la VM et j’ajoute les NICs restantes.
+
+![Les périphériques de la VM dans TrueNAS](images/truenas-vm-details.png)
+
+Pour chaque NIC supplémentaire, j’ai utilisé VirtIO comme type d’adaptateur et je l’ai attachée au bridge correspondant.
+
+Pour la NIC WAN, je copie l’ancienne adresse MAC parce que j’utilise une astuce avec une seule adresse IP WAN. J’incrémente aussi le chiffre dans l’ordre des périphériques pour garder le même que dans Proxmox.
+
+![Interface réseau VirtIO supplémentaire pour la VM OPNsense](images/truenas-vm-add-nic.png)
+
+🎉 Enfin, je peux démarrer la VM OPNsense dans TrueNAS.
+
+![OPNsense démarre avec succès comme VM TrueNAS](images/truenas-vm-opnsense-start-shell.png)
+
+---
+## Valider le cluster HA
+
+Une fois que le nœud passif fonctionne sur TrueNAS, je dois valider que le cluster HA OPNsense se comporte toujours correctement.
+
+Je commence par des vérifications de base sur le nœud passif :
+
+- Ping de l’interface de management depuis le bastion : `192.168.88.3`
+- Ping de l’interface utilisateur depuis un laptop : `192.168.13.3`
+- Ping de l’interface IoT : `192.168.37.3`
+- Ping pfSync depuis l’autre nœud : `192.168.44.2`
+- Ping de l’interface DMZ : `192.168.55.3`
+- Ping de l’interface Lab depuis DockerVM : `192.168.66.3`
+
+Je vérifie aussi que le nœud était accessible en SSH depuis mon laptop en utilisant `192.168.13.3`, et que l’interface web était joignable à :
 
 ```text
 https://192.168.13.3:4443
 ```
 
-Then I validate the OPNsense HA state:
+Ensuite, je valide l’état HA d’OPNsense :
 
-- CARP VIP status must be `BACKUP` on all VIPs
-- HA status page must show that the active node can log in to the passive node
-- Services must be running as expected
-- HA service synchronization must work
-- Firmware update checks must be accessible
+- Le statut des VIP CARP doit être `BACKUP` sur toutes les VIP
+- La page de statut HA doit montrer que le nœud actif peut se connecter au nœud passif
+- Les services doivent fonctionner comme attendu
+- La synchronisation des services HA doit fonctionner
+- Les vérifications de mise à jour du firmware doivent être accessibles
 
-From the active node, I use the HA status page and force a full synchronization with `Synchronize and reconfigure all`.
-
----
-## Switchover Tests
-
-Before testing failover, I start a SSH session to `dockerVM` to confirm that firewall states are preserved across nodes. I also start a ping from a laptop to `192.168.37.120`.
-
-For the switchover test, I gracefully enable maintenance mode on the master node.
-
-The new passive node become `MASTER`, and I validate the important services:
-
-- Extra VLAN routing with ping to `192.168.37.120`
-- WAN access with ping to `8.8.8.8`
-- Firewall states by keeping the SSH session alive
-- External DNS resolution with `host redhat.com`
-- Internal DNS resolution with `host SLZB-06M.mgmt.vezpi.com`
-- Access to a random internet page
-- Caddy reverse proxy
-- Caddy layer4 proxy
-- Wireguard access from outside
-- mDNS by checking if the printer showed up
-
-✅ The switchover is successful.
+Depuis le nœud actif, j’utilise la page de statut HA et je force une synchronisation complète avec `Synchronize and reconfigure all`.
 
 ---
-## Failover Tests
+## Tests de bascule contrôlée
 
-After the graceful switchover test, I test a more direct failover scenario by forcing a poweroff of the active node.
+Avant de tester le failover, je démarre une session SSH vers `dockerVM` pour confirmer que les états du firewall sont préservés entre les nœuds. Je démarre aussi un ping depuis un laptop vers `192.168.37.120`.
 
-I repeated the same validation checklist.
+Pour le test de bascule contrôlée, j’active proprement le mode maintenance sur le nœud master.
 
-✅ The failover is successful.
+Le nouveau nœud passif devient `MASTER`, et je valide les services importants :
 
-Finally, I restart the active OPNsense VM.
+- Routage VLAN supplémentaire avec un ping vers `192.168.37.120`
+- Accès WAN avec un ping vers `8.8.8.8`
+- États du firewall en gardant la session SSH active
+- Résolution DNS externe avec `host redhat.com`
+- Résolution DNS interne avec `host SLZB-06M.mgmt.vezpi.com`
+- Accès à une page internet aléatoire
+- Reverse proxy Caddy
+- Proxy layer4 Caddy
+- Accès Wireguard depuis l’extérieur
+- mDNS en vérifiant si l’imprimante est apparue
 
-🎯 At that point, the OPNsense HA cluster is operational again, with the passive node now running on TrueNAS instead of Proxmox.
+✅ La bascule contrôlée est réussie.
+
+---
+## Tests de failover
+
+Après le test de bascule contrôlée propre, je teste un scénario de failover plus direct en forçant un poweroff du nœud actif.
+
+J’ai répété la même checklist de validation.
+
+✅ Le failover est réussi.
+
+Enfin, je redémarre la VM OPNsense active.
+
+🎯 À ce stade, le cluster HA OPNsense est de nouveau opérationnel, avec le nœud passif qui fonctionne maintenant sur TrueNAS au lieu de Proxmox.
 
 ---
 ## Conclusion
 
-This migration is a small but important improvement for my homelab.
+Cette migration est une petite mais importante amélioration pour mon homelab.
 
-Before, both OPNsense nodes depended on the Proxmox VE cluster. If the cluster was down, my whole network routing layer was down with it.
+Avant, les deux nœuds OPNsense dépendaient du cluster Proxmox VE. Si le cluster était arrêté, toute ma couche de routage réseau était arrêtée avec lui.
 
-Now, the active node still runs on Proxmox, but the passive node runs on TrueNAS. This gives me a better separation between the virtualization cluster and the network failover layer.
+Maintenant, le nœud actif fonctionne toujours sur Proxmox, mais le nœud passif fonctionne sur TrueNAS. Cela me donne une meilleure séparation entre le cluster de virtualisation et la couche de failover réseau.
 
-Little disclaimer, while TrueNAS offers virtualization features, it is not comparable to Proxmox VE in terms of clustering and infrastructure management capabilities.
+Petit disclaimer, bien que TrueNAS offre des fonctionnalités de virtualisation, il n’est pas comparable à Proxmox VE en termes de clustering et de capacités de gestion d’infrastructure.
 
-A note about QEMU Guest Agent, the OPNsense VM already had the QEMU Guest Agent installed before expert. In this setup, it does not seem useful because TrueNAS does not have it implemented as a hypervisor feature. I kept it installed anyway, because it is harmless.
+Une note à propos de QEMU Guest Agent, la VM OPNsense avait déjà QEMU Guest Agent installé avant l’export. Dans cette configuration, il ne semble pas utile parce que TrueNAS ne l’a pas implémenté comme fonctionnalité d’hyperviseur. Je l’ai gardé installé quand même, parce qu’il est inoffensif.
