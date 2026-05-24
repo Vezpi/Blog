@@ -107,19 +107,19 @@ These are the Proxmox VE nodes allowed to mount the share.
 
 I don't manually create a zvol at that point. The VM creation process in TrueNAS handle the disk import and conversion.
 
-## Exporting the VM disk from Proxmox
+## Export the VM Disk from Proxmox
 
 From the Proxmox VE web interface, I locate the node hosting the passive OPNsense VM `cerbere-head2`, it is running on `Zenith`.
 
-I logged into that Proxmox node over SSH and mounted the NFS share from TrueNAS:
+I log into that Proxmox node over SSH and mount the NFS share from TrueNAS:
 
 ```bash
-mount granite.mgmt.vezpi.com:/mnt/storage/disk /mnt
+mount granite.mgmt.vezpi.com:/mnt/storage/vm/disk /mnt
 ```
 
-Then I shut down the VM from the Proxmox VE interface. I did not shut it down from inside OPNsense because the VM had HA enabled.
+Then I shut down the VM from the Proxmox VE interface. I don't shut it down from inside OPNsense because the VM has HA enabled.
 
-Once the VM was stopped, I exported the main disk to qcow2. I did not export the EFI disk.
+Once the VM is stopped, I export the main disk to qcow2. I don't export the EFI disk.
 
 ```bash
 qemu-img convert -f raw -O qcow2 -p \
@@ -129,17 +129,17 @@ qemu-img convert -f raw -O qcow2 -p \
 
 The conversion took about one minute for a 20 GB disk.
 
-At this point, the passive OPNsense disk was available on TrueNAS and ready to be imported into a new VM.
+At this point, the passive OPNsense disk is available on TrueNAS and ready to be imported into a new VM.
 
-## Recreating the OPNsense VM in TrueNAS
+## Recreate the OPNsense VM in TrueNAS
 
-The next step was to recreate the passive OPNsense VM in TrueNAS with parameters matching the original VM as closely as possible.
+The next step is to recreate the passive OPNsense VM in TrueNAS with parameters matching the original VM as closely as possible.
 
-From the TrueNAS web interface, I went to the `Virtual Machines` section.
+From the TrueNAS web interface, I go to the `Virtual Machines` section.
 
 ![Opening the Virtual Machines section in TrueNAS](images/truenas-vm-menu.png)
 
-I created a new VM with these settings.
+I create a new VM with these settings.
 
 For the operating system:
 
@@ -153,7 +153,7 @@ For the operating system:
 - Start on Boot: enabled
 - Enable Display VNC: disabled
 
-The VM name does not use dashes because TrueNAS did not allow them there.
+The VM name does not use dashes because TrueNAS do not allow them there.
 
 For CPU and memory:
 
@@ -179,21 +179,21 @@ For the first network interface:
 - MAC Address: keep the proposed one
 - Attach NIC: `br1: Mgmt`
 
-I skipped installation media and GPU configuration, then confirmed the summary.
+I skip installation media and GPU configuration, then confirm the summary.
 
 ![Summary before creating the OPNsense VM in TrueNAS](images/truenas-vm-create-new-summary.png)
 
-After confirmation, TrueNAS converted the imported qcow2 image into a zvol.
+After confirmation, TrueNAS convert the imported qcow2 image into a zvol.
 
 ![TrueNAS converting the imported disk image into a zvol](images/truenas-vm-disk-image-conversion.png)
 
-Once the VM was created, I opened the VM details and added the remaining NICs.
+Once the VM is created, I open the VM details and add the remaining NICs.
 
 ![Accessing the VM devices in TrueNAS](images/truenas-vm-details.png)
 
-For each additional NIC, I used VirtIO as the adapter type and attached it to the corresponding bridge.
+For each additional NIC, I used VirtIO as the adapter type and attach it to the corresponding bridge.
 
-For the WAN NIC, I copied the old MAC address because I use a single WAN IP address trick. I also incremented the digit in the MAC address for the following NICs to keep the order clear.
+For the WAN NIC, I copy the old MAC address because I use a single WAN IP address trick. I also increment the digit in the MAC address for the following NICs to keep the order clear.
 
 ![Adding an additional VirtIO network interface to the OPNsense VM](images/truenas-vm-add-nic.png)
 
