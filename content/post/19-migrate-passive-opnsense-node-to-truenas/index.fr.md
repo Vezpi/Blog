@@ -14,80 +14,80 @@ categories:
 ---
 ## Intro
 
-My homelab network is handled by an OPNsense cluster composed of two VM nodes. Both of these VMs are running inside my Proxmox VE cluster. You can find details in this [article]({{< ref "post/15-migration-opnsense-proxmox-highly-available" >}}).
+Mon réseau homelab est géré par un cluster OPNsense composé de deux nœuds VM. Ces deux VM fonctionnent dans mon cluster Proxmox VE. Vous pouvez trouver les détails dans cet [article]({{< ref "post/15-migration-opnsense-proxmox-highly-available" >}}).
 
-This setup works fine most of the time. The issue is more about the rare cases where the Proxmox cluster itself is down. When that happens, both OPNsense nodes are unavailable at the same time, which means I do not have any router left, so no network at all.
+Cette configuration fonctionne bien la plupart du temps. Le problème concerne plutôt les rares cas où le cluster Proxmox lui-même est arrêté. Quand cela arrive, les deux nœuds OPNsense sont indisponibles en même temps, ce qui signifie qu’il ne me reste aucun routeur, donc aucun réseau du tout.
 
-Recently, I installed a TrueNAS server in the labwhich I document in that [post]({{< ref "post/18-create-nas-server-with-truenas" >}}). It is mainly here to act as a NAS, but it could also host virtual machines. That give me a good opportunity to improve the resilience of my network without changing the whole design.
+Récemment, j’ai installé un serveur TrueNAS dans le lab, que j'ai documenté dans ce [post]({{< ref "post/18-create-nas-server-with-truenas" >}}). Il est principalement là pour agir comme NAS, mais il pourrait aussi héberger des machines virtuelles. Cela me donne une bonne opportunité d’améliorer la résilience de mon réseau sans changer toute la conception.
 
-💡 The idea is simple: keep the active OPNsense node on Proxmox, but move the passive node to TrueNAS.
+💡 L’idée est simple : garder le nœud OPNsense actif sur Proxmox, mais déplacer le nœud passif vers TrueNAS.
 
-This way, if the Proxmox cluster goes down, the passive OPNsense node can still take over and keep the network alive.
-
----
-## Prepare the OPNsense Nodes
-
-Before moving anything, I want to make sure the OPNsense VMs could run with less memory.
-
-The TrueNAS server does not have as much RAM available as the Proxmox cluster, so the first step is to reduce the memory allocation of the OPNsense nodes to the minimum.
-
-I start with the passive node, `cerbere-head2`:
-
-- Shut down the passive node
-- Reduce its memory allocation from 4 to 2GB
-- Restart it
-- Verify the cluster health
-- Swap the service to the passive node
-- Run network checks
-
-Then I repeat the same operation on the active node, `cerbere-head1`.
-
-Doing it one node at a time allow me to keep the HA cluster healthy while validating that the reduced memory allocation is still enough for my setup.
+De cette façon, si le cluster Proxmox tombe, le nœud OPNsense passif peut toujours prendre le relais et garder le réseau fonctionnel.
 
 ---
-## Prepare the TrueNAS Network
+## Préparer les nœuds OPNsense
 
-The most important part of this migration is not the disk export or the VM creation. It is the network.
+Avant de déplacer quoi que ce soit, je veux m’assurer que les VM OPNsense peuvent fonctionner avec moins de mémoire.
 
-An OPNsense VM is not a simple server with one management interface. It needs access to several networks, including management, WAN, user networks, IoT, pfSync, DMZ and lab networks.
+Le serveur TrueNAS n’a pas autant de RAM disponible que le cluster Proxmox, donc la première étape est de réduire l’allocation mémoire des nœuds OPNsense au minimum.
 
-On the TrueNAS side, I start from `System` > `Network` and add VLAN interfaces.
+Je commence avec le nœud passif, `cerbere-head2` :
 
-The first one is the User VLAN:
+- Éteindre le nœud passif
+- Réduire son allocation mémoire de 4 à 2GB
+- Le redémarrer
+- Vérifier la santé du cluster
+- Basculer le service vers le nœud passif
+- Exécuter des vérifications réseau
 
-- Type: `VLAN`
-- Name: `vlan13`
-- Description: `User`
-- Parent interface: `enp1s0`
-- VLAN tag: `13`
+Ensuite, je répète la même opération sur le nœud actif, `cerbere-head1`.
 
-![Create the User VLAN interface in TrueNAS](images/truenas-create-new-vlan-interface.png)
+Le faire un nœud à la fois me permet de garder le cluster HA en bonne santé tout en validant que l’allocation mémoire réduite est toujours suffisante pour ma configuration.
 
-I then add the other VLANs in the same way.
+---
+## Préparer le réseau TrueNAS
 
-TrueNAS does not apply network changes directly. It gives the option to test the changes first, with a short validation window. If the configuration is not confirmed in time, it rolls back automatically.
+La partie la plus importante de cette migration n’est pas l’export du disque ni la création de la VM. C’est le réseau.
 
-This is really convenient when changing the network configuration of the machine you are currently connected to.
+Une VM OPNsense n’est pas un simple serveur avec une seule interface de management. Elle a besoin d’accéder à plusieurs réseaux, incluant le management, le WAN, les réseaux utilisateurs, l’IoT, pfSync, la DMZ et les réseaux lab.
 
-![Confirm the VLAN interfaces before applying the network changes](images/truenas-network-confirm-add-vlans.png)
+Du côté TrueNAS, je commence depuis `System` > `Network` et j’ajoute des interfaces VLAN.
 
-For the management network, I created a bridge called `br1`.
+La première est le VLAN utilisateur :
 
-This bridge holds the TrueNAS management IP configuration instead of the physical interface `enp1s0`, because it also needs to be shared with the OPNsense VM.
+- Type : `VLAN`
+- Nom : `vlan13`
+- Description : `User`
+- Interface parente : `enp1s0`
+- Tag VLAN : `13`
 
-![Create the management bridge for TrueNAS and the OPNsense VM](images/truenas-network-mgmt-bridge.png)
+![Créer l’interface VLAN utilisateur dans TrueNAS](images/truenas-create-new-vlan-interface.png)
 
-After that, I remove the IP configuration from the physical interface and keep it on the bridge.
+J’ajoute ensuite les autres VLANs de la même manière.
 
-![Network configuration before applying the bridge changes](images/truenas-network-changes-before-apply.png)
+TrueNAS n’applique pas les changements réseau directement. Il donne l’option de tester les changements d’abord, avec une courte fenêtre de validation. Si la configuration n’est pas confirmée à temps, il revient automatiquement en arrière.
 
-I initially tried to use DHCP for the management bridge after updating the MAC address in Dnsmasq, but I finally decided to keep a static IP address for TrueNAS. After some network changes, DHCP gave another address from the pool, so static addressing was the safer and simpler option for this server.
+C’est vraiment pratique lorsqu’on change la configuration réseau de la machine à laquelle on est actuellement connecté.
 
-For the OPNsense VM, I create a bridge for each VLAN. For example, `br13` uses `vlan13`, I also move the description, like `User`, from the VLAN interface to the bridge for clarity.
+![Confirmer les interfaces VLAN avant d’appliquer les changements réseau](images/truenas-network-confirm-add-vlans.png)
 
-The final TrueNAS network configuration:
+Pour le réseau de management, j’ai créé un bridge appelé `br1`.
 
-![Create one bridge per VLAN for the OPNsense VM](images/truenas-network-bridges-for-vlan.png)
+Ce bridge porte la configuration IP de management de TrueNAS à la place de l’interface physique `enp1s0`, parce qu’elle doit aussi être partagée avec la VM OPNsense.
+
+![Créer le bridge de management pour TrueNAS et la VM OPNsense](images/truenas-network-mgmt-bridge.png)
+
+Après cela, je retire la configuration IP de l’interface physique et je la garde sur le bridge.
+
+![Configuration réseau avant d’appliquer les changements du bridge](images/truenas-network-changes-before-apply.png)
+
+J’ai initialement essayé d’utiliser DHCP pour le bridge de management après avoir mis à jour l’adresse MAC dans Dnsmasq, mais j’ai finalement décidé de garder une adresse IP statique pour TrueNAS. Après certains changements réseau, DHCP a donné une autre adresse du pool, donc l’adressage statique était l’option la plus sûre et la plus simple pour ce serveur.
+
+Pour la VM OPNsense, je crée un bridge pour chaque VLAN. Par exemple, `br13` utilise `vlan13`, je déplace aussi la description, comme `User`, de l’interface VLAN vers le bridge pour plus de clarté.
+
+La configuration réseau finale de TrueNAS :
+
+![Créer un bridge par VLAN pour la VM OPNsense](images/truenas-network-bridges-for-vlan.png)
 
 ---
 ## Create a Temporary Export Dataset
