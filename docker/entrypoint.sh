@@ -21,12 +21,6 @@ rm -rf "$CLONE_DIR"
 echo "- Cloning $REPO_URL (branch: $BRANCH)..."
 git clone --recurse-submodules --branch "$BRANCH" "$REPO_URL" "$CLONE_DIR"
 
-# Patch references not yet fixed in Stack theme
-sed -i 's/\.Site\.Data/hugo.Data/g' "$CLONE_DIR/themes/stack/layouts/_partials/article/components/photoswipe.html"
-sed -i 's/LanguageDirection/Direction/g' "$CLONE_DIR/themes/stack/layouts/baseof.html"
-sed -i 's/\.LanguageCode/.Language.Locale/g' "$CLONE_DIR/themes/stack/layouts/baseof.html"
-sed -i 's/\.LanguageCode/.Locale/g' "$CLONE_DIR/themes/stack/layouts/rss.xml"
-
 # Generate static files with hugo
 echo "- Building site with Hugo v$HUGO_VERSION in $HUGO_DEST..."
 hugo --source "$CLONE_DIR" --destination "$HUGO_DEST" --baseURL="https://${URL}" ${DRAFTS} --logLevel info --cleanDestinationDir --gc --panicOnWarning --printI18nWarnings
