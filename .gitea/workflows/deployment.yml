@@ -194,7 +194,10 @@ jobs:
     steps:
       - name: Remove Old Docker Image
         run: |
-          docker image rm $(docker image ls ${DOCKER_IMAGE} 2> /dev/null | awk '$NF != "U" && NR>1 {print $2}')
+          IMAGE_IDS=$(docker image ls "${DOCKER_IMAGE}" 2>/dev/null | awk '$NF != "U" && NR>1 {print $2}')
+          if [ -n "$IMAGE_IDS" ]; then
+              docker image rm $IMAGE_IDS
+          fi
   
   Notify:
     needs: [Check-Rebuild, Build, Deploy-Staging, Test-Staging, Merge, Deploy-Production, Test-Production, Clean]
