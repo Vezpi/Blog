@@ -1,15 +1,16 @@
 ---
 slug: automating-proxmox-update-ansible
-title: Template
-description:
-date:
-draft: true
+title: Automating Proxmox VE Updates with Ansible
+description: Automate Proxmox VE cluster updates with Ansible, Semaphore UI and Ntfy, including Ceph checks, rolling reboots and reports.
+date: 2026-06-09
+draft: false
 tags:
   - proxmox
   - ansible
   - semaphore-ui
   - ntfy
 categories:
+  - homelab
 ---
 ## Intro
 
@@ -38,12 +39,12 @@ The update process is built around a few components I already use in the lab.
 
 [Ansible](https://docs.ansible.com/) is used to describe the update workflow as a playbook.
 
-[Semaphore UI](https://semaphoreui.com/) is used to run the playbook from a web interface and later schedule it.
+[Semaphore UI](https://semaphoreui.com/) is used to run the playbook from a web interface and schedule it.
 
 [Ntfy](https://ntfy.sh/) is used for notifications. If updates are scheduled, I need to know when something happens, especially if the cluster is not ready or if an update fails.
 
 ---
-## Creating a Dedicated Ntfy topic
+## Creating a Dedicated Ntfy Topic
 
 Before scheduling anything, I wanted a notification channel dedicated to the homelab.
 
@@ -72,13 +73,27 @@ The password is stored as an environment variable in the `Secrets` tab.
 ---
 ## Designing the Proxmox Update Workflow
 
-For Proxmox, I did not want a playbook that simply runs `apt upgrade` on all nodes.
+For Proxmox, I did not want a playbook that simply runs `apt upgrade` on all nodes. Instead, it doing the following:
 
+- Check cluster health
+- Stop and send a Ntfy notification if the cluster is not ready
+- For each node, check if updates are available, if so:
+  - Enable maintenance mode
+  - Wait for LXCs and VMs to leave the node
+  - Update packages
+  - Disable Ceph rebalancing
+  - Reboot the node
+  - Enable Ceph rebalancing
+  - Disable maintenance mode
+  - Wait for Ceph to be healthy
+- Send a final Ntfy report
 
+The full playbook is available on my [Homelab repo]([https://git.vezpi.com/Vezpi/Homelab/src/branch/lab/ansible/proxmox/update_proxmox.ym](https://github.com/Vezpi/Homelab/blob/main/ansible/proxmox/update_proxmox.yml)l)
 
+---
+## Workflow Details
 
-
-Before starting the rolling update, it checks:
+Before starting the rolling update, the playbook checks:
 
 - Proxmox cluster quorum
 - Ceph health
@@ -100,8 +115,6 @@ If one of these checks fails, the playbook stops and sends a Ntfy notification i
 ```
 
 This is an important part of the automation. A scheduled update should not blindly continue if the cluster is not in a good state.
-
-## Updating one node at a time
 
 The playbook updates the Proxmox nodes with `serial: 1`.
 
@@ -205,23 +218,8 @@ After the reboot, Ceph rebalancing is enabled again, maintenance mode is disable
 
 The result is a controlled rolling update instead of a manual node-by-node procedure.
 
-## Running the playbook from Semaphore
-
-Once the playbook was ready, I pushed it to the repository and configured a Semaphore task template to run it.
-
-![Semaphore task template used to run the Proxmox update playbook](images/semaphore-playbook-update-proxmox-template.png)
-
-From there, I could launch the workflow and watch it act on the cluster.
-
-During execution, the target node enters maintenance mode and the running workloads are migrated away from it.
-
-![Proxmox node in maintenance mode while the update playbook migrates workloads away](images/proxmox-update-playbook-maintenance.png)
-
-This is the point where the automation becomes really useful. The playbook is not only applying updates. It is also taking care of the operational steps around the update.
-
-## Sending a useful update report
-
-Notifications are not only for failures.
+---
+## Sending an Update Report
 
 At the end of the workflow, the playbook sends a report through Ntfy. It first determines if at least one node was updated:
 
@@ -273,7 +271,23 @@ body: |
 
 This makes the scheduled job much easier to trust. I do not need to open Semaphore every time to know what happened.
 
-## Scheduling the update
+---
+## Running the Playbook from Semaphore
+
+Once the playbook was ready, I pushed it to the repository and configured a Semaphore task template to run it.
+
+![Semaphore task template used to run the Proxmox update playbook](images/semaphore-playbook-update-proxmox-template.png)
+
+From there, I could launch the workflow and watch it act on the cluster.
+
+During execution, the target node enters maintenance mode and the running workloads are migrated away from it.
+
+![Proxmox node in maintenance mode while the update playbook migrates workloads away](images/proxmox-update-playbook-maintenance.png)
+
+This is the point where the automation becomes really useful. The playbook is not only applying updates. It is also taking care of the operational steps around the update.
+
+---
+## Scheduling the Update
 
 After refining the playbook and validating the workflow, I created a schedule in Semaphore.
 
@@ -285,6 +299,7 @@ At this point, the Proxmox update process is no longer something I need to remem
 
 It runs on a schedule, checks the state of the cluster before doing anything, updates one node at a time, and sends a notification with the result.
 
+---
 ## Conclusion
 
 This project started with a simple problem: I was not updating my homelab regularly because the process was still too manual.
@@ -293,4 +308,4 @@ Automating Proxmox updates was the first milestone. The important part was not o
 
 Semaphore gives me a clean way to run and schedule the playbook. Ansible describes the process in a repeatable way. Ntfy closes the loop by telling me what happened.
 
-The next logical steps are to continue the same approach for the other key components of the lab: OPNsense, TrueNAS and dockerVM.
+The next logical steps are to continue the same approach for the other key components of the lab: OPNsense and TrueNAS.
