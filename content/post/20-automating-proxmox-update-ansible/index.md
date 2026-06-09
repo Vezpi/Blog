@@ -88,7 +88,7 @@ For Proxmox, I did not want a playbook that simply runs `apt upgrade` on all nod
   - Wait for Ceph to be healthy
 - Send a final Ntfy report
 
-The full playbook is available on my [Homelab repo]([https://git.vezpi.com/Vezpi/Homelab/src/branch/lab/ansible/proxmox/update_proxmox.ym](https://github.com/Vezpi/Homelab/blob/main/ansible/proxmox/update_proxmox.yml)l)
+The full playbook is available on my [Homelab repo](https://github.com/Vezpi/Homelab/blob/main/ansible/proxmox/update_proxmox.yml)
 
 ---
 ## Workflow Details

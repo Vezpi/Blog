@@ -88,7 +88,7 @@ Pour Proxmox, je ne voulais pas d’un playbook qui exécute simplement `apt upg
   - Attendre que Ceph soit en bonne santé
 - Envoyer un rapport Ntfy final
 
-Le playbook complet est disponible sur mon [dépôt Homelab](https://git.vezpi.com/Vezpi/Homelab/src/branch/lab/ansible/proxmox/update_proxmox.yml)
+Le playbook complet est disponible sur mon [dépôt Homelab](https://github.com/Vezpi/Homelab/blob/main/ansible/proxmox/update_proxmox.yml)
 
 ---
 ## Détails du Workflow
