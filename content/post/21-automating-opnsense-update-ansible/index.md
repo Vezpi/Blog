@@ -19,11 +19,10 @@ In my homelab, most of the infrastructure is already redundant enough to tolerat
 
 My OPNsense setup is an HA cluster with two nodes. The master node, `cerbere-head1`, runs on Proxmox. The backup node, `cerbere-head2`, runs on TrueNAS. That split is intentional, because I want the network to survive maintenance or outages on the Proxmox cluster.
 
-The goal was simple: create an Ansible playbook able to update or upgrade the OPNsense HA cluster safely, in the right order, with checks before touching anything, and a notification at the end.
+The goal is simple: create an Ansible playbook able to update or upgrade the OPNsense HA cluster safely, in the right order, with checks before touching anything, and a notification at the end.
 
-## The tools involved
-
-The workflow uses a few components already present in my homelab.
+---
+## Update Strategy
 
 OPNsense exposes an API that can be used to check system status, firmware status, services and CARP virtual IP state. Ansible drives the automation with API calls, while Semaphore UI is used as the controller to run the playbook manually or from a schedule. Ntfy is used for the final report and for failure notifications.
 
@@ -31,19 +30,9 @@ For the Proxmox hosted node, I also use the [community.proxmox Ansible collectio
 
 The important detail is that both OPNsense nodes are not treated exactly the same. The backup node runs on TrueNAS, so the playbook updates it without taking a hypervisor snapshot. The master node runs on Proxmox, so the playbook takes a snapshot before starting the firmware operation.
 
-## Starting with a manual update
-
-Before writing the playbook, I tested the update process manually on the master node.
-
-That node runs on Proxmox, so it was easy to take a VM snapshot before the update and roll back after the test. The manual update worked fine, but it took around 45 minutes for one node.
-
-That duration mattered. If the playbook was going to wait for firmware jobs, reboots and API availability, the timeouts had to be realistic. Later, during upgrade testing, I extended the timeout to `5400` seconds to give the master node enough time to complete the operation.
-
-Once the manual test was validated, I rolled the VM back to the snapshot and started working on the API based automation.
-
 ## Creating an automation user in OPNsense
 
-To let Ansible interact with OPNsense, I created a dedicated user on the master node.
+To let Ansible interact with OPNsense, I create a dedicated user on the master node.
 
 The user is called `automation`, with a scrambled password and only the privileges needed by the playbook:
 
@@ -54,14 +43,14 @@ The user is called `automation`, with a scrambled password and only the privileg
 
 Because this is an HA cluster, the synchronization between both OPNsense nodes handles the user creation on the backup node.
 
-After creating the user, I generated an API key.
+After creating the user, I generate an API key.
 
 ![opnsense-user-create-api-key.png](images/opnsense-user-create-api-key.png)
 The OPNsense API key is generated from the dedicated automation user.
 
 The downloaded file contains the API `key` and `secret`. In the OPNsense UI, the key remains visible in the `ApiKeys` tab, but the secret does not.
 
-I first tested the API calls with Bruno from VS Code. Once the basic calls were working, I moved the credentials into Semaphore.
+I first test the API calls with Bruno from VS Code. Once the basic calls are working, I load the credentials into Semaphore.
 
 ## Preparing Semaphore
 
