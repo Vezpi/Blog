@@ -30,7 +30,8 @@ For the Proxmox hosted node, I also use the [community.proxmox Ansible collectio
 
 The important detail is that both OPNsense nodes are not treated exactly the same. The backup node runs on TrueNAS, so the playbook updates it without taking a hypervisor snapshot. The master node runs on Proxmox, so the playbook takes a snapshot before starting the firmware operation.
 
-## Creating an automation user in OPNsense
+---
+## Creating an API User in OPNsense
 
 To let Ansible interact with OPNsense, I create a dedicated user on the master node.
 
@@ -54,9 +55,9 @@ I first test the API calls with Bruno from VS Code. Once the basic calls are wor
 
 ## Preparing Semaphore
 
-In Semaphore, I created a key store entry named `OPNsense automation`, containing the API key and secret.
+In Semaphore, I create a key store entry named `OPNsense automation`, containing the API key and secret.
 
-Then I created an inventory for the OPNsense nodes:
+Then I create an inventory for the OPNsense nodes:
 
 ```yaml
 ---
@@ -70,17 +71,20 @@ all:
           hosts:
             cerbere-head2:
               ansible_host: 192.168.88.3
+              main_role: BACKUP
               hypervisor: TrueNAS
         opnsense_master:
           hosts:
             cerbere-head1:
               ansible_host: 192.168.88.2
+              main_role: MASTER
               hypervisor: Proxmox
+              proxmox_vmid: 122
 ```
 
 The playbook runs locally from Semaphore and talks to each firewall through the OPNsense API.
 
-I also created a variable group named `OPNsense automation API` with the API credentials and a few shared variables:
+I also create a variable group named `OPNsense automation API` with the API credentials and a few shared variables:
 
 - `OPNSENSE_API_KEY`
 - `OPNSENSE_API_SECRET`
@@ -91,12 +95,12 @@ I also created a variable group named `OPNsense automation API` with the API cre
 
 The HTTPS port is set to `4443`, and the host is built from the inventory address and this port.
 
-Finally, I created the Semaphore task template.
+Finally, I create the Semaphore task template.
 
 ![semaphore-new-template-task-opnsense-update.png](images/semaphore-new-template-task-opnsense-update.png)
 The Semaphore task template used to run the OPNsense HA update playbook.
 
-Before going further, I validated that Ansible could query both nodes:
+Before going further, I validate that Ansible could query both nodes:
 
 ```yaml
 - name: Check node availability
@@ -109,7 +113,7 @@ Before going further, I validated that Ansible could query both nodes:
     validate_certs: false
 ```
 
-At that point, the automation could reach both nodes and authenticate against the API.
+At that point, the automation can reach both nodes and authenticate against the API.
 
 ## Making CARP maintenance usable from the API
 
