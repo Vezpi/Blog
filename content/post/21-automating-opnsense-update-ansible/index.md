@@ -53,7 +53,8 @@ The downloaded file contains the API `key` and `secret`. In the OPNsense UI, the
 
 I first test the API calls with Bruno from VS Code. Once the basic calls are working, I load the credentials into Semaphore.
 
-## Preparing Semaphore
+---
+## Preparing Semaphore UI
 
 In Semaphore, I create a key store entry named `OPNsense automation`, containing the API key and secret.
 
@@ -115,7 +116,8 @@ Before going further, I validate that Ansible could query both nodes:
 
 At that point, the automation can reach both nodes and authenticate against the API.
 
-## Making CARP maintenance usable from the API
+---
+## Making CARP Maintenance Usable from the API
 
 One important part of the workflow is CARP maintenance mode.
 
@@ -135,18 +137,19 @@ The privileges were granted in the WebUI, so the issue looked related to the ACL
 
 After rebooting the system, the endpoint returned a proper response.
 
-I created a small PR in the OPNsense project to fix this, and it was merged quickly into the `opnsense/core` `master` branch.
+I created a small [PR](https://github.com/opnsense/core/pull/10428) in the OPNsense project to fix this, and it was merged quickly into the `opnsense/core` `master` branch, my first contribution to that project.
 
 ![github-opnsense-pr-merged.png](images/github-opnsense-pr-merged.png)
 The small OPNsense ACL fix was merged upstream.
 
-Later, OPNsense `26.1.11` was released and included the fix. That allowed me to test the full playbook without relying on the manual ACL change.
+Later, OPNsense [26.1.11](https://forum.opnsense.org/index.php?topic=52257.0) was released and included the fix. That allowed me to test the full playbook without relying on the manual ACL change.
 
-## Designing the playbook flow
+---
+## Designing the Playbook Workflow
 
 The playbook follows a simple order:
 
-- Check both nodes first
+- Check both nodes status
 - Update the backup node first
 - Update the master node second
 - Send a final notification
@@ -158,8 +161,9 @@ The playbook also supports different actions through a Semaphore survey.
 ![semaphore-opnsense-update-survey-action.png](images/semaphore-opnsense-update-survey-action.png)
 The Semaphore survey lets me choose between check, update and upgrade.
 
-This was needed because OPNsense does not expose updates and upgrades in exactly the same way. The variables for the target version and the reboot requirement differ between an update and an upgrade, so the playbook resolves those differences before deciding what to do.
+This is needed because OPNsense does not expose updates and upgrades in exactly the same way. The variables for the target version and the reboot requirement differ between an update and an upgrade, so the playbook resolves those differences before deciding what to do.
 
+---
 ## Phase 1: firmware and CARP checks
 
 The first phase runs on both OPNsense nodes.
