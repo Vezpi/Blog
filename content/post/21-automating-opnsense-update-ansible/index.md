@@ -2,7 +2,7 @@
 slug: automating-opnsense-update-ansible
 title: Automating OPNsense HA updates with Ansible
 description: Automating OPNsense HA updates in a homelab with Ansible, Semaphore UI, CARP checks, Proxmox snapshots and Ntfy notifications.
-date: 2026-07-17
+date: 2026-08-21
 draft: true
 tags:
   - opnsense
@@ -164,7 +164,7 @@ The Semaphore survey lets me choose between check, update and upgrade.
 This is needed because OPNsense does not expose updates and upgrades in exactly the same way. The variables for the target version and the reboot requirement differ between an update and an upgrade, so the playbook resolves those differences before deciding what to do.
 
 ---
-## Phase 1: firmware and CARP checks
+## Firmware and CARP Checks
 
 The first phase runs on both OPNsense nodes.
 
@@ -214,13 +214,13 @@ The first phase also validates a few conditions before proceeding:
 
 If one of these checks fails, the playbook aborts and sends a Ntfy notification.
 
-## Handling skip logic properly
+## Handling Skip Logic Properly
 
-One of the trickiest parts was not the update itself, but deciding when not to update.
+One of the trickiest parts is not the update itself, but deciding when not to update.
 
-After the first successful test, the backup node was already updated while the master was not. The next run should not update the backup again if it is already at the version the master is targeting.
+After the first successful test, the backup node is already updated while the master is not. The next run should not update the backup again if it is already at the version the master is targeting.
 
-I added skip logic for that case:
+I add skip logic for that case:
 
 ```yaml
 - name: Backup already updated
@@ -237,7 +237,7 @@ I added skip logic for that case:
     == hostvars[groups['opnsense_master'][0]].firmware_target_value
 ```
 
-Then I generalized the skip behavior.
+Then I generalize the skip behavior.
 
 The playbook skips a node when:
 
@@ -246,9 +246,9 @@ The playbook skips a node when:
 - An update is available but the requested action is upgrade
 - The backup node is already at the target version or series of the master
 
-This made the final notification much cleaner, because a skipped node is not treated as an error. It is simply reported as no action needed.
+This makes the final notification much cleaner, because a skipped node is not treated as an error. It is simply reported as no action needed.
 
-## Updating the backup node
+## Updating the Backup Node
 
 The backup node runs on TrueNAS, so this phase does not create a hypervisor snapshot.
 
@@ -311,20 +311,20 @@ Finally, it checks that the firmware version or product series matches the expec
 
 That check is what gives the playbook a reliable confirmation that the update or upgrade actually reached the expected target.
 
-## Updating the master node with a Proxmox snapshot
+## Updating the Master Node with a Proxmox Snapshot
 
 The master node is handled with more protection.
 
 Because it runs on Proxmox, the playbook creates a VM snapshot before enabling CARP maintenance mode and starting the firmware action.
 
-For this, I created a dedicated Proxmox user and token for Semaphore:
+For this, I create a dedicated Proxmox user and token for Semaphore:
 
 ```bash
 pveum user add semaphore@pve
 pveum user token add semaphore@pve opnsense -expire 0 -privsep 0
 ```
 
-Then I created a limited role:
+Then I create a limited role:
 
 ```bash
 pveum role add SemaphoreOpnsenseUpdate -privs "\
@@ -343,7 +343,7 @@ pveum aclmod /vms/122 -user semaphore@pve -role SemaphoreOpnsenseUpdate
 
 I like this approach because Semaphore can only operate on the one VM involved in this workflow. It does not get broad permissions on the whole Proxmox environment.
 
-In Semaphore, I added another variable group for the Proxmox API credentials:
+In Semaphore, I add another variable group for the Proxmox API credentials:
 
 - `PROXMOX_HOST`
 - `PROXMOX_PORT`
@@ -360,7 +360,7 @@ collections:
     version: "2.0.0"
 ```
 
-The Proxmox collection also requires the `proxmoxer` Python library, so I added a `requirements.txt` next to the Semaphore `docker-compose.yml`:
+The Proxmox collection also requires the `proxmoxer` Python library, so I add a `requirements.txt` next to the Semaphore `docker-compose.yml`:
 
 ```text
 proxmoxer>=2.3
@@ -373,7 +373,7 @@ volumes:
   - /appli/docker/semaphore/requirements.txt:/etc/semaphore/requirements.txt
 ```
 
-After redeploying Semaphore, the playbook could create the snapshot:
+After redeploying Semaphore, the playbook can create the snapshot:
 
 ```yaml
 - name: Take Proxmox VM snapshot
@@ -386,9 +386,9 @@ After redeploying Semaphore, the playbook could create the snapshot:
 
 If something fails during the master update, the rescue block rolls the VM back to the pre-update snapshot and sends a high priority Ntfy notification.
 
-## Final notification
+## Final Notification
 
-At first, I used assertions too much to drive the reporting logic. That worked for failures, but it was not the right model for normal cases like no updates available.
+At first, I used assertions too much to drive the reporting logic. That works for failures, but it is not the right model for normal cases like no updates available.
 
 The rescue block should only handle real failures. Normal situations should reach the final notification phase.
 
@@ -421,11 +421,11 @@ body: |
   {% endif %}
 ```
 
-The notification priority and tag also change depending on whether an action was performed or both nodes were already up to date.
+The notification priority and tag also change depending on whether an action is performed or both nodes are already up to date.
 
 This gives me a useful report without turning a no-op run into an error.
 
-## The final workflow
+## The Final Workflow
 
 The finished workflow is split into four phases:
 
@@ -439,6 +439,8 @@ The backup node is updated first. The master node is updated second, with a Prox
 The playbook can handle update, upgrade and check scenarios through the Semaphore survey. It also knows when to skip a node because there is nothing to do or because the requested action does not match what OPNsense reports.
 
 Most importantly, the workflow now completes end to end and reports the result.
+
+The Ansible playbook can be found [here](https://github.com/Vezpi/Homelab/blob/main/ansible/opnsense/update_opnsense_ha_cluster.yml).
 
 ## Conclusion
 
