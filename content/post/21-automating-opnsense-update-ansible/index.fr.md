@@ -3,7 +3,7 @@ slug: automating-opnsense-update-ansible
 title: Automatiser les mises à jour d'OPNsense avec Ansible
 description: Automatiser les mises à jour d'un cluster HA OPNsense dans un homelab avec Ansible, Semaphore UI, des vérifications CARP, des snapshots Proxmox et des notifications Ntfy.
 date: 2026-08-21
-draft: true
+draft: false
 tags:
   - opnsense
   - ansible

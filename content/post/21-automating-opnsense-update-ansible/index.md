@@ -3,7 +3,7 @@ slug: automating-opnsense-update-ansible
 title: Automating OPNsense HA updates with Ansible
 description: Automating OPNsense HA updates in a homelab with Ansible, Semaphore UI, CARP checks, Proxmox snapshots and Ntfy notifications.
 date: 2026-08-21
-draft: true
+draft: false
 tags:
   - opnsense
   - ansible
