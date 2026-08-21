@@ -22,7 +22,7 @@ My OPNsense setup is an HA cluster with two nodes. The master node, `cerbere-hea
 The goal is simple: create an Ansible playbook able to update or upgrade the OPNsense HA cluster safely, in the right order, with checks before touching anything, and a notification at the end.
 
 ---
-## Update Strategy
+## Update strategy
 
 OPNsense exposes an API that can be used to check system status, firmware status, services and CARP virtual IP state. Ansible drives the automation with API calls, while Semaphore UI is used as the controller to run the playbook manually or from a schedule. Ntfy is used for the final report and for failure notifications.
 
@@ -31,7 +31,7 @@ For the Proxmox hosted node, I also use the [community.proxmox Ansible collectio
 The important detail is that both OPNsense nodes are not treated exactly the same. The backup node runs on TrueNAS, so the playbook updates it without taking a hypervisor snapshot. The master node runs on Proxmox, so the playbook takes a snapshot before starting the firmware operation.
 
 ---
-## Creating an API User in OPNsense
+## Creating an API user in OPNsense
 
 To let Ansible interact with OPNsense, I create a dedicated user on the master node.
 
@@ -117,7 +117,7 @@ Before going further, I validate that Ansible could query both nodes:
 At that point, the automation can reach both nodes and authenticate against the API.
 
 ---
-## Making CARP Maintenance Usable from the API
+## Making CARP maintenance usable from the API
 
 One important part of the workflow is CARP maintenance mode.
 
@@ -145,7 +145,7 @@ The small OPNsense ACL fix was merged upstream.
 Later, OPNsense [26.1.11](https://forum.opnsense.org/index.php?topic=52257.0) was released and included the fix. That allowed me to test the full playbook without relying on the manual ACL change.
 
 ---
-## Designing the Playbook Workflow
+## Designing the playbook workflow
 
 The playbook follows a simple order:
 
@@ -164,7 +164,7 @@ The Semaphore survey lets me choose between check, update and upgrade.
 This is needed because OPNsense does not expose updates and upgrades in exactly the same way. The variables for the target version and the reboot requirement differ between an update and an upgrade, so the playbook resolves those differences before deciding what to do.
 
 ---
-## Firmware and CARP Checks
+## Firmware and CARP checks
 
 The first phase runs on both OPNsense nodes.
 
@@ -214,7 +214,7 @@ The first phase also validates a few conditions before proceeding:
 
 If one of these checks fails, the playbook aborts and sends a Ntfy notification.
 
-## Handling Skip Logic Properly
+## Handling skip logic properly
 
 One of the trickiest parts is not the update itself, but deciding when not to update.
 
@@ -248,7 +248,7 @@ The playbook skips a node when:
 
 This makes the final notification much cleaner, because a skipped node is not treated as an error. It is simply reported as no action needed.
 
-## Updating the Backup Node
+## Updating the backup node
 
 The backup node runs on TrueNAS, so this phase does not create a hypervisor snapshot.
 
@@ -311,7 +311,7 @@ Finally, it checks that the firmware version or product series matches the expec
 
 That check is what gives the playbook a reliable confirmation that the update or upgrade actually reached the expected target.
 
-## Updating the Master Node with a Proxmox Snapshot
+## Updating the master node with a Proxmox snapshot
 
 The master node is handled with more protection.
 
@@ -386,7 +386,7 @@ After redeploying Semaphore, the playbook can create the snapshot:
 
 If something fails during the master update, the rescue block rolls the VM back to the pre-update snapshot and sends a high priority Ntfy notification.
 
-## Final Notification
+## Final notification
 
 At first, I used assertions too much to drive the reporting logic. That works for failures, but it is not the right model for normal cases like no updates available.
 
@@ -425,7 +425,7 @@ The notification priority and tag also change depending on whether an action is 
 
 This gives me a useful report without turning a no-op run into an error.
 
-## The Final Workflow
+## The final workflow
 
 The finished workflow is split into four phases:
 
