@@ -92,6 +92,7 @@ jobs:
 
   Deploy-Staging:
     needs: [Check-Rebuild, Build]
+    if: always()
     runs-on: docker
     container:
       volumes:
