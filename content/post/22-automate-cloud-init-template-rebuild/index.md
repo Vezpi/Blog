@@ -11,9 +11,7 @@ tags:
   - semaphore-ui
 categories:
   - homelab
-image:
-  src: thumbnail-22.png
-  alt: Automating Proxmox Cloud-Init Template Updates with Ansible
+image: thumbnail-22.png
 ---
 ## Intro
 
