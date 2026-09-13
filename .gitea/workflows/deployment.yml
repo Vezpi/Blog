@@ -92,7 +92,6 @@ jobs:
 
   Deploy-Staging:
     needs: [Check-Rebuild, Build]
-    if: always() && needs.Check-Rebuild.result == 'success' && (needs.Build.result == 'skipped' || needs.Build.result == 'success')
     runs-on: docker
     container:
       volumes:
