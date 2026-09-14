@@ -1,7 +1,7 @@
 ---
 slug: automating-proxmox-update-ansible
 title: Automating Proxmox VE Updates with Ansible
-description: Automate Proxmox VE cluster updates with Ansible, Semaphore UI and Ntfy, including Ceph checks, rolling reboots and reports.
+description: Automate Proxmox VE cluster updates using Ansible, including Ceph checks, rolling reboots and Ntfy reports.
 date: 2026-06-09
 draft: false
 tags:
