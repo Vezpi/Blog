@@ -3,7 +3,7 @@ slug: automate-cloud-init-template-rebuild
 title: Automatiser la mise à jour d'un template Cloud-Init Proxmox avec Ansible
 description: J'ai automatisé la reconstruction de mon template cloud-init Ubuntu dans Proxmox avec Ansible pour accélérer et fiabiliser le déploiement de VM Kubernetes.
 date: 2026-09-13
-draft: true
+draft: false
 tags:
   - proxmox
   - cloud-init
@@ -11,6 +11,7 @@ tags:
   - semaphore-ui
 categories:
   - homelab
+image: thumbnail-22.png
 ---
 ## Introduction
 
