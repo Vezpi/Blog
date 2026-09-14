@@ -12,6 +12,7 @@ tags:
   - docker
 categories:
   - homelab
+image: thumbnail-17.png
 ---
 ## Intro
 
