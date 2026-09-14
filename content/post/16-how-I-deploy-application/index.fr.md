@@ -12,6 +12,7 @@ tags:
   - gitea
 categories:
   - homelab
+image: thumbnail-16.png
 ---
 ## Intro
 

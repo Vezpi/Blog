@@ -10,6 +10,7 @@ tags:
   - high-availability
 categories:
   - homelab
+image: thumbnail-12.png
 ---
 ## Intro
 

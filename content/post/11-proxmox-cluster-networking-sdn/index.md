@@ -8,6 +8,7 @@ tags:
   - proxmox
 categories:
   - homelab
+image: thumbnail-11.png
 ---
 
 ## Intro

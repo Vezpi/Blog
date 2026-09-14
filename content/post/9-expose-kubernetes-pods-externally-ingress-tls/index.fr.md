@@ -14,6 +14,7 @@ tags:
   - cert-manager
 categories:
   - homelab
+image: thumbnail-9.png
 ---
 
 ## Intro

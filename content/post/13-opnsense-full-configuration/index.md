@@ -14,6 +14,7 @@ tags:
   - dnsmasq
 categories:
   - homelab
+image: thumbnail-13.png
 ---
 
 ## Intro
