@@ -11,6 +11,7 @@ tags:
   - high-availability
 categories:
   - homelab
+image: thumbnail-19.png
 ---
 ## Intro
 

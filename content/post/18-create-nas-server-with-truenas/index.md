@@ -8,6 +8,7 @@ tags:
   - truenas
 categories:
   - homelab
+image: thumbnail-18.png
 ---
 ## Introduction
 
