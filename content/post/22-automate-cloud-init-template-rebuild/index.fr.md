@@ -11,7 +11,7 @@ tags:
   - semaphore-ui
 categories:
   - homelab
-image: thumbnail-22.png
+image: cover-22.webp
 ---
 ## Introduction
 

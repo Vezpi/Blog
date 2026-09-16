@@ -11,7 +11,7 @@ tags:
   - ntfy
 categories:
   - homelab
-image: thumbnail-20.png
+image: cover-20.webp
 ---
 ## Intro
 

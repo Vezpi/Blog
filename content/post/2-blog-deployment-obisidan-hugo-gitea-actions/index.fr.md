@@ -12,6 +12,7 @@ tags:
   - docker
 categories:
   - blog
+image: cover-2.webp
 ---
 ## 💡 Intro
 

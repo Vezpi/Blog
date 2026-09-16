@@ -10,7 +10,7 @@ tags:
   - high-availability
 categories:
   - homelab
-image: thumbnail-8.png
+image: cover-8.webp
 ---
 
 ## Intro

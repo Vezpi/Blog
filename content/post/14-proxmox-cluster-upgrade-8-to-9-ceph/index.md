@@ -10,7 +10,7 @@ tags:
   - ceph
 categories:
   - homelab
-image: thumbnail-14.png
+image: cover-14.webp
 ---
 
 ## Intro

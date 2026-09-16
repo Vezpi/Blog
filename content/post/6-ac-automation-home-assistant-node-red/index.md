@@ -10,7 +10,7 @@ tags:
   - node-red
 categories:
   - automation
-image: thumbnail-6.png
+image: cover-6.webp
 ---
 ## Intro
 

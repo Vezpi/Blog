@@ -10,7 +10,7 @@ tags:
   - proxmox
 categories:
   - homelab
-image: thumbnail-15.png
+image: cover-15.webp
 ---
 ## Intro
 

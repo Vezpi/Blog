@@ -12,7 +12,7 @@ tags:
   - docker
 categories:
   - homelab
-image: thumbnail-17.png
+image: cover-17.webp
 ---
 ## Intro
 

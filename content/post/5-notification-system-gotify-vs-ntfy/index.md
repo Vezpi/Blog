@@ -11,7 +11,7 @@ tags:
   - ci-cd
 categories:
   - homelab
-image: thumbnail-5.png
+image: cover-5.webp
 ---
 ## Intro
 

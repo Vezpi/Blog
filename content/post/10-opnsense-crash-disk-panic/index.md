@@ -8,7 +8,7 @@ tags:
   - opnsense
 categories:
   - homelab
-image: thumbnail-10.png
+image: cover-10.webp
 ---
 ## Intro
 
