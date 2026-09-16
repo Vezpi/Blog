@@ -93,7 +93,7 @@ jobs:
     needs:
       - Check-Rebuild
       - Build
-    if: always() && needs.Check-Rebuild.result == 'success' && (needs.Build.result == 'skipped' || needs.Build.result == 'success')
+    if: always()
     runs-on: docker
     container:
       volumes:
@@ -107,11 +107,57 @@ jobs:
       - name: Launch Blog Test Deployment
         run: |
           cd /blog
-          docker compose down ${CONTAINER_NAME} 
-          BLOG_TEST_BRANCH=${{ gitea.ref_name }} docker compose up -d ${CONTAINER_NAME}
-          sleep 30
+
+          echo "- Stopping existing ${CONTAINER_NAME}..."
+          docker compose down ${CONTAINER_NAME}
+
+          echo "- Starting ${CONTAINER_NAME}..."
+          BLOG_TEST_BRANCH=${{ gitea.ref_name }} \
+            docker compose up -d ${CONTAINER_NAME}
+
+          echo "- Waiting for ${CONTAINER_NAME} to become healthy..."
+
+          timeout=300
+          elapsed=0
+
+          while true; do
+            status=$(docker inspect \
+              --format='{{.State.Health.Status}}' \
+              ${CONTAINER_NAME})
+
+            echo "Health status: ${status}"
+
+            case "$status" in
+              healthy)
+                echo "✅ ${CONTAINER_NAME} is healthy"
+                break
+                ;;
+
+              unhealthy)
+                echo "❌ ${CONTAINER_NAME} is unhealthy"
+                echo "- Displaying container logs"
+                docker compose logs ${CONTAINER_NAME}
+                exit 1
+                ;;
+
+              *)
+                ;;
+            esac
+
+            if [ "$elapsed" -ge "$timeout" ]; then
+              echo "❌ Timed out waiting for ${CONTAINER_NAME}"
+              echo "- Displaying container logs"
+              docker compose logs ${CONTAINER_NAME}
+              exit 1
+            fi
+
+            sleep 2
+            elapsed=$((elapsed + 2))
+          done
+
           echo "- Displaying container logs"
           docker compose logs ${CONTAINER_NAME}
+
 
   Test:
     needs: Deploy-Test
