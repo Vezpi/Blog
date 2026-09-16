@@ -11,6 +11,7 @@ tags:
   - gitea-actions
 categories:
   - blog
+image: thumbnail-4.png
 ---
 ## Intro
 

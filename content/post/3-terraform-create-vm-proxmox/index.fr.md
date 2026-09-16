@@ -10,6 +10,7 @@ tags:
   - cloud-init
 categories:
   - homelab
+image: thumbnail-3.webp
 ---
 ## Intro
 
