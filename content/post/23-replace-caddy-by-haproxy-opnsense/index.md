@@ -1,6 +1,6 @@
 ---
 slug: replace-caddy-by-haproxy-opnsense
-title: Installation HAProxy in OPNsense to replace Caddy
+title: Installing HAProxy in OPNsense to replace Caddy
 description: I replaced Caddy with HAProxy in OPNsense to fix random TLS errors, route homelab services and keep the firewall highly available.
 date: 2026-09-18
 draft: true
