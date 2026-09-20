@@ -3,7 +3,7 @@ slug: install-haproxy-opnsense-replace-caddy
 title: Installing HAProxy on OPNsense to replace Caddy
 description: I installed HAProxy on my OPNsense cluster and replaced Caddy to resolve random SSL errors while keeping HTTPS routing and failover working.
 date: 2026-09-19
-draft: true
+draft: false
 tags:
   - opnsense
   - caddy
