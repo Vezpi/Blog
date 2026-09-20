@@ -72,7 +72,7 @@ tcp-request inspect-delay 5s
 
 That is enough to keep TLS intact for Traefik while allowing HAProxy to route the infrastructure interfaces itself.
 
-## Keeping Internal Services Internal
+## Keeping Internal Services... Internal
 
 Exposing Proxmox or TrueNAS to the internet would be a very efficient way to create future work for myself, so the dispatcher also needs to enforce access rules.
 
