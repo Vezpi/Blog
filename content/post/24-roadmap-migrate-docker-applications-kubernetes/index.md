@@ -3,7 +3,7 @@ slug: roadmap-migrate-docker-applications-kubernetes
 title: Roadmap of the Migration from Docker Compose to Kubernetes
 description: Why I am moving my self-hosted applications from one Docker VM to Kubernetes and how I plan to do it.
 date: 2026-09-27
-draft: true
+draft: false
 tags:
   - kubernetes
   - docker
