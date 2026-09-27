@@ -9,6 +9,7 @@ tags:
   - docker
 categories:
   - homelab
+image: cover-24.webp
 ---
 
 ## Intro
@@ -31,7 +32,7 @@ The motivation is learning. A homelab gives me a safe place to understand how Ku
 
 There is another reason for doing this properly: I want the platform to become reproducible. Eventually, I want to build a disposable validation cluster, test changes there, and rebuild the cluster and its applications through automation using Terraform and Ansible.
 
-## The migration strategy
+## The Migration Strategy
 
 I do not want to migrate everything in one massive operation. That would make troubleshooting needlessly difficult and would turn every small mistake into a potential service outage.
 
@@ -41,7 +42,7 @@ The Kubernetes cluster itself is being bootstrapped manually at first. This is i
 
 ## Milestone 1: Build the cluster foundation
 
-The first step is to create the infrastructure on which Kubernetes will run.
+The first step is to create the infrastructure on which Kubernetes will run. I've done that months ago in that [article]({{< ref "post/8-create-manual-kubernetes-cluster-kubeadm" >}}), this time I'll automate it a bit further.
 
 I plan to use Terraform to provision the virtual machines for the Kubernetes nodes. Ansible will then prepare those VMs. The initial cluster bootstrap and the installation of the Container Network Interface will be performed manually.
 
@@ -49,7 +50,7 @@ This approach gives me a useful separation:
 
 - Terraform creates the machines.
 - Ansible prepares the operating systems.
-- The first Kubernetes bootstrap remains manual for learning purposes.
+- The first Kubernetes bootstrap remains manual for now.
 
 The cluster foundation needs to be reliable before applications become part of the picture. If the nodes and network are not healthy, debugging an application deployment becomes a particularly creative way of wasting an evening.
 
@@ -119,10 +120,10 @@ Keeping the old environment available during the transition provides a safety ne
 
 ## Conclusion
 
-This is the biggest homelab project I have planned so far, and probably the most exciting one too.
+🚀 This is the biggest homelab project I have planned so far, and probably the most exciting one too.
 
 The technical goal is to migrate self-hosted applications from a single Docker Compose VM to a Kubernetes cluster. The more important goal is to learn how to design, operate, automate, monitor, back up, and eventually rebuild that platform.
 
 The roadmap deliberately moves from understanding to migration, then from migration to automation. I start with a manual cluster, add networking and storage, migrate applications by risk, improve recovery, automate the lifecycle, and finish with GitOps.
 
-It is a lot of work for a homelab. That is exactly why it should be a great learning project.
+🔥 It is a lot of work for a homelab. That is exactly why it should be a great learning project.
