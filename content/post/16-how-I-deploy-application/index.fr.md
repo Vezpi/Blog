@@ -8,8 +8,8 @@ tags:
   - docker
   - proxmox
   - opnsense
-  - treafik
   - gitea
+  - traefik
 categories:
   - homelab
 image: cover-16.webp
