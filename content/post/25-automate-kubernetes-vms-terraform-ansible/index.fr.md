@@ -3,7 +3,7 @@ slug: automate-kubernetes-vms-terraform-ansible
 title: Automatiser le déploiement des VM Kubernetes avec Terraform et Ansible
 description: Je provisionne des VM Kubernetes sur Proxmox avec Terraform et les prépare avec Ansible via Semaphore, en utilisant l’état Terraform comme inventaire.
 date: 2026-10-14
-draft: true
+draft: false
 tags:
   - kubernetes
   - proxmox
@@ -23,7 +23,7 @@ C’était volontaire. Je voulais comprendre les étapes de préparation et de b
 
 ℹ️ Je travaille maintenant sur la [migration de Docker Compose vers Kubernetes]({{< ref "post/24-roadmap-migrate-docker-applications-kubernetes" >}}), et je veux automatiser le déploiement des VM et la préparation des nœuds. Pour l’instant, le bootstrap du cluster restera manuel, comme prévu dans la feuille de route.
 
-L’objectif de ce projet est d’obtenir des VM prêtes pour Kubernetes, créées avec Terraform et configurées avec Ansible. J’exécute les deux via Semaphore UI, et l’état Terraform fournit l’inventaire à Ansible.
+🎯 L’objectif de ce projet est d’obtenir des VM prêtes pour Kubernetes, créées avec Terraform et configurées avec Ansible. J’exécute les deux via Semaphore UI, et l’état Terraform fournit l’inventaire à Ansible.
 
 ## Un projet Terraform dédié
 
@@ -52,7 +52,7 @@ module "pve_vm" {
 
 ✅ Je teste d’abord le déploiement depuis `bastion` avec un master et deux workers. Tout fonctionne comme prévu, je passe donc à l’exécution depuis Semaphore.
 
-Le [projet Terraform complet](https://github.com/Vezpi/Homelab/tree/main/terraform/projects/kubernetes_vms) est disponible dans mon dépôt homelab.
+📝 Le [projet Terraform complet](https://github.com/Vezpi/Homelab/tree/main/terraform/projects/kubernetes_vms) est disponible dans mon dépôt homelab.
 
 ## Choisir les paramètres de déploiement dans Semaphore
 
@@ -138,7 +138,7 @@ Je crée un modèle de tâche Semaphore appelé **Kubernetes VM Preparation** po
 
 ![Modèle de tâche Semaphore pour préparer les nœuds Kubernetes avec Ansible.](images/semaphore-ui-ansible-k8s-node.png)
 
-Le [projet Ansible et son rôle](https://github.com/Vezpi/Homelab/tree/main/ansible/kubernetes) sont également disponibles dans le dépôt.
+📝 Le [projet Ansible et son rôle](https://github.com/Vezpi/Homelab/tree/main/ansible/kubernetes) sont également disponibles dans le dépôt.
 
 ## Où je m’arrête pour l’instant
 
@@ -152,6 +152,6 @@ J’arrête aussi l’automatisation avant le bootstrap du cluster. Le playbook 
 
 ## Conclusion
 
-J’ai maintenant six VM déployées avec Terraform et préparées avec Ansible via Semaphore. En utilisant l’état Terraform comme inventaire, je n’ai pas besoin de recopier leurs noms, leurs adresses et leurs rôles dans une liste d’hôtes séparée.
+🚀 J’ai maintenant six VM déployées avec Terraform et préparées avec Ansible via Semaphore. En utilisant l’état Terraform comme inventaire, je n’ai pas besoin de recopier leurs noms, leurs adresses et leurs rôles dans une liste d’hôtes séparée.
 
 Le stockage temporaire de l’état et l’absence d’environnements indépendants restent à résoudre. Pour l’instant, je m’arrête aux machines préparées et je passe au bootstrap Kubernetes manuel, comme prévu dans la feuille de route de migration.
