@@ -12,7 +12,7 @@ tags:
   - semaphore-ui
 categories:
   - homelab
-image: ""
+image: cover-25.webp
 ---
 
 ## Intro
