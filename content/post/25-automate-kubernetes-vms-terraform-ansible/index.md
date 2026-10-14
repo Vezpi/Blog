@@ -152,6 +152,6 @@ I also stop the automation before cluster bootstrap. The playbook prepares the n
 
 ## Conclusion
 
-I now have six VMs deployed with Terraform and prepared with Ansible through Semaphore. Using Terraform state as inventory means I do not need to copy their names, addresses, and roles into a separate host list.
+🎯 I now have six VMs deployed with Terraform and prepared with Ansible through Semaphore. Using Terraform state as inventory means I do not need to copy their names, addresses, and roles into a separate host list.
 
 The temporary state storage and lack of independent environments still need work. For now, I stop here with the prepared machines and move on to the manual Kubernetes bootstrap, as planned in the migration roadmap.
