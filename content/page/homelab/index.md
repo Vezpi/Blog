@@ -1,7 +1,7 @@
 ---
 title: Welcome to my Homelab
 layout: page
-description: The story behind my homelab project, from a Raspberry Pi to a tiny datacenter, where I experiment with Proxmox, Kubernetes, automation and more.
+description: Inside my compact homelab, with Proxmox, Ceph, TrueNAS and OPNsense, the services it runs today and my ongoing Kubernetes migration project.
 showToc: true
 menu:
   main:
@@ -10,212 +10,120 @@ menu:
     params:
       icon: flask
 ---
-## Intro
 
-My homelab journey began in 2013 with a humble Raspberry Pi, the very first model. I was needing a cheap machine for my first step into the world of Linux. It helped me a lot to dive into this technology and served me as a basic NAS, thank you Vezpibox (shitty name, I know) 
+My homelab started in 2013 with the first Raspberry Pi. I wanted a cheap machine to learn Linux, and it became a basic NAS called Vezpibox. The name hasn't aged particularly well.
 
-In 2015, I upgraded to a Raspberry Pi 2, seeking better performance to run multiple applications like XBMC (the old Kodi's name), CouchPotato, SickBeard... 😇
+More Raspberry Pis followed, then a mini PC in 2019, when I started experimenting with virtualization and Docker at home. Eventually, that single server became a problem: it was both my playground and the machine keeping useful things running. Breaking a test environment is one thing. Taking the lights or the internet down with it is another.
 
-By 2018, the need for more RAM led me to a Raspberry Pi 3, allowing me to run even more applications. My 3 little machines were running happily together, in a quite ordered mess.
+Today, the lab has a three-node Proxmox cluster, distributed storage, a separate NAS and a redundant firewall pair. Most applications still run in Docker Compose. Kubernetes is running too, but moving the applications is the next part of the project, not something I've already finished.
 
-Finally, in 2019, my new job made me experiment the virtualization, with virtual machines and above all Docker. I wanted to try that at home, I took a significant step forward with a compact yet quite powerful headless mini PC that laid the foundation of my homelab.
+*Last reviewed: October 2026.*
 
----
-## Why a Homelab ?
+## A lab inside a cupboard
 
-I wanted my own playground, a space where I could build but also safely break things, learn to fix them, and gain a deeper understanding of how they work.
+The original idea was to build a tiny datacenter in a closet. Space, noise, power consumption and budget all mattered, so the setup grew around compact machines rather than rack servers.
 
-My single server was great, but testing anything risky on it became a problem. It was running critical services like home automation or DNS, when it was down, everything was down. The server had become indispensable, and believe me, having no lights or internet is a major incident in my family. Not so fun anymore.
+![The homelab enclosure open and closed, next to the kitchen. The available space is part of the design, not an unlimited server room.](images/homelab-enclore-open-closed.png)
 
-The first big challenge I set for myself was building a Kubernetes cluster. Sure, I could run one on a single node, but what’s the point of a cluster with only one node? You could argue that running Kubernetes to control my shutters is overkill, and you’d be right. But that wasn’t the point.
+The rack is a DeskPi RackMate T1. It fits into the narrow enclosure, with shelves and a power strip to make use of the available space. With the door closed, the lab disappears into the apartment.
 
-I also wanted to spawn new virtual machines at will, rebuild them from scratch, and apply Infrastructure as Code principles. I could have done all of that in the cloud, but I wanted full control.
+![The original rack layout. The router and HDD labels show the earlier setup; the current firewall and storage architecture is described below.](images/homelab-rack-legend.png)
 
-Initially, my goal was to provide high availability for my existing services. One server wasn’t enough. So, I wanted a second node. But in most HA setups, three nodes are the sweet spot. And just like that, I was on my way to building what would become my homelab.
+Cooling needed some attention too. During the original build, I added two 40 mm extraction fans above the cabinet, with PVC ducts and foam to limit vibration. Two 80 mm fans inside the rack and a PWM controller helped balance airflow and noise. In a cupboard in the middle of a living space, fitting the machines is only half the problem.
 
----
-## Shaping the Lab
+## The hardware
 
-First, I needed to define what my homelab was actually supposed to do. I wanted it to host my existing services reliably, but that wasn’t enough, I wanted a true playground, capable of simulating a more complex enterprise environment.
-### Blueprint
+The three Proxmox nodes are different mini PCs:
 
-That meant:
-- **High Availability:** Three nodes to ensure that no single point of failure would bring everything down.
-- **Distributed Storage:** Data redundancy across nodes, not just for uptime but also to learn how enterprise-grade storage systems work.
-- **Network Segmentation:** Multiple VLANs to mimic real-world network topologies, isolate services, and practice advanced networking.
-### Constraints
+| Node | Hardware | CPU | RAM |
+| --- | --- | --- | --- |
+| vertex | ASRock DeskMini A300 | Ryzen 3 2200G, 4 cores / 4 threads | 16 GB |
+| apex | Minisforum HM50 | Ryzen 5 4500U, 6 cores / 6 threads | 32 GB |
+| zenith | T-bao MN57 | Ryzen 7 5700U, 8 cores / 16 threads | 32 GB |
 
-Of course, reality doesn’t always align with ambitions. Here’s what I was up against:
-- **Space:** My lab needed to fit in a small, hidden service enclosure in the middle of my apartment. Not exactly a server room.
-- **Noise:** Silence was crucial. This wasn’t going to be tucked away in a garage or basement, it was right in the middle of our living space.
-- **Power Draw:** Running 24/7, the power consumption had to be kept in check. I couldn’t afford to triple my electric bill just to tinker with VMs.
-- **Budget:** I wasn’t going to drop thousands on enterprise-grade hardware. The balance was finding reliable, second-hand gear that wouldn’t break the bank.
-- **Temperature**: I’m not gonna lie, I hadn't thought of it... Mini PCs don’t generate much heat, but network gear? That’s a different story. Lesson learned.
+Each has a 256 GB SSD for the operating system, ISOs and templates, plus a 1 TB NVMe drive for Ceph. A 1 Gbps interface carries LAN and management traffic, and a separate 2.5 Gbps interface is dedicated to Ceph.
 
-In a nutshell, I wanted to build a tiny datacenter in a closet.
+A fourth machine, `granite`, is a Beelink ME mini with an Intel N200 and 12 GB of RAM. It runs TrueNAS separately from the Proxmox cluster. That separation matters for more than storage.
 
----
-## Infrastructure Overview
+## Platform
 
-Let’s break down the components that make up my homelab.
-### Rack
+![Selected VMs inside the Proxmox cluster, with TrueNAS alongside it. The OPNsense Master and Backup VMs form one HA pair across the two hosting platforms.](images/homelab-hosting-overview.png)
 
-What is a datacenter without a rack? Honestly, I didn’t think one would fit in my limited space, until I discovered the [DeskPi RackMate T1](https://deskpi.com/products/deskpi-rackmate-t1-2).
+### Proxmox and Ceph
 
-This beauty was the perfect match. The size was spot-on, the build quality impressive, and the modular design allowed me to add some extra accessories, like a power strip and shelves, to complete the setup.
-### Servers
+[Proxmox VE 9]({{< ref "post/14-proxmox-cluster-upgrade-8-to-9-ceph" >}}) provides the virtualization layer across the three mini PCs. Ceph runs on the same physical nodes, using one NVMe drive per node and three-way replication over the dedicated 2.5 Gbps network. It provides shared VM storage and allows workloads to move between Proxmox nodes.
 
-I already had one server that served as the cornerstone of my homelab, and I wanted to keep it. But it had two major drawbacks:
-- **Single Network Interface:** I wanted at least two NICs for network segmentation and redundancy.
-- **Aging Hardware:** It was over five years old, and its compatibility options were becoming limited.
+That is the foundation for the lab, but it does not make every application highly available. A VM can still fail internally, and an application can still break inside a perfectly healthy VM. Consumer NVMe drives and the storage network also put practical limits on performance.
 
-For the missing NIC, I considered a USB adapter but then stumbled upon a better solution: using the internal M.2 port, originally meant for a WiFi module, to connect a 2.5Gbps adapter. It was a perfect fit.
+### TrueNAS
 
-Regarding hardware, my existing server was powered by an AM4 Ryzen 3 2200G with 16GB of RAM DDR4. To keep things consistent and simplify compatibility, I decided to stick with the AM4 socket for all nodes.
+[TrueNAS]({{< ref "post/18-create-nas-server-with-truenas" >}}) runs on `granite`, outside the Proxmox cluster. Its storage pool is a mirror of two 2 TB NVMe drives, with SMB file sharing and NFSv4 shares for application data. Nextcloud files and Immich photos live here rather than inside their containers.
 
-The specifications for the two additional nodes were clear: an AM4 socket for consistency, low power consumption, dual NICs with at least one 2.5Gbps, and sufficient storage options, at least one M.2 NVMe slot and a 2.5" drive bay. Since AM4 is somewhat dated, newer models were off the table, a good news for my budget, as I was able to buy second-hand mini PCs.
+This is a different storage job from Ceph: Ceph holds VM disks, while TrueNAS provides shared files and photos. The old NFS container on Vertex is gone. TrueNAS also hosts the [backup OPNsense VM]({{< ref "post/19-migrate-passive-opnsense-node-to-truenas" >}}), with its disk on a zvol, keeping that firewall outside the Proxmox and Ceph failure domain.
 
-Here is the specs of my nodes:
+### dockerVM
 
-| **Node**  | **Vertex**              | **Apex**                | **Zenith**               |
-| --------- | ----------------------- | ----------------------- | ------------------------ |
-| **Model** | ASRock DeskMini A300    | Minisforum HM50         | T-bao MN57               |
-| **CPU**   | AMD Ryzen 3 2200G 4C/4T | AMD Ryzen 5 4500U 6C/6T | AMD Ryzen 7 5700U 8C/16T |
-| **TDP**   | 65W                     | 15W                     | 15W                      |
-| **RAM**   | 16GB                    | 16GB                    | 32GB                     |
-| **NIC**   | 1Gbps (+ 2.5Gbps)       | 1Gbps + 2.5Gbps         | 1Gbps + 2.5Gbps          |
-| **M.2**   | 2                       | 1                       | 1                        |
-| **2,5"**  | 2                       | 2                       | 1                        |
+Most applications currently run on `dockerVM`, with [one Docker Compose stack per application]({{< ref "post/16-how-I-deploy-application" >}}). Its VM disk lives on Ceph, while services that need shared data mount the relevant TrueNAS shares.
 
-Each node follows the same disk layout: a 256GB SSD in the 2.5" bay for the operating system and a 1TB NVMe drive for data storage.
-### Network
+Docker remains the everyday application platform. It is also a concentration point: most services depend on this one VM, updates are still manual, and recovering an application is not the same thing as restarting its VM elsewhere in the cluster.
 
-For the network, I had two main objectives: implement VLANs for network segmentation and manage my firewall for more granular control. Since my nodes were equipped with 2.5Gbps NICs, I needed switches that could handle those speeds, and a few Power over Ethernet (PoE) ports for my Zigbee antenna and what could come after.
+### Kubernetes
 
-Initially, I was drawn to MikroTik hardware, great for learning, but their switch layouts didn’t quite align with my setup. On the other hand, Ubiquiti's UniFi line was the easy route with their with a sleek UI and impressive hardware aesthetics.
+Kubernetes is the [intended replacement for the Compose application platform]({{< ref "post/24-roadmap-migrate-docker-applications-kubernetes" >}}). Its six VMs already run on Proxmox: three control-plane nodes and three workers, bootstrapped with kubeadm and connected with Cilium. [Terraform provisions the VMs and Ansible prepares them]({{< ref "post/25-automate-kubernetes-vms-terraform-ansible" >}}) before the manual cluster bootstrap.
 
-For the router, I opted against the UniFi gateway. I wanted something more customizable, something I could get my hands dirty with. After some research, I settled on OPNsense over pfSense, it was said to be a bit more beginner-friendly, and so far, I haven’t regretted it.
+The foundation is running, but no applications have moved there yet. The Kubernetes Traefik gateway and cert-manager are still to be deployed, followed by storage and protection work before the gradual migration. GitOps comes later. The Traefik instance serving Docker applications today is a separate installation.
 
-Here is the final network setup:
-- **Router:** OPNsense running on a fanless Topton box with an Intel N100, 16GB RAM, and 4x 2.5Gbps ports.
-- **Switch:** [UniFi Switch Lite 16 PoE](https://eu.store.ui.com/eu/en/category/switching-utility/products/usw-lite-16-poe), 8x 1Gbps PoE ports and 8x non-PoE ports.
-- **Switch:** [UniFi Flex Mini 2.5G](https://eu.store.ui.com/eu/en/category/switching-utility/products/usw-flex-2-5g-5), 5x 2.5Gbps ports, with one PoE-in port.
-- **Access Point:** [UniFi U7 Pro Wall](https://eu.store.ui.com/eu/en/category/all-wifi/products/u7-pro-wall), Wi-Fi 7, 2.5Gbps PoE+ in.
-### Storage
+## Network
 
-While I don't have massive storage requirement, I still needed a flexible setup to either store my homelab workload and my personal media and documents.
+### UniFi for switching and Wi-Fi
 
-Each Proxmox node is equipped with a **256GB SATA SSD** for the operating system, ISO files, and VM/LXC templates. For the workload storage, I added a **1TB NVMe drive** per node, which forms the basis of my **Ceph cluster**. This gives me distributed, redundant, and high-performance storage for VMs and containers, which allows live migration and high availability across the cluster.
+The physical network uses a UniFi Switch Lite 16 PoE, a Flex Mini 2.5G dedicated to Ceph, and a U7 Pro Wall access point. The UniFi Network Application runs as a container on `dockerVM` and manages those devices.
 
-Originally, my first server had two **1TB HDDs** installed internally. Because I needed a slot for the SSD, I moved them outside the case using **USB-to-SATA adapters** and reconnected them to the same node. These drives store my photos, Nextcloud documents and backups, less performance-critical data that doesn’t need to sit on Ceph. They are served on the network using a NFS server sitting in a LXC container on that node.
-### Cooling
+[VLANs]({{< ref "post/11-proxmox-cluster-networking-sdn" >}}) separate user devices, IoT equipment, the lab, the DMZ and management. There are also dedicated networks for the WAN, firewall synchronization, Proxmox heartbeat, Ceph and VPN access. UniFi carries the traffic; OPNsense decides what can cross between the routed segments.
 
-I quickly learned that my network gear was turning my closet into a mini furnace. Fortunately, I started the build in December, so the heat wasn’t too noticeable, but come summer, it was bound to become a real problem.
+### OPNsense for routing and firewalling
 
-Options were limited, there was no way I was going to convince my wife that our servers needed a cooling system. Plus, it had to be silent. Not an easy combo.
+The [two firewall VMs]({{< ref "post/15-migration-opnsense-proxmox-highly-available" >}}) are `cerbere-head1`, the Master on Proxmox, and `cerbere-head2`, the Backup on TrueNAS. CARP provides gateway redundancy, pfSync synchronizes connection state, and XMLRPC synchronizes configuration.
 
-The best solution I came up with was to drill two 40mm holes above the kitchen cabinet. I ran PVC pipes through the wall and installed two small fans, each cushioned with foam to minimize vibrations and keep noise down.
+Hosting the Backup on TrueNAS means that taking the Proxmox or Ceph cluster down does not take both firewall VMs with it. This improves the firewall's resilience, without pretending that every switch, cable or other component is redundant too.
 
-Inside the rack, I also added two 80mm fans to help with airflow. To keep everything quiet, I hooked up a PWM controller to regulate fan speeds, striking a balance between airflow and silence.
-### Photos
+Dnsmasq provides DHCP and local naming. Unbound handles recursive DNS with Hagezi blocklists, and WireGuard provides remote access for my mobile devices.
 
-Here what is look like:
+[HAProxy runs on OPNsense]({{< ref "post/23-install-haproxy-opnsense-replace-caddy" >}}) and dispatches incoming HTTPS connections. Docker-hosted services go through Traefik on `dockerVM`; infrastructure interfaces use a separate HTTPS reverse-proxy branch on OPNsense. The OPNsense ACME plugin handles infrastructure certificate renewal on the primary firewall.
 
-![Front view of my homelab with legend](images/homelab-rack-legend.png)
+## Applications
 
-![Different views of my homelab with open and closed enclosure](images/homelab-enclore-open-closed.png)
+The applications below still run on `dockerVM`. Some are services used at home, while others support the network, automation or the blog itself.
 
+| Application | What I use it for |
+| --- | --- |
+| Home Assistant | Integrating connected devices and running home automation. |
+| Node-RED | Visual automation flows alongside Home Assistant, including [Daikin AC control]({{< ref "post/6-ac-automation-home-assistant-node-red" >}}). |
+| InfluxDB | Storing historical Home Assistant data. |
+| Nextcloud | File synchronization and collaboration, with its data on a TrueNAS share. |
+| Immich | Managing photos and videos, with the photo library on TrueNAS. |
+| Vaultwarden | Hosting a lightweight Bitwarden-compatible password manager. |
+| Jellyfin | Serving the media library. |
+| ARR stack | Automating media acquisition and organization with Sonarr, Radarr, Prowlarr and related tools. |
+| Gitea | Hosting Git repositories and running CI/CD workflows with Gitea Actions. |
+| Hugo blog | Generating this static website from Markdown in Obsidian, then serving it through Nginx. |
+| Umami | Collecting web analytics for the blog. |
+| Traefik | Routing requests to Docker applications behind OPNsense HAProxy and terminating their HTTPS connections. |
+| UniFi Network Application | Managing the switches and Wi-Fi access point. |
+| [Semaphore UI]({{< ref "post/17-semaphore-ui-interface-ansible-terraform" >}}) | Launching Ansible and Terraform automation from a web interface. |
+| Portainer | Inspecting and managing the Docker containers, stacks and logs. |
+| [Ntfy]({{< ref "post/5-notification-system-gotify-vs-ntfy" >}}) | Delivering push notifications from deployments, automation runs and media services. |
 
----
-## Software Stack
+## Documentation with Obsidian
 
-With the hardware foundation set, the next step was to decide what software would orchestrate everything, the real engine behind every experiment, deployment, and learning opportunity.
-### Hypervisor
+Obsidian is where I keep the lab's documentation. Projects, task logs, technical references and the infrastructure inventory live in the same vault, as local Markdown files versioned in Gitea. That gives me somewhere to record both what is running and how it got there, including the decisions and troubleshooting behind a change.
 
-At the core of my setup is a 3-node Proxmox VE 8 cluster, a KVM-based hypervisor that also supports LXC containers. Built on Debian, it provides essential features like live migration, HA, and seamless Ceph integration right out of the box.
+It is also where I write this blog. The articles start in the vault's `Blog/` folder, and [Gitea Actions and Hugo turn those notes into the site]({{< ref "post/2-blog-deployment-obisidan-hugo-gitea-actions" >}}) you are reading. Only the blog content is sent to the website; the project notes and inventory stay in the vault.
 
-For now, I’m primarily running just one VM and one LXC container. The VM is essentially a clone of my old physical server, hosting most of my applications as Docker containers. The LXC container serves as a simple jump server.
-### Network
+Obsidian itself runs locally, rather than as another service on `dockerVM`. Gitea hosts the vault repository, while Hugo generates the public website.
 
-The objective for my network was to implement VLANs for segmentation and manage firewall rules directly to simulate more complex setups. 
+## Still a work in progress
 
-#### Router and Firewall
+The setup is more resilient than the original single server, but it still has obvious limits. Most applications depend on `dockerVM`, the NAS is a single host, and TrueNAS currently needs periodic restarts to work around unresolved memory growth. The firewall backup lives on that host, so the issue matters beyond file storage.
 
-At the heart of this network is **OPNsense**, running on a dedicated fanless box. The ISP router is in bridge mode, passing all traffic to OPNsense, which handles all routing and firewall duties. Inter-VLAN traffic is restricted, explicit firewall rules are mandatory, only the management VLAN having access to other segments.  
-#### L2 Network
-
-Layer 2 networking is managed by **UniFi switches**, chosen for their sleek UI and simplicity. The UniFi controller, which manages the devices configuration, runs as a plugin on OPNsense.
-
-The access point is broadcasting 2 SSIDs, one for my family's laptops and cellulars (5 and 6Ghz) and the other only in 2.4Ghz for everything else (IoT, vacuum, AC, printer, Chromecast, etc.)
-
-A 2.5Gbps UniFi switch is dedicated to Ceph storage communications, isolating storage traffic to prevent interference with other networks.
-
-I set up **LACP** (Link Aggregation) between the router and the main switch at 1Gbps, hoping to double bandwidth. Reality check: a single session will only use one link, meaning that a single download will still cap at 1Gbps.
-#### VLANs
-
-To segment traffic, I divided the network into several VLANs:
-
-| Name      | ID   | Purpose                      |
-| --------- | ---- | ---------------------------- |
-| User      | 13   | Home network                 |
-| IoT       | 37   | IoT and untrusted equipments |
-| DMZ       | 55   | Internet facing              |
-| Lab       | 66   | Lab network, trusted         |
-| Heartbeat | 77   | Proxmox cluster heartbeat    |
-| Mgmt      | 88   | Management                   |
-| Ceph      | 99   | Ceph                         |
-| VPN       | 1337 | Wireguard network            |
-
-Each VLAN has its own DHCP pool managed by OPNsense, excepted the Heartbeat and Ceph ones.
-#### DNS
-
-DNS is structured in two layers within OPNsense:
-- ADguard Home:  ads and trackers filters, serves every client on the network over plain DNS on port 53
-- Unbound DNS: recursive DNS, serves only the ADguard Home DNS service locally
-#### Reverse Proxy
-
-**Caddy** runs as a plugin on OPNsense and acts as the main entry point for web traffic. It routes requests based on subdomains and automatically handles HTTPS certificates and drops internal service access coming from the WAN.
-
-Most services are still managed by a **Traefik** instance running on my VM. In those cases, Caddy simply forwards HTTPS requests directly to Traefik.
-
-This two-layer proxy setup centralizes SSL certificate management in **Caddy** while preserving flexible and dynamic routing internally with **Traefik**.
-#### VPN
-
-For secure remote access, I configured **WireGuard** on OPNsense. This lightweight VPN provides encrypted connectivity to my lab from anywhere, allowing management of all my services without exposing them all directly to the internet.
-#### Network Diagram
-
-![Diagram of my home network ](images/homelab-network-schema.png)
-### Application
-
-Let's dive into the fun part! What started as a modest setup meant to serve a few personal needs quickly turned into a full ecosystem of open source services, each solving a specific need or just satisfying curiosity.
-
-Here’s an overview of what’s currently running in my homelab:
-- **Home Assistant**: Central hub for home automation, integrating smart devices and routines.
-- **Vaultwarden**: Lightweight alternative to Bitwarden for managing and syncing passwords securely.
-- **Nextcloud**: Self-hosted cloud storage.
-- **Gitea**:  Git repository solution for managing my code and projects.
-- **Blog**: My Hugo-based personal blog, which you are reading now.
-- **Immich** – Photo and video management app, similar to Google Photos.
-- **Jellyfin**: Media server for streaming movies and shows.
-- **ARR Stack**: Automated media acquisition tools. (Radarr, Sonarr, Torrent, etc.)
-- **Duplicati**: Encrypted backup solution for my important data and configs.
-- **Prometheus**: Monitoring and metrics collection tool, used with Grafana for dashboards.
-- **Portainer**: Web interface for managing Docker containers and stacks.
-- **Umami**: Privacy-focused analytics for tracking visits on my blog.
-- **phpIPAM**: IP address management tool for keeping my VLANs and subnets organized.
-#### Docker
-
-Docker was the real game-changer in my self-hosted journey. Before containers, managing multiple services on a single server felt like a constant battle with dependencies and conflicts. Now, every service runs neatly, managed with Docker Compose inside a single VM. Traefik dynamically handles reverse proxy, simplifying access and SSL certificates.
-#### Kubernetes
-
-My next big challenge is to take container orchestration to the next level. While Docker Swarm could meet the technical need, my primary goal is to gain hands-on experience with Kubernetes, and there’s no better way to learn than by applying it to real-world use cases.
-
----
-
-## Final Words
-
-Thank you for taking the time to read through my homelab journey!
-
-Building and refining this setup has been a great source of learning and fun, and I’m always looking for new ways to improve it.
-
-If you’ve got ideas, feedback, better solutions, or just want to share your own setup, I’d love to hear from you. Drop me a message, challenge my choices, or inspire me with your story!
+Those are part of the lab too. This page is the overview; the articles document how the pieces got here and what changes next.
