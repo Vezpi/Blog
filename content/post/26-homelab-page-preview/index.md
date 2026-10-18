@@ -20,8 +20,6 @@ More Raspberry Pis followed, then a mini PC in 2019, when I started experimentin
 
 Today, the lab has a three-node Proxmox cluster, distributed storage, a separate NAS and a redundant firewall pair. Most applications still run in Docker Compose. Kubernetes is running too, but moving the applications is the next part of the project, not something I've already finished.
 
-This page describes the current setup. The articles go into the individual builds, migrations and occasional mistakes.
-
 *Last reviewed: October 2026.*
 
 ## A lab inside a cupboard
@@ -35,12 +33,6 @@ The rack is a DeskPi RackMate T1. It fits into the narrow enclosure, with shelve
 ![The original rack layout. The router and HDD labels show the earlier setup; the current firewall and storage architecture is described below.](images/homelab-rack-legend.png)
 
 Cooling needed some attention too. During the original build, I added two 40 mm extraction fans above the cabinet, with PVC ducts and foam to limit vibration. Two 80 mm fans inside the rack and a PWM controller helped balance airflow and noise. In a cupboard in the middle of a living space, fitting the machines is only half the problem.
-
-## The lab at a glance
-
-![A high-level view of the lab, from the internet connection to the network, compute and shared storage.](images/homelab-overview-simple.png)
-
-OPNsense handles routing and firewalling, UniFi provides switching and Wi-Fi, and the servers have two main jobs: Proxmox and Ceph host the VMs, while TrueNAS provides shared files and photos. The diagram deliberately leaves out individual VMs, network segments and application dependencies.
 
 ## The hardware
 
@@ -56,85 +48,77 @@ Each has a 256 GB SSD for the operating system, ISOs and templates, plus a 1 TB 
 
 A fourth machine, `granite`, is a Beelink ME mini with an Intel N200 and 12 GB of RAM. It runs TrueNAS separately from the Proxmox cluster. That separation matters for more than storage.
 
-## Proxmox and two different storage jobs
+## Platform
 
-The cluster now runs Proxmox VE 9. It hosts the application VM, the primary firewall, the Kubernetes VMs and the Hermes Agent VM, along with LXC environments for administration and OpenCode.
+![Selected VMs inside the Proxmox cluster, with TrueNAS alongside it. The OPNsense Master and Backup VMs form one HA pair across the two hosting platforms.](images/homelab-hosting-overview.png)
 
-Ceph runs on the same three physical nodes. Each contributes one NVMe drive, with three-way replication over the dedicated 2.5 Gbps network. It provides shared VM storage and supports migration between Proxmox nodes.
+### Proxmox and Ceph
 
-That does not make every application highly available. `dockerVM` is still one VM containing most of my services. A cluster underneath it does not remove failures inside that VM or its containers. Consumer NVMe drives and the storage network also put practical limits on performance, which remains a topic of investigation.
+Proxmox VE 9 provides the virtualization layer across the three mini PCs. Ceph runs on the same physical nodes, using one NVMe drive per node and three-way replication over the dedicated 2.5 Gbps network. It provides shared VM storage and allows workloads to move between Proxmox nodes.
 
-TrueNAS has a different role. Its storage pool is a mirror of two 2 TB NVMe drives. It provides SMB file sharing and NFSv4 shares, including Nextcloud data and Immich photos. Those shares are separate from the VM disks stored on Ceph.
+That is the foundation for the lab, but it does not make every application highly available. A VM can still fail internally, and an application can still break inside a perfectly healthy VM. Consumer NVMe drives and the storage network also put practical limits on performance.
 
-The old NFS container on Vertex is gone. TrueNAS is now the NAS, but it is still a single machine, not another HA cluster. Replication, a mirror and snapshots also should not be confused with a complete offsite backup strategy.
+### TrueNAS
 
-## Keeping the network outside one failure domain
+TrueNAS runs on `granite`, outside the Proxmox cluster. Its storage pool is a mirror of two 2 TB NVMe drives, with SMB file sharing and NFSv4 shares for application data. Nextcloud files and Immich photos live here rather than inside their containers.
 
-OPNsense no longer runs on the original dedicated firewall box. There are now two firewall VMs:
+This is a different storage job from Ceph: Ceph holds VM disks, while TrueNAS provides shared files and photos. The old NFS container on Vertex is gone. TrueNAS also hosts the backup OPNsense VM, with its disk on a zvol, keeping that firewall outside the Proxmox and Ceph failure domain.
 
-- `cerbere-head1`, the primary, runs on Proxmox with its disk on Ceph.
-- `cerbere-head2`, the backup, runs on TrueNAS with its own zvol-backed disk.
+### dockerVM
 
-CARP provides gateway redundancy, pfSync synchronizes connection state, and XMLRPC synchronizes configuration. Putting the backup on TrueNAS avoids losing both firewall VMs when the Proxmox or Ceph cluster is unavailable. It does not make the rest of the home network redundant.
+Most applications currently run on `dockerVM`, with one Docker Compose stack per application. Its VM disk lives on Ceph, while services that need shared data mount the relevant TrueNAS shares.
 
-The physical network uses a UniFi Switch Lite 16 PoE, a Flex Mini 2.5G for Ceph, and a U7 Pro Wall access point. The UniFi Network Application runs as a Docker container on `dockerVM`, not as an OPNsense plugin.
+Docker remains the everyday application platform. It is also a concentration point: most services depend on this one VM, updates are still manual, and recovering an application is not the same thing as restarting its VM elsewhere in the cluster.
 
-The network is split into management, user, IoT, DMZ and lab segments, with additional networks for WAN, firewall synchronization, Proxmox heartbeat, Ceph and VPN access. OPNsense handles routing and firewall policy. Dnsmasq provides DHCP and local naming, while Unbound handles recursive DNS and Hagezi blocklists. WireGuard provides remote access for my mobile devices.
+### Kubernetes
 
-### From HAProxy to the applications
+Kubernetes is the intended replacement for the Compose application platform. Its six VMs already run on Proxmox: three control-plane nodes and three workers, bootstrapped with kubeadm and connected with Cilium. Terraform provisions the VMs and Ansible prepares them before the manual cluster bootstrap.
 
-HAProxy has replaced Caddy on OPNsense. For Docker-hosted HTTPS services, the main path is:
+The foundation is running, but no applications have moved there yet. The Kubernetes Traefik gateway and cert-manager are still to be deployed, followed by storage and protection work before the gradual migration. GitOps comes later. The Traefik instance serving Docker applications today is a separate installation.
 
-```text
-HTTPS request → OPNsense HAProxy → Traefik on dockerVM → application
-```
+## Network
 
-HAProxy dispatches HTTPS connections using SNI. Infrastructure services use a separate HTTPS reverse-proxy branch on OPNsense; they do not all pass through Docker's Traefik.
+### UniFi for switching and Wi-Fi
 
-The OPNsense ACME plugin handles infrastructure certificate renewal. Its renewal job runs only on the primary firewall, so synchronized proxy configuration is not the same thing as redundant certificate renewal.
+The physical network uses a UniFi Switch Lite 16 PoE, a Flex Mini 2.5G dedicated to Ceph, and a U7 Pro Wall access point. The UniFi Network Application runs as a container on `dockerVM` and manages those devices.
 
-## What runs here
+VLANs separate user devices, IoT equipment, the lab, the DMZ and management. There are also dedicated networks for the WAN, firewall synchronization, Proxmox heartbeat, Ceph and VPN access. UniFi carries the traffic; OPNsense decides what can cross between the routed segments.
 
-Most of the everyday services still use one Docker Compose stack per application on `dockerVM`.
+### OPNsense for routing and firewalling
 
-| Purpose | Services |
+The two firewall VMs are `cerbere-head1`, the Master on Proxmox, and `cerbere-head2`, the Backup on TrueNAS. CARP provides gateway redundancy, pfSync synchronizes connection state, and XMLRPC synchronizes configuration.
+
+Hosting the Backup on TrueNAS means that taking the Proxmox or Ceph cluster down does not take both firewall VMs with it. This improves the firewall's resilience, without pretending that every switch, cable or other component is redundant too.
+
+Dnsmasq provides DHCP and local naming. Unbound handles recursive DNS with Hagezi blocklists, and WireGuard provides remote access for my mobile devices.
+
+HAProxy runs on OPNsense and dispatches incoming HTTPS connections. Docker-hosted services go through Traefik on `dockerVM`; infrastructure interfaces use a separate HTTPS reverse-proxy branch on OPNsense. The OPNsense ACME plugin handles infrastructure certificate renewal on the primary firewall.
+
+## Applications
+
+The applications below still run on `dockerVM`. Some are services used at home, while others support the network, automation or the blog itself.
+
+| Application | What I use it for |
 | --- | --- |
-| Home automation | Home Assistant, Node-RED and InfluxDB |
-| Files, photos and passwords | Nextcloud, Immich and Vaultwarden |
-| Media | Jellyfin and the ARR stack |
-| Code and publishing | Gitea with Actions, this Hugo blog served by Nginx, and Umami |
-| Administration | Semaphore UI, Portainer and the UniFi Network Application |
-| Notifications | Ntfy |
-
-The blog is part of the lab too. Its content starts as Markdown in my Obsidian vault, moves through Gitea Actions, and is built by Hugo. The result is served by Nginx on the same application VM.
-
-AI tools have their own environments. Hermes Agent runs in a separate VM, with profiles for orchestration, research, engineering and writing. OpenCode CLI remains in an LXC. They help with the work around the lab; I remain responsible for applying infrastructure changes.
-
-## Making it easier to rebuild
-
-The `bastion` LXC is my administration environment, with SSH, Ansible, Terraform, OpenTofu, Helm and kubectl. Semaphore UI provides a web interface for automation runs.
-
-Every week, Semaphore rebuilds the Ubuntu Noble cloud-init template and sends a notification through Ntfy. Terraform provisions the Kubernetes VMs, and Ansible prepares them before the manual kubeadm bootstrap.
-
-Automation is not universal yet. Docker application updates remain manual, and rebuilding the entire lab from Git is still a goal rather than a capability I can claim today.
-
-## Kubernetes is running, the migration is not done
-
-The Kubernetes cluster has six VMs: three control-plane nodes and three workers. It was bootstrapped with kubeadm and uses Cilium. HAProxy balances access to the Kubernetes API, and BGP sessions connect the Cilium workers to OPNsense.
-
-There are no application workloads on it yet. The Traefik gateway and cert-manager are still to be deployed. The Traefik instance serving Docker applications is a different installation, and Ceph backing the VM disks does not mean Kubernetes already has a Ceph storage class.
-
-The plan is to validate the gateway and certificates, define storage and protection, then migrate applications progressively. GitOps comes later. Moving everything at once would defeat the point of keeping a useful home environment alongside a place to experiment.
+| Home Assistant | Integrating connected devices and running home automation. |
+| Node-RED | Visual automation flows alongside Home Assistant, including Daikin AC control. |
+| InfluxDB | Storing historical Home Assistant data. |
+| Nextcloud | File synchronization and collaboration, with its data on a TrueNAS share. |
+| Immich | Managing photos and videos, with the photo library on TrueNAS. |
+| Vaultwarden | Hosting a lightweight Bitwarden-compatible password manager. |
+| Jellyfin | Serving the media library. |
+| ARR stack | Automating media acquisition and organization with Sonarr, Radarr, Prowlarr and related tools. |
+| Gitea | Hosting Git repositories and running CI/CD workflows with Gitea Actions. |
+| Hugo blog | Generating this static website from Markdown in Obsidian, then serving it through Nginx. |
+| Umami | Collecting web analytics for the blog. |
+| Traefik | Routing requests to Docker applications behind OPNsense HAProxy and terminating their HTTPS connections. |
+| UniFi Network Application | Managing the switches and Wi-Fi access point. |
+| Semaphore UI | Launching Ansible and Terraform automation from a web interface. |
+| Portainer | Inspecting and managing the Docker containers, stacks and logs. |
+| Ntfy | Delivering push notifications from deployments, automation runs and media services. |
 
 ## Still a work in progress
 
 The setup is more resilient than the original single server, but it still has obvious limits. Most applications depend on `dockerVM`, the NAS is a single host, and TrueNAS currently needs periodic restarts to work around unresolved memory growth. The firewall backup lives on that host, so the issue matters beyond file storage.
 
 Those are part of the lab too. This page is the overview; the articles document how the pieces got here and what changes next.
-
-## The builds behind this page
-
-- [Building the TrueNAS server]({{< ref "post/18-create-nas-server-with-truenas" >}})
-- [Moving the backup OPNsense VM to TrueNAS]({{< ref "post/19-migrate-passive-opnsense-node-to-truenas" >}})
-- [Replacing Caddy with HAProxy on OPNsense]({{< ref "post/23-install-haproxy-opnsense-replace-caddy" >}})
-- [Planning the Docker Compose to Kubernetes migration]({{< ref "post/24-roadmap-migrate-docker-applications-kubernetes" >}})
