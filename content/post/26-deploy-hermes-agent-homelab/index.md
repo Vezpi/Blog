@@ -1,6 +1,6 @@
 ---
 slug: deploy-hermes-agent-homelab
-title: Deploying Hermes Agent and Orchestrating an AI Crew in My Homelab
+title: My Homelab AI Crew with Hermes Agent
 description: I deploy Hermes Agent on Proxmox, connect it to my Obsidian vault, and use a Kanban board to coordinate AI agents with separate roles.
 date: 2026-10-28
 draft: true
@@ -40,7 +40,7 @@ Two features particularly interest me:
 
 Hermes also provides a desktop application and messaging gateways. I can interact with the same remote setup from my laptop or through Telegram on my phone.
 
-## A dedicated VM on Proxmox
+## Hermes on Proxmox
 
 🚀 I create an Ubuntu VM from my existing [cloud-init template]({{< ref "post/1-proxmox-cloud-init-vm-template" >}}), with the following resources:
 
@@ -73,7 +73,7 @@ I run the dashboard backend as a user `systemd` service and enable lingering so 
 
 That gives me a convenient place to chat, inspect tool activity, and configure the agents without keeping an SSH terminal open.
 
-## Giving the agent something useful to work with
+## Connecting Obsidian
 
 Before asking Hermes to help with the lab, I prepare context about my goals, the infrastructure, and how I work. I then ask it to review what it knows and interview me about the gaps.
 
@@ -87,7 +87,7 @@ Access to the files is only part of the preparation. The agent also needs to kno
 
 Hermes starts creating skills from this context. This is useful, but I don't want each agent inventing a different version of my workflow. As the setup grows, I start maintaining the shared instructions more deliberately.
 
-## One assistant becomes a crew
+## Agent roles
 
 🏴‍☠️ For some reason, I already call myself Captain when talking to AI assistants. With Docker and Kubernetes in the lab, the nautical theme is not completely out of place. I push the idea a little further and create a crew for Vezpi Lab.
 
@@ -108,7 +108,7 @@ That separation lets me give each agent a narrower role. Ink needs my writing co
 
 ⚠️ I also define boundaries. The agents can research, prepare code, run checks, and document the results. I remain responsible for deciding and applying changes to the homelab infrastructure. A role description is not a security sandbox, though. Tool access and credentials still need to match those responsibilities.
 
-### Keeping their instructions consistent
+### Context files
 
 I organize the context into a few different places:
 
@@ -126,7 +126,7 @@ The shared workspace rules point the agents to the vault's Codex. They also make
 
 I move the identities and custom skills into a dedicated Git repository, alongside a deployment script and project configuration. Those files were becoming scattered across the VM, and I want to track their changes like the rest of my configuration.
 
-## Separate agents do not automatically work together
+## Agent delegation
 
 Creating the profiles gives me specialists, but it does not immediately give me a useful team.
 
@@ -144,7 +144,7 @@ The gateway runs as a user service. After restarting the VM, I confirm that it c
 
 Still, maintaining several profiles creates friction. I even consider going back to one assistant. I need a way to assign work and preserve the result without carrying context between conversations myself.
 
-## Kanban makes the handoff explicit
+## Kanban coordination
 
 The Kanban board is the part that convinces me to keep the multi-agent setup.
 
@@ -177,7 +177,7 @@ hermes -p flint tools enable kanban --platform telegram
 
 This gives the agents a work-tracking mechanism alongside chat. It does not prove that any complex project can run unattended, and it does not remove my review responsibility. It does give me somewhere to see what was requested, who handled it, and what came back.
 
-## The token bill is part of the experiment
+## OpenAI subscription
 
 💸 After a few sessions, token usage is higher than I expected. Adding profiles also means maintaining their context and deciding which tools and skills each one needs.
 
@@ -185,7 +185,15 @@ I disable unused skills according to each role, without restricting the agents s
 
 One request through OpenRouter costs about $5 in my test. I am happy with the result, but that is enough to make me reconsider how I pay for the models. The crew may be virtual, but the bill has no such limitation. 😅
 
-I switch the profiles to the OpenAI subscription integration through Hermes Desktop and test text requests and image generation. I also install a provider-usage plugin so I can see usage in the interface rather than repeatedly checking the provider's website.
+With API-key billing, each follow-up adds to the usage I pay for. That makes me hesitate to keep the conversation going, even to tell an agent that it did a good job or explain what needs improvement. Paying to say "good job" gives politeness a rather unusual price tag.
+
+That hesitation gets in the way of the self-improvement loop I wanted to try. Feedback gives the agent useful context about what worked and what should change. Corrections can then become instructions in a reusable skill, rather than something I have to explain again next time.
+
+I switch the profiles to the OpenAI subscription integration through Hermes Desktop and test text requests and image generation.
+
+🔁 Since switching, I no longer hold back on that feedback because of the cost of each request. I tell the agents when their work is good, and I take the time to explain when it needs improvement. I am more willing to iterate, which lets me make better use of Hermes' self-improvement loop.
+
+I also install a provider-usage plugin so I can see usage in the interface rather than repeatedly checking the provider's website.
 
 ![The provider-usage plugin shows subscription usage and OpenRouter figures directly in the status bar.](images/hermes-desktop-codex-usage-status-bar.png)
 
