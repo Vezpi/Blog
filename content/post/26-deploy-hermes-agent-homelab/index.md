@@ -17,9 +17,9 @@ categories:
 
 I have been hearing about autonomous AI agents for a while. OpenClaw was getting a lot of attention, but I didn't initially see what I would do with one. After experimenting a little with AI agents, I started to understand how they could help with my own projects.
 
-My homelab already gives me plenty of material to work with: infrastructure code, project notes, documentation, and this blog. I want an assistant that can use that context, rather than asking me to explain the whole setup again in every conversation.
+My homelab already gives me plenty of material to work with: infrastructure code, project notes, and technical documentation. I want an assistant that can use that context, rather than asking me to explain the whole setup again in every conversation.
 
-I also want to experiment with several agents working together. Can I give them separate responsibilities and have one hand work to another without becoming the person who copies information between chats?
+I also want to experiment with several agents working together. Can I give them separate responsibilities and have one hand work to another without becoming the person who copies information between chats? Automating the work only to become the copy-paste department would be a slightly disappointing promotion. 😅
 
 🎯 For this project, I deploy Hermes Agent in a dedicated Proxmox VM, connect it to my Obsidian vault, and build a small team of specialized agents. Getting them installed is the easy part. Making them work together takes a little more thought.
 
@@ -27,7 +27,7 @@ I also want to experiment with several agents working together. Can I give them 
 
 [Hermes Agent](https://hermes-agent.nousresearch.com/docs/) is an open-source AI agent developed by Nous Research. It connects a language model to tools, persistent memory, and reusable instructions called skills.
 
-Hermes is not the model itself. The model interprets my request and decides what to do next; Hermes provides the environment in which it can act. Depending on the tools I enable, that can include reading files, editing Markdown, searching the web, or running commands.
+Hermes is not the model itself. The model interprets my request and decides what to do next. Hermes provides the environment in which it can act. Depending on the tools I enable, that can include reading files, editing Markdown, searching the web, or running commands.
 
 An agent can therefore work through several steps before returning an answer. It reads the relevant files, calls a tool, examines the result, and continues if more work is needed. That is the agent loop. Its usefulness depends on the context, permissions, and tools it receives, as well as the model behind it.
 
@@ -36,13 +36,13 @@ Two features particularly interest me:
 - Persistent memory keeps useful context between sessions, such as my preferences and facts about my environment.
 - Skills store procedures that the agent can load when a task needs them. Hermes can create and refine these skills from its experience.
 
-The self-improvement part needs a little explanation. Saving a procedure is not the same as training the underlying model. The agent writes down something reusable, then consults it in a later session. I can inspect those instructions and correct them when necessary.
+💡 The self-improvement part needs a little explanation. Saving a procedure is not the same as training the underlying model. The agent writes down something reusable, then consults it in a later session. I can inspect those instructions and correct them when necessary.
 
 Hermes also provides a desktop application and messaging gateways. I can interact with the same remote setup from my laptop or through Telegram on my phone.
 
 ## A dedicated VM on Proxmox
 
-I create an Ubuntu VM from my existing [cloud-init template]({{< ref "post/1-proxmox-cloud-init-vm-template" >}}), with the following resources:
+🚀 I create an Ubuntu VM from my existing [cloud-init template]({{< ref "post/1-proxmox-cloud-init-vm-template" >}}), with the following resources:
 
 | Resource | Configuration |
 | --- | --- |
@@ -65,7 +65,11 @@ The setup walks me through the model provider and tools. I initially use OpenRou
 
 ℹ️ This is a self-hosted agent environment, not a locally hosted language model. In my setup, model requests still go to an external provider. Running Hermes in my own VM does not mean that the context sent to that provider stays inside the homelab.
 
-On my Surface, I install Hermes Desktop and connect it to the VM using the remote gateway settings. The application is my interface; the agent works with the files on the VM. I run the dashboard backend as a user `systemd` service and enable lingering so it can remain available after logout.
+On my Surface, I install Hermes Desktop and connect it to the VM using the remote gateway settings. The application is my interface, while the agent works with the files on the VM.
+
+![Hermes Desktop confirms that the remote backend on my VM is reachable.](images/hermes-desktop-remote-gateway-connection-success.png)
+
+I run the dashboard backend as a user `systemd` service and enable lingering so it can remain available after logout.
 
 That gives me a convenient place to chat, inspect tool activity, and configure the agents without keeping an SSH terminal open.
 
@@ -73,23 +77,19 @@ That gives me a convenient place to chat, inspect tool activity, and configure t
 
 Before asking Hermes to help with the lab, I prepare context about my goals, the infrastructure, and how I work. I then ask it to review what it knows and interview me about the gaps.
 
-The questions are sharper than I expected, and I take the time to answer carefully. This is also a useful way to discover which parts of my setup I have not explained well.
+🔎 The questions are sharper than I expected, and I take the time to answer carefully. This is also a useful way to discover which parts of my setup I have not explained well.
 
-My Obsidian vault is the next step. It contains the project notes and infrastructure inventory that the agent needs, along with the Markdown sources for this blog. I already described the publishing side in [my article about Obsidian, Hugo, and Gitea Actions]({{< ref "post/2-blog-deployment-obisidan-hugo-gitea-actions" >}}).
+My Obsidian vault is the next step. It contains the project notes and technical documentation I want the agent to consult instead of relying on what I happen to mention in a chat.
 
 I create a dedicated Gitea account for Hermes and initially give it read access to the vault repository. The agent clones the vault onto the VM. Once I am ready for it to push documentation changes, I grant write access.
 
-Access to the files is only part of the preparation. The agent also needs to know how to use them, so I write a Codex describing the vault structure and its operating rules. The inventory is the authority for infrastructure facts; project logs explain what I tried and why.
+Access to the files is only part of the preparation. The agent also needs to know how to use them, so I write a Codex describing the vault structure and its operating rules. Project logs give it the context behind my experiments and decisions.
 
-Hermes starts creating skills from this context:
-
-![Skills learned during the first sessions, including procedures for the infrastructure and blog.](images/hermes-desktop-list-learned-skills.png)
-
-This is useful, but I don't want each agent inventing a different version of my workflow. As the setup grows, I start maintaining the shared instructions more deliberately.
+Hermes starts creating skills from this context. This is useful, but I don't want each agent inventing a different version of my workflow. As the setup grows, I start maintaining the shared instructions more deliberately.
 
 ## One assistant becomes a crew
 
-For some reason, I already call myself Captain when talking to AI assistants. With Docker and Kubernetes in the lab, the nautical theme is not completely out of place. I push the idea a little further and create a crew for Vezpi Lab.
+🏴‍☠️ For some reason, I already call myself Captain when talking to AI assistants. With Docker and Kubernetes in the lab, the nautical theme is not completely out of place. I push the idea a little further and create a crew for Vezpi Lab.
 
 Behind the names and avatars, each member has a defined responsibility:
 
@@ -98,15 +98,15 @@ Behind the names and avatars, each member has a defined responsibility:
 | Salty | Architecture, planning, delegation, and review |
 | Flint | Research and verification against external sources |
 | Patch | Software and infrastructure engineering, tests, and read-only investigation |
-| Ink | Vault documentation, blog drafts, and translations |
+| Ink | Documentation, knowledge-base maintenance, and translations |
 
-I initially include another agent for architecture, then fold that responsibility into Salty. Four profiles are enough for this experiment.
+I initially include another agent for architecture, then fold that responsibility into Salty. Four profiles are enough for this experiment. My homelab now has an org chart, which is probably a sign that I have taken the naming exercise far enough. 😄
 
 A [Hermes profile](https://hermes-agent.nousresearch.com/docs/user-guide/profiles) has its own configuration, memory, sessions, and skills. These are separate assistant environments on the same machine, not four VMs or four separately trained models.
 
 That separation lets me give each agent a narrower role. Ink needs my writing conventions, while Patch needs the code and verification workflow. Flint does not need every tool used to maintain the vault.
 
-I also define boundaries. The agents can research, prepare code, run checks, and document the results. I remain responsible for deciding and applying changes to the homelab infrastructure. A role description is not a security sandbox, though; tool access and credentials still need to match those responsibilities.
+⚠️ I also define boundaries. The agents can research, prepare code, run checks, and document the results. I remain responsible for deciding and applying changes to the homelab infrastructure. A role description is not a security sandbox, though. Tool access and credentials still need to match those responsibilities.
 
 ### Keeping their instructions consistent
 
@@ -120,21 +120,25 @@ I organize the context into a few different places:
 | `AGENTS.md` | Shared rules for working in the Vezpi Lab workspace |
 | `skills/` | Procedures loaded for particular tasks |
 
-The shared workspace rules point the agents to the vault's Codex and inventory. They also make the division of work explicit, so every profile does not try to do everything.
+The shared workspace rules point the agents to the vault's Codex. They also make the division of work explicit, so every profile does not try to do everything. I set their working directory to the Vezpi Lab workspace.
+
+![The workspace setting gives each profile the same starting directory for the project.](images/hermes-desktop-define-workingdir.png)
 
 I move the identities and custom skills into a dedicated Git repository, alongside a deployment script and project configuration. Those files were becoming scattered across the VM, and I want to track their changes like the rest of my configuration.
-
-I also adapt the blog skills I previously used with Obsidian Copilot and OpenCode. My first attempt asks the agent to learn from an existing skill, but the result misses some shared conventions and adds unnecessary material. Manually adapting the instructions gives me a much better result.
 
 ## Separate agents do not automatically work together
 
 Creating the profiles gives me specialists, but it does not immediately give me a useful team.
 
-In an early delegation test, Salty creates a temporary subagent instead of contacting the named crew member I intended. Both approaches can be useful, but they are different.
+🧩 In an early delegation test, Salty creates a temporary subagent instead of contacting the named crew member I intended. Both approaches can be useful, but they are different. Giving everyone a name and an avatar does not automatically solve delegation, unfortunately.
 
 A temporary subagent starts a fresh conversation for a bounded task. My named profiles carry their own persistent instructions and memory. If I want Flint to do the research according to Flint's role, spawning a generic child agent is not necessarily the handoff I am looking for.
 
-I experiment with Bot Mode and get the named agents exchanging messages in the desktop application. I also configure Telegram for each profile, which lets me talk to the crew from my phone.
+I experiment with Bot Mode and get the named agents exchanging messages in the desktop application.
+
+![An early Bot Mode exchange, before I fold Moon's architecture role into Salty's responsibilities.](images/hermes-desktop-bot-to-bot.png)
+
+📱 I also configure Telegram for each profile, which lets me talk to the crew from my phone.
 
 The gateway runs as a user service. After restarting the VM, I confirm that it comes back and I can reach the bots again.
 
@@ -146,7 +150,11 @@ The Kanban board is the part that convinces me to keep the multi-agent setup.
 
 In Hermes, it is a shared work queue. A card has an assignee, a description of the expected work, and a recorded result. Dependencies let one task wait for another, and the dispatcher starts eligible work with the assigned profile.
 
-I enable the Kanban plugin in Hermes Desktop, then check that the Kanban tools are enabled for all four profiles. Enabling the plugin alone is not enough if the intended worker cannot use its tools.
+I enable the Kanban plugin in Hermes Desktop:
+
+![The Kanban plugin in the Capabilities menu, before I enable it.](images/hermes-desktop-plugin-enable-kanban.png)
+
+🔧 I then check that the Kanban tools are enabled for all four profiles. Enabling the plugin alone is not enough if the intended worker cannot use its tools.
 
 For the first test, I ask Salty to create a small task for Flint, followed by a task for Ink. Flint leaves a comment and prepares the handoff. Ink then checks the parent result and confirms it.
 
@@ -155,6 +163,8 @@ For the first test, I ask Salty to create a small task for Flint, followed by a 
 The dependency is visible on the board. Ink's task waits until Flint finishes, rather than relying on me to notice a message and forward it. I can open the cards to inspect their instructions, comments, and results.
 
 ✅ Both tasks complete, and Salty reports the outcome. This is a small smoke test, but it verifies the part I was missing: work can pass between the named profiles through a shared queue.
+
+![Ink's completed task records the comment and summary confirming Flint's handoff.](images/hermes-desktop-kanban-task-info.png)
 
 To make the same Kanban tools available through Telegram, I enable them for that platform on each profile:
 
@@ -169,19 +179,21 @@ This gives the agents a work-tracking mechanism alongside chat. It does not prov
 
 ## The token bill is part of the experiment
 
-After a few sessions, token usage is higher than I expected. Adding profiles also means maintaining their context and deciding which tools and skills each one needs.
+💸 After a few sessions, token usage is higher than I expected. Adding profiles also means maintaining their context and deciding which tools and skills each one needs.
 
 I disable unused skills according to each role, without restricting the agents so much that I cannot discover what they need in practice. Skills load on demand, but selecting the relevant set still helps keep the setup focused.
 
-One blog-drafting request through OpenRouter costs about $5 in my test. I am happy with the result, but that is enough to make me reconsider how I pay for the models.
+One request through OpenRouter costs about $5 in my test. I am happy with the result, but that is enough to make me reconsider how I pay for the models. The crew may be virtual, but the bill has no such limitation. 😅
 
 I switch the profiles to the OpenAI subscription integration through Hermes Desktop and test text requests and image generation. I also install a provider-usage plugin so I can see usage in the interface rather than repeatedly checking the provider's website.
 
-This changes how I access the models; it does not make the work unlimited or free. I still need to pay attention to usage and choose an appropriate model for each task.
+![The provider-usage plugin shows subscription usage and OpenRouter figures directly in the status bar.](images/hermes-desktop-codex-usage-status-bar.png)
+
+This changes how I access the models, but it does not make the work unlimited or free. I still need to pay attention to usage and choose an appropriate model for each task.
 
 ## Conclusion
 
-I now have Hermes running in a Proxmox VM, connected to my Obsidian vault and available from my laptop and phone. The agents have separate roles, and their shared instructions and custom skills are tracked in Git.
+🎉 I now have Hermes running in a Proxmox VM, connected to my Obsidian vault and available from my laptop and phone. The agents have separate roles, and their shared instructions and custom skills are tracked in Git.
 
 The most useful discovery is the Kanban handoff. Separate profiles initially add enough friction that I question keeping them. Once the agents can assign work, wait for dependencies, and record results on cards, the arrangement makes more sense.
 
