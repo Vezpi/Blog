@@ -11,7 +11,7 @@ tags:
   - obsidian
 categories:
   - homelab
-image: cover-26.webp
+image: cover-26-hermes.webp
 ---
 
 ## Intro
