@@ -3,7 +3,7 @@ slug: deploy-hermes-agent-homelab
 title: My Homelab AI Crew with Hermes Agent
 description: I deploy Hermes Agent on Proxmox, connect it to my Obsidian vault, and use a Kanban board to coordinate AI agents with separate roles.
 date: 2026-10-28
-draft: true
+draft: false
 tags:
   - ai
   - hermes

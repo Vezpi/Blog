@@ -3,7 +3,7 @@ slug: deploy-hermes-agent-homelab
 title: Hermes Agent, l'équipe IA de mon homelab
 description: Je déploie Hermes Agent sur Proxmox, le connecte à mon coffre Obsidian et coordonne des agents aux rôles distincts avec Kanban.
 date: 2026-10-28
-draft: true
+draft: false
 tags:
   - ai
   - hermes
