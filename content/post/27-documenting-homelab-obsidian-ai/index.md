@@ -1,6 +1,6 @@
 ---
 slug: documenting-homelab-obsidian-ai
-title: Documenting My Homelab in Obsidian with AI
+title: My Homelab in Obsidian
 description: How I use Obsidian and an AI-led interview to document my homelab, giving my agents precise context they can help keep up to date.
 date: 2026-11-01
 draft: true
@@ -14,59 +14,72 @@ image: ""
 
 ## Intro
 
-I have been using Obsidian for about three years now, after moving from Notion. It holds my notes and project documentation, but it is also where I write the articles for this blog.
+I have been using Obsidian for about three years, after moving from Notion. It holds my notes, homelab projects, and the articles for this blog.
 
-With AI agents joining my homelab workflow, those notes have another use. An agent helping me with a project needs to understand the infrastructure it is working with. Knowing how Proxmox or Docker works is useful, but that does not tell it how I use them at home.
+💡 Those notes now give my AI agents context about the lab. Knowing Proxmox or Docker does not tell an agent how I use them at home. A linked inventory helps fill that gap.
 
-I need to give it that context. For my homelab inventory, I start by giving an agent broad information about the lab, then ask it to interview me and write the documentation from my answers.
+## Why Obsidian?
 
-The agent gets to ask the questions and take the notes. I still have to know what is plugged into what. 😅
+[Obsidian](https://obsidian.md/) stores notes as Markdown files in a local folder called a vault. Links connect related notes, such as an application and the VM hosting it.
 
-## Why Obsidian fits
+I read and edit them in Obsidian. My agents work on the same files using file tools, without needing to operate the application interface.
 
-[Obsidian](https://obsidian.md/) is a note-taking application that stores notes as Markdown files in a local folder called a vault. Notes can link to each other, so a page about an application can lead to its VM, storage, or related project.
+### Git and the blog
 
-The files are ordinary text files. I can read and edit them in Obsidian, track them with Git, and let an AI agent work on them using file tools. The agent does not need to operate the Obsidian interface to update a note.
+The vault is versioned in my self-hosted Gitea instance, so I can review documentation changes, including those made by an agent.
 
-In my setup, the vault is versioned in my self-hosted Gitea instance. That gives documentation changes a history I can inspect, including changes made by an agent.
+📖 My [Obsidian, Hugo, and Gitea Actions workflow]({{< ref "post/2-blog-deployment-obisidan-hugo-gitea-actions" >}}) sends the dedicated `Blog/` folder to the blog repository. The rest of the vault stays outside that publication workflow.
 
-📖 The same vault contains my blog source, but that does not make the whole vault public. The publishing workflow synchronizes the dedicated `Blog/` folder to the Hugo blog repository. My homelab inventory and private notes stay outside that content selection. I describe that pipeline in [Blog Deployment featuring Obsidian, Hugo and Gitea Actions]({{< ref "post/2-blog-deployment-obisidan-hugo-gitea-actions" >}}).
+## An AI-led interview
 
-## An interview instead of a blank page
+I gave an agent broad information about my infrastructure, then asked it to interview me. It used my answers to write the inventory notes and link related components.
 
-I give the agent a broad description of the infrastructure, then ask it to interview me to fill in the details. Its job is to turn that starting information and my answers into structured inventory notes.
+I prefer one focused question at a time. That is easier to answer than a large questionnaire, and uncertain details can wait for verification.
 
-That changes the work I need to do. Rather than writing every note from scratch and deciding how to organize it, I answer focused questions about the setup. The agent handles the writing and links the related components together.
+The agent takes the notes. I still have to know what is plugged into what. 😅
 
-I prefer to go through one item at a time. A large questionnaire would mostly give me another document to finish. A focused question is easier to answer, and if I am unsure about a detail, we can leave it for verification rather than make something up.
+⚠️ Unknown details stay marked as unknown. An unused application, for example, is not necessarily a stopped or removed container.
 
-The review leaves a visible record of those gaps. Some details are confirmed, while others remain explicitly unverified. An unused application, for example, is not necessarily a stopped or removed container. That distinction belongs in the notes until I check it.
+## Inventory layout
 
-⚠️ A confident sentence is not evidence. Asking me a follow-up question is much more useful than silently completing the infrastructure with something plausible.
+The inventory lives under `Homelab/Inventory/`, with four categories:
 
-## A linked inventory
+- **Compute**: Physical hosts, VMs, LXCs, and clusters. Examples include the Proxmox cluster, `dockerVM`, and the `bastion` LXC.
+- **Storage**: Storage platforms, including Ceph and TrueNAS.
+- **Network**: Connectivity and shared services, such as OPNsense, VLANs, DNS, DHCP, and UniFi.
+- **Application**: One note per application, such as Home Assistant, Gitea, and Portainer.
 
-The inventory lives under `Homelab/Inventory/`, organized into four categories:
+An `Infrastructure.md` index links to the component notes. It is the starting point for me and the agents.
 
-- Compute covers physical hosts, VMs, LXCs, and cluster overviews. Examples include my Proxmox cluster, the `dockerVM` application VM, and the `bastion` management LXC.
-- Storage describes the storage platforms, such as Ceph and TrueNAS.
-- Network covers connectivity and shared network services, with notes for OPNsense, VLANs, DNS, DHCP, and UniFi.
-- Application contains one note per application, such as Home Assistant, Gitea, and Portainer.
+### Common sections
 
-An `Infrastructure.md` index links to the component notes and gives me, or an agent, somewhere to start.
+Each component note is expected to have four sections:
 
-Each component has a dedicated note. The notes follow the same structure, with a description, technical details, relations, and a dated changelog. Their properties describe the type of component, its operational status, where it runs, and what it depends on.
+- **Description**: What the component is and its role in the lab.
+- **Details**: Specifications, configuration, and useful technical facts.
+- **Relations**: Links to hosts, dependencies, and downstream consumers.
+- **Changelog**: Dated changes to the component or its documentation.
 
-Two properties are particularly useful:
+### Details by kind
 
-| Property | What it describes |
-| --- | --- |
-| `runs_on` | The host or platform on which the component runs |
-| `depends_on` | Other services or infrastructure it needs beyond that host |
+The structure stays the same, but the subsections inside `Details` depend on the component's `kind`:
 
-### A complete note
+- **Host, VM, or LXC**: Hardware or allocated resources, OS, disks, and network configuration.
+- **Cluster**: Members, topology, and availability mechanisms.
+- **Storage**: Architecture, pools or datasets, redundancy, and consumers.
+- **Network or service**: Architecture, addressing or naming, and relevant service configuration.
+- **Application**: Purpose, hosting method, and application-specific configuration or integrations.
 
-Here is the full `Portainer.md` inventory note. It is short enough to show the whole structure, including the YAML properties and the changelog:
+### Hosting and dependencies
+
+YAML properties record the component's kind, status, management method, and availability. Two fields describe its relationships:
+
+- **`runs_on`**: The host or platform where it runs.
+- **`depends_on`**: Other services it needs, without repeating the host.
+
+### A full example
+
+Here is the complete `Portainer.md` note, including its properties and changelog:
 
 ```markdown
 ---
@@ -107,32 +120,30 @@ Docker management UI for the [[dockerVM]] application stack. Provides visual con
 - **2026-10-16**: Removed the host from `depends_on`; it is represented by `runs_on`.
 ```
 
-The double brackets are Obsidian links, shown here as literal Markdown rather than links on the blog. They connect Portainer to its host and ingress dependencies. The changelog also records a correction to that relationship: the VM belongs in `runs_on`, without duplicating it in `depends_on`.
+ℹ️ The double brackets are Obsidian links, shown here as literal Markdown. They connect Portainer to `dockerVM` and its ingress dependencies.
 
-For example, my Home Assistant note points to `dockerVM` as its host. The VM note then describes the primary Docker Compose application stack and its relationship to the Proxmox cluster and Ceph storage. Related application notes explain the roles of Node-RED and InfluxDB.
+The changelog records a correction too: the VM belongs in `runs_on`, not in both relationship fields.
 
-An agent can follow those links when a task needs more context. It does not have to treat every application as an isolated container, or read the entire vault before answering a question.
+## Context for agents
 
-The inventory also separates the current setup from planned work. My Kubernetes foundation is deployed, but the primary application stack still runs on Docker Compose. A migration project is not proof that the applications have already moved.
+### Read before working
 
-## Context the agents can maintain
+An agent can start from an application note and follow its hosting and dependency links. It gets the relevant context without reading the entire vault or relying on an earlier conversation.
 
-💡 This is what makes the inventory useful beyond documentation. It gives my agents a shared, precise reference for the homelab, instead of relying on whatever each agent remembers from an earlier conversation.
+📖 Project notes explain decisions and work in progress. The inventory describes the current setup. A migration plan does not mean the applications have already moved.
 
-Before helping with an application, an agent can consult its inventory note and follow the relevant dependencies. Project notes explain the work and decisions around a change. The inventory describes the current state. Both are useful, but they answer different questions.
+### Keep notes current
 
-The next part is keeping that context current. I want the agents to maintain the documentation they use, updating the relevant notes as verified changes happen rather than leaving me with a separate writing task every time.
+🔁 I want the agents to maintain the context they use, updating relevant notes from verified changes. Git history and changelogs keep those updates reviewable.
 
-Later, I want the agents to verify facts against the infrastructure by gathering data directly from the components. With appropriate read-only access, they could compare what is actually running with what the inventory says, flag differences, and help correct outdated notes. That is a future step, not an automatic verification process already in place.
+### Verify against infrastructure
 
-For now, the agents need confirmed information, whether it comes from my answers or an authorized investigation. I remain responsible for deciding and applying infrastructure changes. Reading data to verify a note is a different responsibility from changing the system it describes.
+Later, I want agents to gather data directly from the components. With appropriate read-only access, they could compare the running setup with the inventory, flag differences, and help correct outdated notes.
 
-Git history and the inventory changelogs make those documentation updates reviewable. Unknown details should stay marked as unknown, and planned changes should stay separate from deployed ones.
+⚠️ This is a future step, not an automatic verification process already in place. I remain responsible for deciding and applying infrastructure changes. Permission to read a system is not permission to change it.
 
 ## Conclusion
 
-The inventory already gives my agents a documented starting point for understanding the lab. Building it through an interview lets me provide the information while the agent handles the structure and writing.
+The interview turns my answers into an inventory that both I and my agents can use. Obsidian keeps it readable, while Markdown lets the agents work on the notes directly.
 
-I want to carry that approach into maintenance: agents reading the inventory before they work, then helping update it from verified results. Obsidian gives me a familiar place to review those notes, and Markdown gives the agents files they can work with directly.
-
-I still need to check the facts. At least I can share the note-taking.
+💡 The goal is to keep that shared context current, with direct infrastructure checks later. For now, I still check the facts, but I can share the note-taking.
