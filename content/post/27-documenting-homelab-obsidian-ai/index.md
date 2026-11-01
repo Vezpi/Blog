@@ -9,7 +9,7 @@ tags:
   - ai
 categories:
   - homelab
-image: ""
+image: cover-27.webp
 ---
 
 ## Intro
