@@ -14,9 +14,11 @@ image: ""
 
 ## Intro
 
-I have been using Obsidian for about three years, after moving from Notion. It holds my notes, homelab projects, and the articles for this blog.
+My homelab brings together physical hosts, virtual machines, storage, and applications that depend on each other. When I ask an AI agent to help with a project, knowing how Proxmox or Docker works is only part of what it needs. It also needs to understand how those pieces fit together in my lab.
 
-💡 Those notes now give my AI agents context about the lab. Knowing Proxmox or Docker does not tell an agent how I use them at home. A linked inventory helps fill that gap.
+I have been using Obsidian for about three years, after moving from Notion. My project notes and blog articles already live there, so it is also where I keep the inventory: a description of the current infrastructure that I can read and my agents can consult.
+
+💡 To build it, I gave an agent broad information about the setup and asked it to interview me. I supplied the knowledge, while it handled the writing and organization. The result is a linked inventory that gives our work a shared starting point, without asking each agent to reconstruct the lab from a conversation.
 
 ## Why Obsidian?
 
@@ -144,6 +146,8 @@ Later, I want agents to gather data directly from the components. With appropria
 
 ## Conclusion
 
-The interview turns my answers into an inventory that both I and my agents can use. Obsidian keeps it readable, while Markdown lets the agents work on the notes directly.
+I now have a structured inventory in Obsidian, with an index to navigate the lab and individual notes describing its components. The common format makes the information easier to find, while hosting and dependency links explain how the pieces connect. Changelogs keep a record of corrections and updates.
 
-💡 The goal is to keep that shared context current, with direct infrastructure checks later. For now, I still check the facts, but I can share the note-taking.
+Building it through an interview lets me contribute what I know without writing every note myself. For me, the result is a readable reference for the infrastructure. For my agents, it is concrete context they can consult before helping with a project, rather than relying on fragments from earlier conversations.
+
+🔁 That gives me a foundation for agent-maintained documentation. The next step is keeping those notes current from verified changes, with direct checks against the infrastructure later. I still review the facts, but the writing and organization are work I can share with the agents.
