@@ -3,7 +3,7 @@ slug: documenting-homelab-obsidian-ai
 title: Créer l'inventaire de mon homelab dans Obsidian
 description: Je documente mon homelab dans Obsidian grâce à un entretien mené par un agent IA, pour fournir un contexte précis à mes agents.
 date: 2026-11-01
-draft: true
+draft: false
 tags:
   - obsidian
   - ai
