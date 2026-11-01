@@ -1,6 +1,6 @@
 ---
 slug: documenting-homelab-obsidian-ai
-title: My Homelab in Obsidian
+title: Documenting My Homelab in Obsidian with AI
 description: How I use Obsidian and an AI-led interview to document my homelab, giving my agents precise context they can help keep up to date.
 date: 2026-11-01
 draft: true
