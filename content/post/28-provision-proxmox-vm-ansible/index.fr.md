@@ -3,7 +3,7 @@ slug: provision-proxmox-vm-ansible
 title: Provisionner des VM Proxmox avec Ansible et Semaphore
 description: Je crée des VM Proxmox jetables avec Ansible et Semaphore, configure cloud-init et vérifie leur disponibilité sans gérer de state Terraform.
 date: 2026-11-09
-draft: true
+draft: false
 tags:
   - proxmox
   - ansible

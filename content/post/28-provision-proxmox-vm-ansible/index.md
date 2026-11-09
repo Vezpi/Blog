@@ -3,7 +3,7 @@ slug: provision-proxmox-vm-ansible
 title: Provisioning Proxmox VMs with Ansible and Semaphore
 description: I use Ansible and Semaphore to clone disposable Proxmox VMs, configure cloud-init, and check guest readiness without managing Terraform state.
 date: 2026-11-09
-draft: true
+draft: false
 tags:
   - proxmox
   - ansible
