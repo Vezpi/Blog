@@ -175,8 +175,8 @@ jobs:
           fi
 
   Merge:
-    needs: [Check-Rebuild, Test-Staging]
-    if: needs.Test-Staging.result == 'success'
+    needs: [Check-Rebuild, Build, Test-Staging]
+    if: always() && needs.Check-Rebuild.result == 'success' && (needs.Build.result == 'success' || needs.Build.result == 'skipped') && needs.Test-Staging.result == 'success'
     runs-on: ubuntu
     steps:
       - name: Checkout Repository
