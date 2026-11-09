@@ -199,8 +199,4 @@ I also remove the serial-console display override from the template rebuild play
 
 I now have a third way to create a VM in Proxmox. For a disposable PoC, I can launch the Semaphore task, choose the hostname and resources, and let Ansible handle cloning and guest preparation without maintaining Terraform state afterwards.
 
-The useful part is checking the guest after the API says it has started. DNS publication, SSH access, and cloud-init completion all have a place in the workflow, and failures leave the machine available for inspection.
-
-There is still a manual responsibility at the other end. The playbook does not track expiry or remove the VMs after a PoC. Cleanup remains to be done, because calling a VM disposable does not make it disappear.
-
-📝 To reuse or adapt the workflow, start with the [playbook on GitHub](https://github.com/Vezpi/Homelab/blob/main/ansible/proxmox/provision_vm.yml) and the [companion setup notes](https://github.com/Vezpi/Homelab/blob/main/ansible/proxmox/README.md). Review the network, DNS, permissions, and SSH trust requirements for your own environment before running it.
+🔎 Next, I want to work on monitoring the homelab, with historical metrics, health checks, and alerts across my devices, network, and applications. I plan to compare Zabbix and Checkmk Community before choosing a main platform. These PoCs give me a concrete use for the VM provisioning workflow.
